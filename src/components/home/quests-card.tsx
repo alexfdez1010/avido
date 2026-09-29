@@ -11,14 +11,6 @@ import { useGame } from '@/store/game';
 import { useSettings } from '@/store/settings';
 import { tx } from '@/i18n';
 
-function untilMidnight() {
-  const now = new Date();
-  const end = new Date(now);
-  end.setHours(24, 0, 0, 0);
-  const m = Math.floor((end.getTime() - now.getTime()) / 60000);
-  return `${Math.floor(m / 60)} h ${m % 60} min`;
-}
-
 export function QuestsCard() {
   const p = usePalette();
   const key = dayKey();
@@ -32,15 +24,15 @@ export function QuestsCard() {
         <Txt v="eyebrow" tone="muted">
           {tx('Misiones', 'Quests')} · {done}/{quests.length}
         </Txt>
-        <Txt v="mono" tone="faint" style={{ fontSize: 10.5 }}>
-          {tx('renuevan en', 'reset in')} {untilMidnight()}
+        <Txt v="mono" color={p.gold} style={{ fontSize: 11 }}>
+          {tx('Pleno', 'All')} +100
         </Txt>
       </View>
       {quests.map((q, i) => {
         const complete = log.quests.includes(q.id);
         const prog = Math.min(q.target, q.progress(log));
         return (
-          <View key={q.id} style={{ paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: p.line, flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+          <View key={q.id} style={{ paddingVertical: 11, flexDirection: 'row', gap: 14, alignItems: 'center' }}>
             <View
               style={{
                 width: 30,
@@ -48,9 +40,7 @@ export function QuestsCard() {
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: complete ? p.mint : 'transparent',
-                borderWidth: complete ? 0 : 1.5,
-                borderColor: p.faint,
+                backgroundColor: complete ? p.mint : p.raised,
               }}
             >
               {complete ? <Check size={17} color={p.bg} strokeWidth={3} /> : <Txt v="mono" tone="muted">{i + 1}</Txt>}
@@ -78,14 +68,6 @@ export function QuestsCard() {
           </View>
         );
       })}
-      <View style={{ marginTop: 6, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: p.goldSoft, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 9 }}>
-        <Txt v="caption" color={p.gold}>
-          {tx('Completa las 3 y gana un bonus', 'Complete all 3 for a bonus')}
-        </Txt>
-        <Txt v="mono" color={p.gold}>
-          +100 XP
-        </Txt>
-      </View>
     </Card>
   );
 }

@@ -16,13 +16,13 @@ function Stepper({ label, value, onMinus, onPlus, fg, line }: { label: string; v
         {label}
       </Txt>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <Tap onPress={onMinus} feedback="select" style={{ width: 42, height: 38, borderRadius: 12, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
+        <Tap onPress={onMinus} feedback="select" style={{ width: 42, height: 38, borderRadius: 12, backgroundColor: line, alignItems: 'center', justifyContent: 'center' }}>
           <Minus size={16} color={fg} />
         </Tap>
         <Txt v="mono" color={fg} style={{ width: 52, textAlign: 'center', fontSize: 14 }}>
           {value}
         </Txt>
-        <Tap onPress={onPlus} feedback="select" style={{ width: 42, height: 38, borderRadius: 12, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
+        <Tap onPress={onPlus} feedback="select" style={{ width: 42, height: 38, borderRadius: 12, backgroundColor: line, alignItems: 'center', justifyContent: 'center' }}>
           <Plus size={16} color={fg} />
         </Tap>
       </View>
@@ -47,7 +47,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             const on = id === r.theme;
             return (
               <Tap key={id} onPress={() => setReader({ theme: id })} feedback="select" style={{ flex: 1, alignItems: 'center', gap: 6 }}>
-                <View style={{ width: '100%', aspectRatio: 1, borderRadius: 16, backgroundColor: th.bg, borderWidth: on ? 2 : 1, borderColor: on ? th.accent : t.line, alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ width: '100%', aspectRatio: 1, borderRadius: 16, backgroundColor: th.bg, borderWidth: 2, borderColor: on ? th.accent : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
                   <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 20, color: th.text }}>Aa</Txt>
                 </View>
                 <Txt v="caption" color={on ? t.text : t.muted}>
@@ -70,7 +70,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
                 key={id}
                 onPress={() => setReader({ font: id })}
                 feedback="select"
-                style={{ width: '48.5%', paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, borderWidth: on ? 2 : 1, borderColor: on ? t.accent : t.line }}
+                style={{ width: '48.5%', paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, borderWidth: 2, borderColor: on ? t.accent : 'transparent', backgroundColor: on ? 'transparent' : t.line }}
               >
                 <Txt style={{ fontFamily: f.regular, fontSize: 19, color: t.text }}>{f.label}</Txt>
                 <Txt v="caption" color={t.muted}>

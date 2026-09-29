@@ -81,7 +81,7 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
       </View>
       <Animated.View
         entering={ZoomIn.springify().damping(14)}
-        style={{ width: W - 48, backgroundColor: p.surface, borderRadius: 32, paddingHorizontal: 26, paddingTop: 34, paddingBottom: 22, alignItems: 'center', borderWidth: 1, borderColor: p.line, overflow: 'hidden' }}
+        style={{ width: W - 48, backgroundColor: p.surface, borderRadius: 32, paddingHorizontal: 26, paddingTop: 34, paddingBottom: 22, alignItems: 'center', overflow: 'hidden' }}
       >
         <Txt v="eyebrow" color={accent}>
           {KIND_LABEL[c.kind]}
@@ -91,7 +91,7 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
           <Animated.View style={[{ alignItems: 'center' }, popStyle]}>
             {c.kind === 'goal' || c.kind === 'streak' ? (
               <View style={{ alignItems: 'center' }}>
-                <Flame size={84} color={p.ember} inner={p.gold} />
+                <Flame size={84} />
                 <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 40, lineHeight: 44, color: p.text, marginTop: -4 }}>{c.big}</Txt>
               </View>
             ) : (

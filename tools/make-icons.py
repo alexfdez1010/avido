@@ -7,7 +7,7 @@ FONT = os.path.join(ROOT, 'node_modules/@expo-google-fonts/fraunces/900Black_Ita
 OUT = os.path.join(ROOT, 'assets/images')
 INK = (16, 14, 11, 255)
 PAPER = (243, 237, 226, 255)
-EMBER = (255, 91, 36, 255)
+EMBER = (61, 214, 140, 255)
 
 
 def glyph(size, scale, color, accent, bg=None):

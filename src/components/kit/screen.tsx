@@ -61,8 +61,6 @@ export function Card({ children, style, tint }: { children: React.ReactNode; sty
           backgroundColor: tint ?? p.surface,
           borderRadius: 22,
           padding: 18,
-          borderWidth: 1,
-          borderColor: p.line,
         },
         style,
       ]}

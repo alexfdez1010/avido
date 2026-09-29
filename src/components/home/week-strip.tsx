@@ -32,14 +32,13 @@ export function WeekStrip() {
                 borderRadius: 19,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: lit ? p.emberSoft : log?.frozen ? 'rgba(143,211,255,0.14)' : 'transparent',
-                borderWidth: isToday ? 1.5 : 1,
-                borderColor: isToday ? p.ember : future ? p.line : lit ? 'transparent' : p.line,
-                borderStyle: future ? 'dashed' : 'solid',
+                backgroundColor: lit ? p.goldSoft : log?.frozen ? 'rgba(143,211,255,0.14)' : future ? 'transparent' : p.surface,
+                borderWidth: isToday ? 1.5 : 0,
+                borderColor: p.ember,
               }}
             >
               {lit ? (
-                <Flame size={20} color={p.ember} inner={p.gold} />
+                <Flame size={20} />
               ) : log?.frozen ? (
                 <Txt style={{ color: '#8FD3FF', fontSize: 16 }}>❄</Txt>
               ) : (

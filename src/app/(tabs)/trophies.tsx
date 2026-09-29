@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { Bar, Card, Cover, Ring, Screen, SectionTitle, Sheet, Tap, Txt } from '@/components/kit';
 import { Heatmap } from '@/components/trophies/heatmap';
 import { ACHIEVEMENTS, type Achievement, type AchievementContext } from '@/game/achievements';
-import { levelProgress, levelTitle, LEVEL_TITLES } from '@/game/levels';
+import { levelProgress, levelTitle } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
 import { formatDuration } from '@/lib/dates';
 import { computeStreak, useGame } from '@/store/game';
@@ -145,9 +145,6 @@ export default function Trophies() {
             </Txt>
           </View>
         </View>
-        <Txt v="caption" tone="muted" style={{ marginTop: 12 }}>
-          {tx('Próximo rango:', 'Next rank:')} {LEVEL_TITLES[Math.min(LEVEL_TITLES.length - 1, Math.floor((lp.level - 1) / 3) + 1)]} · {tx('nivel', 'level')} {Math.floor((lp.level - 1) / 3) * 3 + 4}
-        </Txt>
       </Card>
 
       <Card
@@ -179,10 +176,10 @@ export default function Trophies() {
           </Txt>
           <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
             {thisYear.length >= yearlyGoal
-              ? tx('¡Reto superado! Sube la apuesta.', 'Challenge beaten! Raise the stakes.')
+              ? tx('Reto superado', 'Challenge beaten')
               : ahead >= 0
-                ? isEs ? `Vas ${ahead >= 1 ? `${Math.floor(ahead)} por delante` : 'al día'}. Sigue así.` : `${ahead >= 1 ? `${Math.floor(ahead)} ahead of pace` : 'Right on pace'}. Keep going.`
-                : tx(`Un libro cada ${pace} días y lo logras.`, `One book every ${pace} days and you'll make it.`)}
+                ? isEs ? (ahead >= 1 ? `${Math.floor(ahead)} por delante` : 'Al día') : ahead >= 1 ? `${Math.floor(ahead)} ahead` : 'On pace'
+                : tx(`1 libro cada ${pace} días`, `1 book every ${pace} days`)}
           </Txt>
           <Txt v="caption" tone="muted">
             {tx(`Faltan ${Math.max(0, yearlyGoal - thisYear.length)} libros`, `${Math.max(0, yearlyGoal - thisYear.length)} books to go`)} · {365 - dayOfYear} {tx('días', 'days')}
@@ -190,22 +187,16 @@ export default function Trophies() {
         </View>
       </Card>
 
-      <SectionTitle>
-        <Txt v="eyebrow" tone="muted">
-          {tx('Constancia', 'Consistency')}
-        </Txt>
-      </SectionTitle>
-      <Card>
+      <Card style={{ marginTop: 14 }}>
         <View style={{ flexDirection: 'row', marginBottom: 18 }}>
           {[
-            { k: tx('Racha', 'Streak'), v: `${streak}`, u: tx('días', 'days') },
-            { k: tx('Mejor', 'Best'), v: `${Math.max(bestStreak, streak)}`, u: tx('días', 'days') },
+            { k: tx('Racha', 'Streak'), v: `${streak}` },
+            { k: tx('Mejor', 'Best'), v: `${Math.max(bestStreak, streak)}` },
             {
               k: 'Total',
               v: formatDuration(totalSec).replace(' min', '′').replace(' h ', 'h '),
-              u: tx('leído', 'read'),
             },
-            { k: tx('Páginas', 'Pages'), v: `${Math.floor(totalPages)}`, u: tx('nuevas', 'new') },
+            { k: tx('Páginas', 'Pages'), v: `${Math.floor(totalPages)}` },
           ].map((s) => (
             <View key={s.k} style={{ flex: 1 }}>
               <Txt v="eyebrow" tone="muted" style={{ fontSize: 9 }}>
@@ -213,9 +204,6 @@ export default function Trophies() {
               </Txt>
               <Txt v="number" style={{ marginTop: 4, fontSize: 19 }} numberOfLines={1} adjustsFontSizeToFit>
                 {s.v}
-              </Txt>
-              <Txt v="caption" tone="faint">
-                {s.u}
               </Txt>
             </View>
           ))}

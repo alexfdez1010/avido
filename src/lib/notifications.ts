@@ -16,7 +16,7 @@ export async function ensurePermission(): Promise<boolean> {
     await Notifications.setNotificationChannelAsync('reminders', {
       name: tx('Recordatorios de lectura', 'Reading reminders'),
       importance: Notifications.AndroidImportance.HIGH,
-      lightColor: '#FF5B24',
+      lightColor: '#3DD68C',
     });
   }
   const current = await Notifications.getPermissionsAsync();

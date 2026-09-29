@@ -26,8 +26,6 @@ function TabBar({ state, navigation }: TabBarProps) {
           borderRadius: 999,
           padding: 6,
           gap: 4,
-          borderWidth: 1,
-          borderColor: p.line,
           shadowColor: '#000',
           shadowOpacity: 0.3,
           shadowRadius: 18,

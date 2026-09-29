@@ -9,7 +9,7 @@ import { QuestsCard } from '@/components/home/quests-card';
 import { WeekStrip } from '@/components/home/week-strip';
 import { levelProgress, levelTitle, streakMultiplier } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
-import { dayKey, formatLongDate, greeting } from '@/lib/dates';
+import { dayKey, greeting } from '@/lib/dates';
 import { pickFolder } from '@/lib/library';
 import type { Book } from '@/lib/types';
 import { useGame, useStreak } from '@/store/game';
@@ -28,10 +28,7 @@ function Header() {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
       <View style={{ flex: 1 }}>
-        <Txt v="eyebrow" tone="muted">
-          {formatLongDate()}
-        </Txt>
-        <Txt v="display" style={{ marginTop: 8 }}>
+        <Txt v="display">
           {greeting()}
           {name ? ',' : '.'}
           {name ? (
@@ -43,7 +40,7 @@ function Header() {
         </Txt>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 8 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: todayMet ? p.emberSoft : p.surface, borderRadius: 999, paddingVertical: 6, paddingLeft: 8, paddingRight: 12, borderWidth: 1, borderColor: todayMet ? 'transparent' : p.line }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: todayMet ? p.emberSoft : p.surface, borderRadius: 999, paddingVertical: 6, paddingLeft: 8, paddingRight: 12 }}>
           <Flame size={20} dim={!todayMet && streak === 0} />
           <Txt v="number" style={{ fontSize: 18 }} tone={todayMet ? 'ember' : 'text'}>
             {streak}
@@ -70,7 +67,7 @@ function GoalCard() {
   const hour = new Date().getHours();
   const danger = !met && streak > 0 && hour >= 18;
   return (
-    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 20, borderColor: danger ? p.ember : p.line }}>
+    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
       <Ring size={112} stroke={11} value={sec / (goal * 60)} color={met ? p.mint : p.ember}>
         <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 34, lineHeight: 38, color: p.text }}>{Math.floor(sec / 60)}</Txt>
         <Txt v="mono" tone="muted" style={{ marginTop: -2 }}>
@@ -81,19 +78,19 @@ function GoalCard() {
         <Txt v="eyebrow" color={met ? p.mint : danger ? p.ember : p.muted}>
           {met ? tx('Meta cumplida', 'Goal reached') : danger ? tx('Racha en peligro', 'Streak at risk') : tx('Meta de hoy', "Today's goal")}
         </Txt>
-        <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
-          {met
-            ? tx('Llama encendida. Todo lo que leas ahora suma extra.', 'Flame lit. Everything you read now is a bonus.')
-            : left <= 5
-              ? tx(`¡Solo ${left} min más!`, `Only ${left} more min!`)
-              : tx(`Te faltan ${left} minutos para encender la llama.`, `${left} minutes left to light the flame.`)}
-        </Txt>
+        {!met && (
+          <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
+            {tx(`Faltan ${left} min`, `${left} min left`)}
+          </Txt>
+        )}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-          <View style={{ backgroundColor: p.goldSoft, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
-            <Txt v="mono" color={p.gold} style={{ fontSize: 11 }}>
-              XP ×{mult.toFixed(2)}
-            </Txt>
-          </View>
+          {mult > 1 && (
+            <View style={{ backgroundColor: p.goldSoft, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
+              <Txt v="mono" color={p.gold} style={{ fontSize: 11 }}>
+                XP ×{mult.toFixed(2)}
+              </Txt>
+            </View>
+          )}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(143,211,255,0.12)', borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
             <Snowflake size={11} color="#8FD3FF" />
             <Txt v="mono" color="#8FD3FF" style={{ fontSize: 11 }}>
@@ -111,15 +108,11 @@ function ContinueCard({ book }: { book: Book }) {
   const pages = book.totalChars ? Math.round((book.totalChars * (1 - book.progress)) / 1500) : book.pdfPages ? Math.round(book.pdfPages * (1 - book.progress)) : 0;
   return (
     <Tap onPress={() => router.push(`/reader/${book.id}`)} scale={0.98}>
-      <View style={{ backgroundColor: p.surface, borderRadius: 26, borderWidth: 1, borderColor: p.line, padding: 18, flexDirection: 'row', gap: 18, overflow: 'hidden' }}>
-        <View style={{ position: 'absolute', right: -60, top: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: `hsla(${book.hue}, 60%, 55%, 0.10)` }} />
+      <View style={{ backgroundColor: p.surface, borderRadius: 26, padding: 18, flexDirection: 'row', gap: 18, overflow: 'hidden' }}>
         <Cover book={book} width={96} />
         <View style={{ flex: 1, justifyContent: 'space-between' }}>
           <View>
-            <Txt v="eyebrow" tone="ember">
-              {book.progress > 0 ? tx('Continúa', 'Continue') : tx('Empieza', 'Start')}
-            </Txt>
-            <Txt v="title" numberOfLines={2} style={{ marginTop: 6 }}>
+            <Txt v="title" numberOfLines={2}>
               {book.title}
             </Txt>
             {!!book.author && (
@@ -183,12 +176,9 @@ function EmptyLibrary() {
   const p = usePalette();
   return (
     <Tap onPress={pickFolder}>
-      <View style={{ borderRadius: 26, borderWidth: 1.5, borderStyle: 'dashed', borderColor: p.ember, padding: 24, gap: 10, backgroundColor: p.emberSoft }}>
+      <View style={{ borderRadius: 26, padding: 24, gap: 10, backgroundColor: p.emberSoft }}>
         <FolderOpen size={28} color={p.ember} />
         <Txt v="title">{tx('Conecta tu carpeta de libros', 'Connect your books folder')}</Txt>
-        <Txt v="body" tone="soft">
-          {tx('Elige dónde guardas tus EPUB, PDF o TXT y empieza a sumar.', 'Choose where you keep your EPUB, PDF or TXT files and start scoring.')}
-        </Txt>
       </View>
     </Tap>
   );
@@ -214,9 +204,7 @@ export default function Today() {
         {current ? <ContinueCard book={current} /> : suggestion ? <ContinueCard book={suggestion} /> : !folder ? <EmptyLibrary /> : (
           <Card>
             <Txt v="title">{tx('Tu carpeta está vacía', 'Your folder is empty')}</Txt>
-            <Txt v="body" tone="soft" style={{ marginTop: 6, marginBottom: 16 }}>
-              {tx('Copia algún EPUB, PDF o TXT en ella y vuelve aquí.', 'Copy some EPUB, PDF or TXT files into it and come back.')}
-            </Txt>
+            <View style={{ height: 16 }} />
             <Cta compact kind="quiet" label={tx('Cambiar carpeta', 'Change folder')} onPress={pickFolder} />
           </Card>
         )}
@@ -225,12 +213,9 @@ export default function Today() {
         <GoalCard />
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(180).duration(380)}>
-        <SectionTitle>
-          <Txt v="eyebrow" tone="muted">
-            {tx('Esta semana', 'This week')}
-          </Txt>
-        </SectionTitle>
-        <WeekStrip />
+        <View style={{ marginTop: 26 }}>
+          <WeekStrip />
+        </View>
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(240).duration(380)} style={{ marginTop: 26 }}>
         <QuestsCard />

@@ -16,27 +16,24 @@ import { fonts } from '@/theme/fonts';
 import { tx } from '@/i18n';
 
 const GOALS = [
-  { min: 10, label: tx('Tranquilo', 'Easy'), hint: tx('Un hábito que no falla', 'A habit that never fails') },
-  { min: 20, label: tx('Constante', 'Steady'), hint: tx('El punto dulce', 'The sweet spot') },
-  { min: 30, label: tx('Ambicioso', 'Ambitious'), hint: tx('~20 libros al año', '~20 books a year') },
-  { min: 60, label: tx('Voraz', 'Voracious'), hint: tx('Sin piedad', 'No mercy') },
+  { min: 10, label: tx('Tranquilo', 'Easy') },
+  { min: 20, label: tx('Constante', 'Steady') },
+  { min: 30, label: tx('Ambicioso', 'Ambitious') },
+  { min: 60, label: tx('Voraz', 'Voracious') },
 ];
 
 const YEARLY = [6, 12, 24, 52];
 
-function Choice({ on, title, hint, right, onPress }: { on: boolean; title: string; hint: string; right: string; onPress: () => void }) {
+function Choice({ on, title, right, onPress }: { on: boolean; title: string; right: string; onPress: () => void }) {
   const p = usePalette();
   return (
     <Tap
       onPress={onPress}
       feedback="select"
-      style={{ flexDirection: 'row', alignItems: 'center', padding: 18, borderRadius: 20, borderWidth: on ? 2 : 1, borderColor: on ? p.ember : p.line, backgroundColor: on ? p.emberSoft : p.surface, marginBottom: 10 }}
+      style={{ flexDirection: 'row', alignItems: 'center', padding: 18, borderRadius: 20, borderWidth: 2, borderColor: on ? p.ember : 'transparent', backgroundColor: on ? p.emberSoft : p.surface, marginBottom: 10 }}
     >
       <View style={{ flex: 1 }}>
         <Txt v="headline">{title}</Txt>
-        <Txt v="caption" tone="muted">
-          {hint}
-        </Txt>
       </View>
       <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 26, color: on ? p.ember : p.soft }}>{right}</Txt>
     </Tap>
@@ -75,7 +72,7 @@ export default function Onboarding() {
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(340).springify()}>
         <Txt v="body" tone="soft" style={{ marginTop: 18, fontSize: 17, lineHeight: 25 }}>
-          {tx('Ávido convierte cada página en progreso: rachas, niveles, misiones diarias y logros. Tú pones los libros; nosotros, las ganas de seguir.', 'Ávido turns every page into progress: streaks, levels, daily quests and achievements. You bring the books; we bring the drive to keep going.')}
+          {tx('Rachas, niveles y misiones por cada página.', 'Streaks, levels and quests for every page.')}
         </Txt>
       </Animated.View>
     </View>,
@@ -98,9 +95,6 @@ export default function Onboarding() {
           style={{ fontFamily: fonts.displayItalic, fontSize: 34, color: p.text }}
         />
       </Input>
-      <Txt v="caption" tone="muted" style={{ marginTop: 12 }}>
-        {tx('Opcional. Solo para saludarte.', 'Optional. Just to say hi.')}
-      </Txt>
     </View>,
     <View key="2" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
@@ -110,11 +104,8 @@ export default function Onboarding() {
         {tx('¿Cuánto lees al día?', 'How much will you read a day?')}
       </Txt>
       {GOALS.map((g) => (
-        <Choice key={g.min} on={s.dailyGoalMin === g.min} title={g.label} hint={g.hint} right={`${g.min}′`} onPress={() => s.set({ dailyGoalMin: g.min })} />
+        <Choice key={g.min} on={s.dailyGoalMin === g.min} title={g.label} right={`${g.min}′`} onPress={() => s.set({ dailyGoalMin: g.min })} />
       ))}
-      <Txt v="caption" tone="muted" style={{ marginTop: 6 }}>
-        {tx('Cumplirla mantiene viva tu racha. Puedes cambiarla cuando quieras.', 'Hitting it keeps your streak alive. You can change it anytime.')}
-      </Txt>
     </View>,
     <View key="3" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
@@ -131,7 +122,7 @@ export default function Onboarding() {
               key={y}
               onPress={() => s.set({ yearlyGoal: y })}
               feedback="select"
-              style={{ width: '48%', aspectRatio: 1.3, borderRadius: 22, borderWidth: on ? 2 : 1, borderColor: on ? p.ember : p.line, backgroundColor: on ? p.emberSoft : p.surface, padding: 16, justifyContent: 'space-between' }}
+              style={{ width: '48%', aspectRatio: 1.3, borderRadius: 22, borderWidth: 2, borderColor: on ? p.ember : 'transparent', backgroundColor: on ? p.emberSoft : p.surface, padding: 16, justifyContent: 'space-between' }}
             >
               <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 44, lineHeight: 48, color: on ? p.ember : p.text }}>{y}</Txt>
               <Txt v="caption" tone="muted">
@@ -150,7 +141,7 @@ export default function Onboarding() {
         {tx('Elige la carpeta de tus libros', 'Pick your books folder')}
       </Txt>
       <Txt v="body" tone="soft" style={{ marginTop: 12 }}>
-        {tx('EPUB, PDF, TXT o Markdown. Ávido lee directamente de ahí y detecta los libros nuevos cada vez que abres la app.', 'EPUB, PDF, TXT or Markdown. Ávido reads straight from there and picks up new books every time you open the app.')}
+        EPUB · PDF · TXT · MD
       </Txt>
       <Tap
         onPress={async () => {
@@ -158,14 +149,11 @@ export default function Onboarding() {
           await pickFolder();
           setPicking(false);
         }}
-        style={{ marginTop: 28, borderRadius: 24, borderWidth: 1.5, borderStyle: 'dashed', borderColor: folder ? p.mint : p.ember, padding: 22, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: folder ? p.mintSoft : p.emberSoft }}
+        style={{ marginTop: 28, borderRadius: 24, padding: 22, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: folder ? p.mintSoft : p.emberSoft }}
       >
         <FolderOpen size={28} color={folder ? p.mint : p.ember} />
         <View style={{ flex: 1 }}>
           <Txt v="headline">{folder ? folder : picking ? tx('Abriendo…', 'Opening…') : tx('Seleccionar carpeta', 'Select folder')}</Txt>
-          <Txt v="caption" tone="muted">
-            {folder ? tx('Carpeta conectada · toca para cambiar', 'Folder connected · tap to change') : tx('Por ejemplo: Descargas/Libros', 'For example: Downloads/Books')}
-          </Txt>
         </View>
       </Tap>
     </View>,

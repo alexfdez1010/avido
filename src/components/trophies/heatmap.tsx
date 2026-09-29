@@ -20,9 +20,9 @@ export function Heatmap({ weeks = 17 }: { weeks?: number }) {
   const shade = (sec: number) => {
     if (sec <= 0) return p.raised;
     const r = sec / goal;
-    if (r < 0.34) return 'rgba(255,91,36,0.28)';
-    if (r < 0.67) return 'rgba(255,91,36,0.5)';
-    if (r < 1) return 'rgba(255,91,36,0.72)';
+    if (r < 0.34) return 'rgba(61,214,140,0.25)';
+    if (r < 0.67) return 'rgba(61,214,140,0.48)';
+    if (r < 1) return 'rgba(61,214,140,0.72)';
     return p.ember;
   };
   return (

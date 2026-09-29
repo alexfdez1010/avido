@@ -1,4 +1,4 @@
-import { Bell, FolderOpen, Minus, Moon, Plus, Sun, Vibrate } from 'lucide-react-native';
+import { Bell, BookMarked, Clock, FolderOpen, Minus, Moon, Plus, Sun, Timer, Vibrate } from 'lucide-react-native';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -6,7 +6,6 @@ import { Card, Screen, SectionTitle, Tap, Txt } from '@/components/kit';
 import { Switch } from '@/components/ui/switch';
 import { levelProgress, levelTitle } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
-import { formatDuration } from '@/lib/dates';
 import { pickFolder } from '@/lib/library';
 import { scheduleReminders } from '@/lib/notifications';
 import { computeStreak, useGame } from '@/store/game';
@@ -18,7 +17,7 @@ import { tx } from '@/i18n';
 function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean }) {
   const p = usePalette();
   const body = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, borderBottomWidth: last ? 0 : 1, borderBottomColor: p.line }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12 }}>
       <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: p.raised, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
       <View style={{ flex: 1 }}>
         <Txt v="label">{title}</Txt>
@@ -36,7 +35,7 @@ function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNod
 
 function Stepper({ value, unit, onChange, step, min, max }: { value: number; unit: string; onChange: (v: number) => void; step: number; min: number; max: number }) {
   const p = usePalette();
-  const btn = { width: 34, height: 34, borderRadius: 11, borderWidth: 1, borderColor: p.line, alignItems: 'center' as const, justifyContent: 'center' as const };
+  const btn = { width: 34, height: 34, borderRadius: 11, backgroundColor: p.raised, alignItems: 'center' as const, justifyContent: 'center' as const };
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <Tap feedback="select" onPress={() => onChange(Math.max(min, value - step))} style={btn}>
@@ -69,7 +68,7 @@ export default function Profile() {
   return (
     <Screen>
       <View style={{ alignItems: 'center', marginTop: 10 }}>
-        <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: p.emberSoft, borderWidth: 2, borderColor: p.ember, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: p.emberSoft, alignItems: 'center', justifyContent: 'center' }}>
           <Txt style={{ fontFamily: fonts.displayBlackItalic, fontSize: 44, lineHeight: 52, color: p.ember }}>{(s.name || 'L').slice(0, 1).toUpperCase()}</Txt>
         </View>
         <Txt v="display" style={{ marginTop: 14 }}>
@@ -87,7 +86,7 @@ export default function Profile() {
           { k: tx('Días', 'Days'), v: `${activeDays}` },
           { k: tx('Horas', 'Hours'), v: `${Math.floor(totalSec / 3600)}` },
         ].map((x) => (
-          <View key={x.k} style={{ flex: 1, backgroundColor: p.surface, borderRadius: 18, borderWidth: 1, borderColor: p.line, paddingVertical: 14, alignItems: 'center' }}>
+          <View key={x.k} style={{ flex: 1, backgroundColor: p.surface, borderRadius: 18, paddingVertical: 14, alignItems: 'center' }}>
             <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 26, lineHeight: 30, color: p.text }}>{x.v}</Txt>
             <Txt v="eyebrow" tone="muted" style={{ fontSize: 9, marginTop: 2 }}>
               {x.k}
@@ -95,9 +94,6 @@ export default function Profile() {
           </View>
         ))}
       </View>
-      <Txt v="caption" tone="faint" center style={{ marginTop: 10 }}>
-        {formatDuration(totalSec)} {tx('leyendo con Ávido', 'reading with Ávido')}
-      </Txt>
 
       <SectionTitle>
         <Txt v="eyebrow" tone="muted">
@@ -105,8 +101,8 @@ export default function Profile() {
         </Txt>
       </SectionTitle>
       <Card style={{ paddingVertical: 4 }}>
-        <Row icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.ember }}>′</Txt>} title={tx('Meta diaria', 'Daily goal')} hint={tx('Mantiene viva la racha', 'Keeps the streak going')} right={<Stepper value={s.dailyGoalMin} unit="′" step={5} min={5} max={180} onChange={(v) => s.set({ dailyGoalMin: v })} />} />
-        <Row icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.gold }}>#</Txt>} title={tx('Libros este año', 'Books this year')} hint={tx('Tu reto anual', 'Your yearly challenge')} last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
+        <Row icon={<Timer size={17} color={p.ember} />} title={tx('Meta diaria', 'Daily goal')} right={<Stepper value={s.dailyGoalMin} unit="′" step={5} min={5} max={180} onChange={(v) => s.set({ dailyGoalMin: v })} />} />
+        <Row icon={<BookMarked size={17} color={p.gold} />} title={tx('Libros este año', 'Books this year')} last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
       </Card>
 
       <SectionTitle>
@@ -119,7 +115,6 @@ export default function Profile() {
         <Row
           icon={<Bell size={17} color={p.soft} />}
           title={tx('Recordatorios', 'Reminders')}
-          hint={s.reminders ? tx(`Cada día a las ${s.reminderHour}:00`, `Every day at ${s.reminderHour}:00`) : tx('Desactivados', 'Off')}
           right={sw(s.reminders, (v) => {
             s.set({ reminders: v });
             setTimeout(scheduleReminders, 0);
@@ -127,7 +122,7 @@ export default function Profile() {
         />
         {s.reminders && (
           <Row
-            icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.soft }}>h</Txt>}
+            icon={<Clock size={17} color={p.soft} />}
             title={tx('Hora del aviso', 'Reminder time')}
             right={
               <Stepper
@@ -144,18 +139,14 @@ export default function Profile() {
             }
           />
         )}
-        <Row icon={<Vibrate size={17} color={p.soft} />} title={tx('Vibración', 'Vibration')} hint={tx('Respuesta háptica', 'Haptic feedback')} right={sw(s.haptics, (v) => s.set({ haptics: v }))} />
+        <Row icon={<Vibrate size={17} color={p.soft} />} title={tx('Vibración', 'Vibration')} right={sw(s.haptics, (v) => s.set({ haptics: v }))} />
         <Row
           icon={s.mode === 'dark' ? <Moon size={17} color={p.soft} /> : <Sun size={17} color={p.soft} />}
           title={tx('Tema oscuro', 'Dark mode')}
-          hint={tx('Interfaz de la app', 'App interface')}
           last
           right={sw(s.mode === 'dark', (v) => s.set({ mode: v ? 'dark' : 'light' }))}
         />
       </Card>
-      <Txt v="mono" tone="faint" center style={{ marginTop: 26 }}>
-        {tx('Ávido · lee con hambre', 'Ávido · read hungry')}
-      </Txt>
     </Screen>
   );
 }

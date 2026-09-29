@@ -157,14 +157,11 @@ export default function Library() {
     <View style={{ paddingTop: insets.top + 14 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <View style={{ flex: 1 }}>
-          <Txt v="eyebrow" tone="muted">
-            {counts.all} {tx('libros', 'books')} · {counts.done} {tx('leídos', 'read')}
-          </Txt>
-          <Txt v="display" style={{ marginTop: 6 }}>
+          <Txt v="display">
             {tx('Biblioteca', 'Library')}
           </Txt>
         </View>
-        <Tap onPress={() => scanLibrary()} style={{ width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: p.line, alignItems: 'center', justifyContent: 'center' }}>
+        <Tap onPress={() => scanLibrary()} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: p.surface, alignItems: 'center', justifyContent: 'center' }}>
           <RefreshCw size={18} color={p.soft} />
         </Tap>
       </View>
@@ -184,7 +181,7 @@ export default function Library() {
           <Bar value={scan.progress} height={3} />
         </View>
       )}
-      <Input style={{ marginTop: 18, backgroundColor: p.surface, borderColor: p.line, height: 48, borderRadius: 16 }}>
+      <Input style={{ marginTop: 18, backgroundColor: p.surface, borderWidth: 0, height: 48, borderRadius: 16 }}>
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
@@ -199,7 +196,7 @@ export default function Library() {
         {FILTERS.map((f) => {
           const on = f.id === filter;
           return (
-            <Tap key={f.id} feedback="select" onPress={() => setFilter(f.id)} style={{ paddingHorizontal: 14, height: 34, borderRadius: 999, backgroundColor: on ? p.text : 'transparent', borderWidth: 1, borderColor: on ? p.text : p.line, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Tap key={f.id} feedback="select" onPress={() => setFilter(f.id)} style={{ paddingHorizontal: 14, height: 34, borderRadius: 999, backgroundColor: on ? p.text : p.surface, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Txt v="label" style={{ fontSize: 13 }} color={on ? p.bg : p.soft}>
                 {f.label}
               </Txt>
@@ -220,11 +217,7 @@ export default function Library() {
         {!folderUri ? tx('Sin carpeta', 'No folder') : q ? tx('Nada por aquí', 'Nothing here') : tx('Aún no hay libros', 'No books yet')}
       </Txt>
       <Txt v="body" tone="muted" center>
-        {!folderUri
-          ? tx('Conecta la carpeta donde guardas tus libros.', 'Connect the folder where you keep your books.')
-          : q
-            ? tx('Prueba con otra búsqueda.', 'Try another search.')
-            : tx('Copia archivos EPUB, PDF, TXT o MD en tu carpeta.', 'Copy EPUB, PDF, TXT or MD files into your folder.')}
+        {!folderUri || q ? '' : 'EPUB · PDF · TXT · MD'}
       </Txt>
       {!folderUri && (
         <View style={{ marginTop: 10 }}>

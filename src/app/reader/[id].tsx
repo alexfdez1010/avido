@@ -2,7 +2,7 @@ import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ArrowLeft, ChevronRight, ListTree, Type } from 'lucide-react-native';
+import { ArrowLeft, ListTree, Type } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, View, type ViewToken } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -241,13 +241,11 @@ export default function ReaderScreen() {
     if (item.type === 'block') return <BlockView block={item.block} st={st} first={item.i === 0} />;
     return (
       <View style={{ paddingHorizontal: prefs.margin, paddingTop: 40, paddingBottom: insets.bottom + 120 }}>
-        <View style={{ borderTopWidth: 1, borderTopColor: theme.line, paddingTop: 28, alignItems: 'center' }}>
+        <View style={{ paddingTop: 28, alignItems: 'center' }}>
           {isLast ? (
             <>
               <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 44, color: theme.accent }}>{tx('Fin', 'The end')}</Txt>
-              <Txt v="body" color={theme.muted} center style={{ marginTop: 6, marginBottom: 20 }}>
-                {tx('Márcalo como terminado y cobra tu recompensa.', 'Mark it as finished and claim your reward.')}
-              </Txt>
+              <View style={{ height: 20 }} />
               <Cta label={book.finishedAt ? tx('Volver a la biblioteca', 'Back to library') : tx('Terminar libro  ·  +XP', 'Finish book  ·  +XP')} onPress={book.finishedAt ? () => router.back() : finish} />
             </>
           ) : (
@@ -258,7 +256,7 @@ export default function ReaderScreen() {
               <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 22, color: theme.text, marginTop: 10, marginBottom: 22, textAlign: 'center' }} numberOfLines={2}>
                 {content?.chapters[chapter + 1]?.title}
               </Txt>
-              <Cta label={tx('Siguiente capítulo', 'Next chapter')} icon={<ChevronRight size={18} color="#fff" />} onPress={() => goChapter(chapter + 1, true)} />
+              <Cta label={tx('Siguiente capítulo', 'Next chapter')} onPress={() => goChapter(chapter + 1, true)} />
             </>
           )}
         </View>
@@ -331,7 +329,7 @@ export default function ReaderScreen() {
         <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 8), backgroundColor: theme.bg }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: prefs.margin, paddingBottom: 6 }}>
             <Txt v="mono" color={theme.muted} style={{ fontSize: 10.5 }}>
-              {isPdf ? `${book.pdfPage ?? 1} / ${pdfTotal || '–'}` : tx(`${minsLeft} min en el capítulo`, `${minsLeft} min left in chapter`)}
+              {isPdf ? `${book.pdfPage ?? 1} / ${pdfTotal || '–'}` : `${minsLeft} min`}
             </Txt>
             <Txt v="mono" color={theme.muted} style={{ fontSize: 10.5 }}>
               {Math.floor(pos * 100)}%
@@ -348,7 +346,7 @@ export default function ReaderScreen() {
           <Animated.View
             entering={FadeIn.duration(160)}
             exiting={FadeOut.duration(160)}
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: insets.top + 6, paddingHorizontal: 12, paddingBottom: 10, backgroundColor: theme.bg, borderBottomWidth: 1, borderBottomColor: theme.line }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: insets.top + 6, paddingHorizontal: 12, paddingBottom: 10, backgroundColor: theme.bg, }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Tap onPress={() => router.back()} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
@@ -377,22 +375,24 @@ export default function ReaderScreen() {
           <Animated.View
             entering={FadeIn.duration(160)}
             exiting={FadeOut.duration(160)}
-            style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingBottom: Math.max(insets.bottom, 12) + 6, paddingTop: 16, paddingHorizontal: 22, backgroundColor: theme.bg, borderTopWidth: 1, borderTopColor: theme.line, gap: 14 }}
+            style={{ position: 'absolute', bottom: 0, left: 0, right: 0, paddingBottom: Math.max(insets.bottom, 12) + 6, paddingTop: 16, paddingHorizontal: 22, backgroundColor: theme.bg, gap: 14 }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <Txt v="number" color={theme.text}>
                 {Math.floor(pos * 100)}
                 <Txt v="mono" color={theme.muted}>
-                  {' '}{tx('% del libro', '% of book')}
+                  %
                 </Txt>
               </Txt>
               <View style={{ alignItems: 'flex-end' }}>
                 <Txt v="mono" color={theme.accent}>
                   {formatClock(tracker.sessionSec)}
                 </Txt>
-                <Txt v="caption" color={theme.muted}>
-                  {tracker.idle ? tx('en pausa', 'paused') : tx('sesión', 'session')}
-                </Txt>
+                {tracker.idle && (
+                  <Txt v="caption" color={theme.muted}>
+                    {tx('en pausa', 'paused')}
+                  </Txt>
+                )}
               </View>
             </View>
             <Bar value={pos} color={theme.accent} track={theme.line} height={4} />
