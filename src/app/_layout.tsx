@@ -1,3 +1,4 @@
+import { FolderBrowserHost } from '@/components/folder-browser';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -78,6 +79,7 @@ export default function RootLayout() {
               <Stack.Screen name="onboarding" options={{ animation: p.ink ? 'none' : 'fade', gestureEnabled: false }} />
               <Stack.Screen name="reader/[id]" options={{ animation: p.ink ? 'none' : 'slide_from_bottom' }} />
             </Stack>
+            <FolderBrowserHost />
             <CelebrationHost />
           </ThemeProvider>
         </GluestackUIProvider>

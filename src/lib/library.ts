@@ -6,6 +6,7 @@ import { readEpubMeta } from './epub';
 import { hashString, hueFor } from './hash';
 import type { Book, BookFormat } from './types';
 import { tx } from '@/i18n';
+import { openFolderBrowser } from '@/store/folder-browser';
 
 const EXT: Record<string, BookFormat> = { epub: 'epub', pdf: 'pdf', txt: 'txt', md: 'md', markdown: 'md' };
 
@@ -40,18 +41,33 @@ function collect(dir: Directory, depth: number, out: File[]) {
   }
 }
 
-export async function pickFolder(): Promise<boolean> {
+export type PickResult = 'ok' | 'cancelled' | 'failed';
+
+export function folderNameOf(uri: string): string {
+  const decoded = decodeURIComponent(uri);
+  return decoded.split(/[:/]/).filter(Boolean).pop() ?? tx('Libros', 'Books');
+}
+
+export function setBooksFolder(uri: string, name?: string) {
+  useLibrary.getState().setFolder(uri, name ?? folderNameOf(uri));
+  scanLibrary().catch(() => {});
+}
+
+export async function pickFolder(): Promise<PickResult> {
+  let dir: Directory | null;
   try {
-    const dir = await Directory.pickDirectoryAsync(useLibrary.getState().folderUri);
-    if (!dir) return false;
-    const decoded = decodeURIComponent(dir.uri);
-    const name = decoded.split(/[:/]/).filter(Boolean).pop() ?? dir.name ?? tx('Libros', 'Books');
-    useLibrary.getState().setFolder(dir.uri, name);
-    await scanLibrary();
-    return true;
-  } catch {
-    return false;
+    dir = await Directory.pickDirectoryAsync(useLibrary.getState().folderUri);
+  } catch (e) {
+    const cancelled = e instanceof Error && /cancel/i.test(e.message);
+    if (!cancelled) {
+      console.warn('Folder picker failed', e);
+      openFolderBrowser();
+    }
+    return cancelled ? 'cancelled' : 'failed';
   }
+  if (!dir) return 'cancelled';
+  setBooksFolder(dir.uri, folderNameOf(dir.uri) || dir.name);
+  return 'ok';
 }
 
 let scanPromise: Promise<void> | null = null;

@@ -10,6 +10,7 @@ import { Input, InputField } from '@/components/ui/input';
 import { usePalette } from '@/hooks/use-palette';
 import { pickFolder } from '@/lib/library';
 import { ensurePermission, scheduleReminders } from '@/lib/notifications';
+import { openFolderBrowser } from '@/store/folder-browser';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { fonts } from '@/theme/fonts';
@@ -45,13 +46,17 @@ export default function Onboarding() {
   const insets = useSafeAreaInsets();
   const s = useSettings();
   const folder = useLibrary((st) => st.folderName);
-  const [step, setStep] = useState(0);
+  const step = s.onboardStep;
+  const setStep = (n: number) => s.set({ onboardStep: n });
   const [name, setName] = useState(s.name);
   const [picking, setPicking] = useState(false);
+  const [pickFailed, setPickFailed] = useState(false);
 
-  const next = () => setStep((x) => x + 1);
+  const next = () => {
+    s.set({ onboardStep: step + 1, name: name.trim() });
+  };
   const done = async () => {
-    s.set({ onboarded: true, name: name.trim() });
+    s.set({ onboarded: true, onboardStep: 0, name: name.trim() });
     await ensurePermission().catch(() => false);
     scheduleReminders();
     router.replace('/');
@@ -146,8 +151,9 @@ export default function Onboarding() {
       <Tap
         onPress={async () => {
           setPicking(true);
-          await pickFolder();
+          const res = await pickFolder();
           setPicking(false);
+          setPickFailed(res === 'failed');
         }}
         style={{ marginTop: 28, borderRadius: 24, padding: 22, flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: folder ? p.mintSoft : p.emberSoft }}
       >
@@ -155,6 +161,16 @@ export default function Onboarding() {
         <View style={{ flex: 1 }}>
           <Txt v="headline">{folder ? folder : picking ? tx('Abriendo…', 'Opening…') : tx('Seleccionar carpeta', 'Select folder')}</Txt>
         </View>
+      </Tap>
+      {pickFailed && !folder && (
+        <Txt v="caption" tone="ember" style={{ marginTop: 12 }}>
+          {tx('El selector del sistema ha fallado.', 'The system picker failed.')}
+        </Txt>
+      )}
+      <Tap onPress={openFolderBrowser} style={{ alignSelf: 'flex-start', paddingVertical: 12, marginTop: 4 }}>
+        <Txt v="label" tone="muted">
+          {tx('¿No funciona? Buscar en el almacenamiento', 'Not working? Browse storage')}
+        </Txt>
       </Tap>
     </View>,
   ];
@@ -175,7 +191,7 @@ export default function Onboarding() {
         <View style={{ gap: 6, marginTop: 20 }}>
           <Cta label={step === 0 ? tx('Empezar', 'Get started') : last ? (folder ? tx('A leer', "Let's read") : tx('Elegir más tarde', 'Choose later')) : tx('Continuar', 'Continue')} onPress={last ? done : next} kind={last && !folder ? 'quiet' : 'primary'} />
           {step > 0 && (
-            <Tap onPress={() => setStep((x) => x - 1)} style={{ alignSelf: 'center', padding: 10 }}>
+            <Tap onPress={() => setStep(step - 1)} style={{ alignSelf: 'center', padding: 10 }}>
               <Txt v="label" tone="muted">
                 {tx('Atrás', 'Back')}
               </Txt>

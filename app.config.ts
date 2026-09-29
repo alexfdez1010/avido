@@ -47,7 +47,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
-    permissions: ['android.permission.POST_NOTIFICATIONS', 'android.permission.VIBRATE'],
+    permissions: [
+      'android.permission.POST_NOTIFICATIONS',
+      'android.permission.VIBRATE',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.MANAGE_EXTERNAL_STORAGE',
+    ],
   },
   plugins: [
     'expo-router',

@@ -30,6 +30,7 @@ const EINK = detectEink();
 
 type SettingsState = {
   onboarded: boolean;
+  onboardStep: number;
   name: string;
   mode: AppMode;
   eink: boolean;
@@ -47,6 +48,7 @@ export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
       onboarded: false,
+      onboardStep: 0,
       name: '',
       mode: EINK ? 'light' : 'dark',
       eink: EINK,
