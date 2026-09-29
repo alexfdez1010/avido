@@ -22,15 +22,17 @@ function TabBar({ state, navigation }: TabBarProps) {
       <View
         style={{
           flexDirection: 'row',
-          backgroundColor: p.mode === 'dark' ? 'rgba(30,27,23,0.97)' : 'rgba(251,248,242,0.97)',
+          backgroundColor: p.ink ? p.bg : p.mode === 'dark' ? 'rgba(30,27,23,0.97)' : 'rgba(251,248,242,0.97)',
           borderRadius: 999,
           padding: 6,
           gap: 4,
+          borderWidth: p.ink ? 1.5 : 0,
+          borderColor: p.text,
           shadowColor: '#000',
-          shadowOpacity: 0.3,
+          shadowOpacity: p.ink ? 0 : 0.3,
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 8 },
-          elevation: 12,
+          elevation: p.ink ? 0 : 12,
         }}
       >
         {state.routes.map((route, i) => {

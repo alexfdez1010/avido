@@ -1,4 +1,4 @@
-import { Bell, BookMarked, Clock, FolderOpen, Minus, Moon, Plus, Sun, Timer, Vibrate } from 'lucide-react-native';
+import { Bell, BookMarked, Clock, Contrast, FolderOpen, Minus, Moon, Plus, Sun, Timer, Vibrate } from 'lucide-react-native';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -141,11 +141,21 @@ export default function Profile() {
         )}
         <Row icon={<Vibrate size={17} color={p.soft} />} title={tx('Vibración', 'Vibration')} right={sw(s.haptics, (v) => s.set({ haptics: v }))} />
         <Row
-          icon={s.mode === 'dark' ? <Moon size={17} color={p.soft} /> : <Sun size={17} color={p.soft} />}
-          title={tx('Tema oscuro', 'Dark mode')}
-          last
-          right={sw(s.mode === 'dark', (v) => s.set({ mode: v ? 'dark' : 'light' }))}
+          icon={<Contrast size={17} color={p.soft} />}
+          title={tx('Tinta electrónica', 'E-ink screen')}
+          last={s.eink}
+          right={sw(s.eink, (v) =>
+            s.set({ eink: v, reader: { ...s.reader, theme: v ? 'eink' : s.reader.theme === 'eink' ? 'paper' : s.reader.theme } })
+          )}
         />
+        {!s.eink && (
+          <Row
+            icon={s.mode === 'dark' ? <Moon size={17} color={p.soft} /> : <Sun size={17} color={p.soft} />}
+            title={tx('Tema oscuro', 'Dark mode')}
+            last
+            right={sw(s.mode === 'dark', (v) => s.set({ mode: v ? 'dark' : 'light' }))}
+          />
+        )}
       </Card>
     </Screen>
   );

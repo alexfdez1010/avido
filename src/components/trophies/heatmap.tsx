@@ -20,9 +20,9 @@ export function Heatmap({ weeks = 17 }: { weeks?: number }) {
   const shade = (sec: number) => {
     if (sec <= 0) return p.raised;
     const r = sec / goal;
-    if (r < 0.34) return 'rgba(61,214,140,0.25)';
-    if (r < 0.67) return 'rgba(61,214,140,0.48)';
-    if (r < 1) return 'rgba(61,214,140,0.72)';
+    if (r < 0.34) return p.heat[0];
+    if (r < 0.67) return p.heat[1];
+    if (r < 1) return p.heat[2];
     return p.ember;
   };
   return (
@@ -40,7 +40,7 @@ export function Heatmap({ weeks = 17 }: { weeks?: number }) {
                   style={{
                     aspectRatio: 1,
                     borderRadius: 4,
-                    backgroundColor: future ? 'transparent' : log?.frozen && !log.goalMet ? 'rgba(143,211,255,0.35)' : shade(log?.sec ?? 0),
+                    backgroundColor: future ? 'transparent' : log?.frozen && !log.goalMet ? p.frostSoft : shade(log?.sec ?? 0),
                     borderWidth: key === todayKey ? 1.5 : 0,
                     borderColor: p.text,
                   }}

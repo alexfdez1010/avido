@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 import { persist } from 'zustand/middleware';
 
 import type { ReadingFontId } from '@/theme/fonts';
@@ -15,10 +16,23 @@ export type ReaderPrefs = {
   justify: boolean;
 };
 
+const EINK_MAKERS = /onyx|boox|bigme|meebook|boyue|likebook|mudita|minimal|daylight|ratta|supernote|moaan|xplore/i;
+
+function detectEink(): boolean {
+  if (Platform.OS !== 'android') return false;
+  const c = Platform.constants as { Manufacturer?: string; Brand?: string; Model?: string };
+  const id = `${c.Manufacturer ?? ''} ${c.Brand ?? ''}`;
+  if (EINK_MAKERS.test(id)) return true;
+  return /hisense/i.test(id) && /\bA[5-9]/i.test(c.Model ?? '');
+}
+
+const EINK = detectEink();
+
 type SettingsState = {
   onboarded: boolean;
   name: string;
   mode: AppMode;
+  eink: boolean;
   dailyGoalMin: number;
   yearlyGoal: number;
   reminders: boolean;
@@ -34,13 +48,14 @@ export const useSettings = create<SettingsState>()(
     (set) => ({
       onboarded: false,
       name: '',
-      mode: 'dark',
+      mode: EINK ? 'light' : 'dark',
+      eink: EINK,
       dailyGoalMin: 20,
       yearlyGoal: 24,
       reminders: true,
       reminderHour: 21,
       haptics: true,
-      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: 'night', justify: false },
+      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false },
       set: (patch) => set(patch),
       setReader: (patch) => set((s) => ({ reader: { ...s.reader, ...patch } })),
     }),

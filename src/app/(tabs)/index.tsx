@@ -91,9 +91,9 @@ function GoalCard() {
               </Txt>
             </View>
           )}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(143,211,255,0.12)', borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
-            <Snowflake size={11} color="#8FD3FF" />
-            <Txt v="mono" color="#8FD3FF" style={{ fontSize: 11 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: p.frostSoft, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
+            <Snowflake size={11} color={p.frost} />
+            <Txt v="mono" color={p.frost} style={{ fontSize: 11 }}>
               {freezes}
             </Txt>
           </View>

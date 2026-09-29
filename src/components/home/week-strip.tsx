@@ -32,7 +32,7 @@ export function WeekStrip() {
                 borderRadius: 19,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: lit ? p.goldSoft : log?.frozen ? 'rgba(143,211,255,0.14)' : future ? 'transparent' : p.surface,
+                backgroundColor: lit ? p.goldSoft : log?.frozen ? p.frostSoft : future ? 'transparent' : p.surface,
                 borderWidth: isToday ? 1.5 : 0,
                 borderColor: p.ember,
               }}
@@ -40,7 +40,7 @@ export function WeekStrip() {
               {lit ? (
                 <Flame size={20} />
               ) : log?.frozen ? (
-                <Txt style={{ color: '#8FD3FF', fontSize: 16 }}>❄</Txt>
+                <Txt style={{ color: p.frost, fontSize: 16 }}>❄</Txt>
               ) : (
                 <Txt v="mono" tone={future ? 'faint' : 'muted'}>
                   {d.getDate()}

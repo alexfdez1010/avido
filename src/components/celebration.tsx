@@ -61,7 +61,7 @@ const KIND_LABEL: Record<Celebration['kind'], string> = {
 
 function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
   const p = usePalette();
-  const accent = c.kind === 'achievement' || c.kind === 'level' ? p.gold : c.kind === 'freeze' ? '#8FD3FF' : c.kind === 'quest' ? p.mint : p.ember;
+  const accent = c.kind === 'achievement' || c.kind === 'level' ? p.gold : c.kind === 'freeze' ? p.frost : c.kind === 'quest' ? p.mint : p.ember;
   const seed = c.id.length * 7 + c.title.length;
   const colors = [p.ember, p.gold, p.mint, p.violet, p.text];
   const pop = useSharedValue(0.6);
@@ -75,19 +75,19 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
   return (
     <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(180)} style={[StyleSheet.absoluteFill, { backgroundColor: p.scrim, alignItems: 'center', justifyContent: 'center', zIndex: 1000 }]}>
       <View style={{ position: 'absolute', top: H * 0.3, left: W / 2, width: 0, height: 0, alignItems: 'center', justifyContent: 'center' }}>
-        {Array.from({ length: 34 }).map((_, i) => (
+        {!p.ink && Array.from({ length: 34 }).map((_, i) => (
           <Particle key={`${c.id}-${i}`} i={i} seed={seed} color={colors[i % colors.length]} />
         ))}
       </View>
       <Animated.View
         entering={ZoomIn.springify().damping(14)}
-        style={{ width: W - 48, backgroundColor: p.surface, borderRadius: 32, paddingHorizontal: 26, paddingTop: 34, paddingBottom: 22, alignItems: 'center', overflow: 'hidden' }}
+        style={{ width: W - 48, backgroundColor: p.surface, borderRadius: 32, borderWidth: p.ink ? 1.5 : 0, borderColor: p.text, paddingHorizontal: 26, paddingTop: 34, paddingBottom: 22, alignItems: 'center', overflow: 'hidden' }}
       >
         <Txt v="eyebrow" color={accent}>
           {KIND_LABEL[c.kind]}
         </Txt>
         <View style={{ height: 180, alignItems: 'center', justifyContent: 'center', marginVertical: 8 }}>
-          <Glow color={accent} />
+          {!p.ink && <Glow color={accent} />}
           <Animated.View style={[{ alignItems: 'center' }, popStyle]}>
             {c.kind === 'goal' || c.kind === 'streak' ? (
               <View style={{ alignItems: 'center' }}>

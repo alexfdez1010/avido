@@ -1,7 +1,8 @@
 import { useSettings } from '@/store/settings';
-import { palettes } from '@/theme/palette';
+import { einkPalette, palettes } from '@/theme/palette';
 
 export function usePalette() {
   const mode = useSettings((s) => s.mode);
-  return palettes[mode];
+  const eink = useSettings((s) => s.eink);
+  return eink ? einkPalette : palettes[mode];
 }

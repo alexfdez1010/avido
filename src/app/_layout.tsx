@@ -5,6 +5,7 @@ import * as SystemUI from 'expo-system-ui';
 import React, { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaListener } from 'react-native-safe-area-context';
 import { Uniwind } from 'uniwind';
 
@@ -37,7 +38,7 @@ function useHydrated() {
 export default function RootLayout() {
   const ready = useHydrated();
   const p = usePalette();
-  const mode = useSettings((s) => s.mode);
+  const mode = p.mode;
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(p.bg).catch(() => {});
@@ -68,13 +69,14 @@ export default function RootLayout() {
   return (
     <SafeAreaListener onChange={({ insets }) => Uniwind.updateInsets(insets)}>
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: p.bg }}>
+        <ReducedMotionConfig mode={p.ink ? ReduceMotion.Always : ReduceMotion.System} />
         <GluestackUIProvider mode={mode}>
           <ThemeProvider value={{ ...navTheme, colors: { ...navTheme.colors, background: p.bg, card: p.bg, text: p.text, border: p.line, primary: p.ember } }}>
             <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: p.bg }, animation: 'fade_from_bottom' }}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: p.bg }, animation: p.ink ? 'none' : 'fade_from_bottom' }}>
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="onboarding" options={{ animation: 'fade', gestureEnabled: false }} />
-              <Stack.Screen name="reader/[id]" options={{ animation: 'slide_from_bottom' }} />
+              <Stack.Screen name="onboarding" options={{ animation: p.ink ? 'none' : 'fade', gestureEnabled: false }} />
+              <Stack.Screen name="reader/[id]" options={{ animation: p.ink ? 'none' : 'slide_from_bottom' }} />
             </Stack>
             <CelebrationHost />
           </ThemeProvider>

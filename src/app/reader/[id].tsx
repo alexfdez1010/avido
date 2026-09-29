@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft, ListTree, Type } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, View, type ViewToken } from 'react-native';
+import { ActivityIndicator, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ViewToken } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,7 +37,7 @@ function GoalChip({ theme }: { theme: ReaderTheme }) {
   const met = sec >= goal * 60;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      <Ring size={26} stroke={3.5} value={sec / (goal * 60)} color={met ? '#7FD6AE' : theme.accent} track={theme.line}>
+      <Ring size={26} stroke={3.5} value={sec / (goal * 60)} color={theme.accent} track={theme.line}>
         {met ? <Flame size={12} /> : null}
       </Ring>
       <Txt v="mono" color={theme.muted}>
@@ -53,6 +53,7 @@ export default function ReaderScreen() {
   const book = useLibrary((s) => s.books[id]);
   const updateBook = useLibrary((s) => s.updateBook);
   const prefs = useSettings((s) => s.reader);
+  const eink = useSettings((s) => s.eink);
   const theme = readerThemes[prefs.theme];
   const insets = useSafeAreaInsets();
 
@@ -68,6 +69,10 @@ export default function ReaderScreen() {
   const maxRef = useRef(book?.maxProgress ?? 0);
   const [initialBlock, setInitialBlock] = useState(book?.location?.block ?? 0);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollY = useRef(0);
+  const viewH = useRef(0);
+  const viewW = useRef(0);
+  const contentH = useRef(0);
 
   const tracker = useReadingTracker(id);
   const { poke, addPages } = tracker;
@@ -182,6 +187,7 @@ export default function ReaderScreen() {
         record(offsets[n] / content.totalChars, { chapter: n, block: 0 });
       }
       setInitialBlock(0);
+      scrollY.current = 0;
       setChapter(n);
       setSheet('none');
       requestAnimationFrame(() => listRef.current?.scrollToOffset({ offset: 0, animated: false }));
@@ -201,7 +207,61 @@ export default function ReaderScreen() {
     setChrome((c) => !c);
   }, [poke]);
 
-  const tap = useMemo(() => Gesture.Tap().maxDuration(260).maxDistance(10).runOnJS(true).onEnd(toggle), [toggle]);
+  const turnPage = useCallback(
+    (dir: 1 | -1) => {
+      if (!content) return;
+      poke();
+      const max = Math.max(0, contentH.current - viewH.current);
+      const y = scrollY.current;
+      if (dir > 0 && y >= max - 2) {
+        if (chapter < content.chapters.length - 1) goChapter(chapter + 1, true);
+        return;
+      }
+      if (dir < 0 && y <= 2) {
+        if (chapter > 0) goChapter(chapter - 1);
+        return;
+      }
+      const step = viewH.current - insets.bottom - 48 - prefs.size * prefs.lineHeight;
+      const next = Math.max(0, Math.min(max, y + dir * step));
+      scrollY.current = next;
+      listRef.current?.scrollToOffset({ offset: next, animated: false });
+    },
+    [chapter, content, goChapter, insets.bottom, poke, prefs.lineHeight, prefs.size]
+  );
+
+  const onTap = useCallback(
+    (x: number) => {
+      if (!eink || chrome) return toggle();
+      const w = viewW.current || 1;
+      if (x < w * 0.3) turnPage(-1);
+      else if (x > w * 0.7) turnPage(1);
+      else toggle();
+    },
+    [chrome, eink, toggle, turnPage]
+  );
+
+  const tapHandler = useRef<(x: number) => void>(() => {});
+  useLayoutEffect(() => {
+    tapHandler.current = onTap;
+  });
+  const tap = useMemo(
+    () =>
+      Gesture.Tap()
+        .maxDuration(260)
+        .maxDistance(10)
+        .runOnJS(true)
+        // eslint-disable-next-line react-hooks/refs -- gesture callback, runs outside render
+        .onEnd((e) => tapHandler.current(e.x)),
+    []
+  );
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    scrollY.current = e.nativeEvent.contentOffset.y;
+  }, []);
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    viewH.current = e.nativeEvent.layout.height;
+    viewW.current = e.nativeEvent.layout.width;
+  }, []);
 
   const st: BlockStyle = useMemo(
     () => ({ font: readingFonts[prefs.font], size: prefs.size, lineHeight: prefs.lineHeight, margin: prefs.margin, justify: prefs.justify, theme }),
@@ -306,7 +366,7 @@ export default function ReaderScreen() {
         />
       ) : (
         <GestureDetector gesture={tap}>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1 }} onLayout={onLayout}>
             <FlashList
               ref={listRef}
               key={`${chapter}`}
@@ -318,6 +378,11 @@ export default function ReaderScreen() {
               onViewableItemsChanged={onViewable}
               viewabilityConfig={{ itemVisiblePercentThreshold: 60, minimumViewTime: 250 }}
               onScrollBeginDrag={poke}
+              onScroll={onScroll}
+              scrollEventThrottle={32}
+              onContentSizeChange={(_, h) => {
+                contentH.current = h;
+              }}
               showsVerticalScrollIndicator={false}
               extraData={st}
             />

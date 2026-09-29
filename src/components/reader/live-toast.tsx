@@ -36,7 +36,7 @@ export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: theme.statusBar === 'light' ? '#2A2520' : '#1F1C18',
+        backgroundColor: theme.id === 'eink' ? '#000000' : theme.statusBar === 'light' ? '#2A2520' : '#1F1C18',
         paddingVertical: 10,
         paddingLeft: 12,
         paddingRight: 16,
@@ -45,13 +45,13 @@ export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
         elevation: 10,
       }}
     >
-      <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 16, color: '#F2B544' }}>{item.big && item.big.length <= 3 ? item.big : '✦'}</Txt>
+      <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 16, color: theme.id === 'eink' ? '#FFFFFF' : '#F2B544' }}>{item.big && item.big.length <= 3 ? item.big : '✦'}</Txt>
       <Txt v="label" style={{ color: '#F3EDE2' }} numberOfLines={1}>
         {item.title}
         {item.kind === 'quest' || item.kind === 'achievement' ? ` · ${item.subtitle}` : ''}
       </Txt>
       {!!item.xp && (
-        <Txt v="mono" style={{ color: '#F2B544' }}>
+        <Txt v="mono" style={{ color: theme.id === 'eink' ? '#FFFFFF' : '#F2B544' }}>
           +{Math.round(item.xp)}
         </Txt>
       )}
