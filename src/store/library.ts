@@ -10,6 +10,8 @@ type LibraryState = {
   folderName?: string;
   books: Record<string, Book>;
   lastScanAt?: number;
+  downloaded: Record<number, true>;
+  markDownloaded: (id: number) => void;
   setFolder: (uri: string | undefined, name?: string) => void;
   replaceBooks: (books: Record<string, Book>) => void;
   updateBook: (id: string, patch: Partial<Book>) => void;
@@ -19,6 +21,8 @@ export const useLibrary = create<LibraryState>()(
   persist(
     (set) => ({
       books: {},
+      downloaded: {},
+      markDownloaded: (id) => set((s) => ({ downloaded: { ...s.downloaded, [id]: true } })),
       setFolder: (folderUri, folderName) => set({ folderUri, folderName }),
       replaceBooks: (books) => set({ books, lastScanAt: Date.now() }),
       updateBook: (id, patch) =>

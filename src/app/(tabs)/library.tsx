@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { Check, FolderOpen, RefreshCw, RotateCcw, Search, X } from 'lucide-react-native';
+import { Check, Compass, FolderOpen, RefreshCw, RotateCcw, Search, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -161,9 +161,14 @@ export default function Library() {
             {tx('Biblioteca', 'Library')}
           </Txt>
         </View>
-        <Tap onPress={() => scanLibrary()} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: p.surface, alignItems: 'center', justifyContent: 'center' }}>
-          <RefreshCw size={18} color={p.soft} />
-        </Tap>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Tap onPress={() => scanLibrary()} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: p.surface, alignItems: 'center', justifyContent: 'center' }}>
+            <RefreshCw size={18} color={p.soft} />
+          </Tap>
+          <Tap onPress={() => router.push('/discover')} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: p.emberSoft, alignItems: 'center', justifyContent: 'center' }}>
+            <Compass size={19} color={p.ember} />
+          </Tap>
+        </View>
       </View>
       <Tap onPress={pickFolder} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
         <FolderOpen size={15} color={p.ember} />
@@ -219,11 +224,10 @@ export default function Library() {
       <Txt v="body" tone="muted" center>
         {!folderUri || q ? '' : 'EPUB · PDF · TXT · MD'}
       </Txt>
-      {!folderUri && (
-        <View style={{ marginTop: 10 }}>
-          <Cta label={tx('Elegir carpeta', 'Choose folder')} onPress={pickFolder} />
-        </View>
-      )}
+      <View style={{ marginTop: 10, gap: 8, alignItems: 'center' }}>
+        {!folderUri && <Cta label={tx('Elegir carpeta', 'Choose folder')} onPress={pickFolder} />}
+        {!q && <Cta kind={folderUri ? 'primary' : 'ghost'} icon={<Compass size={18} color={folderUri ? p.onEmber : p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />}
+      </View>
     </View>
   );
 

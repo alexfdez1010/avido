@@ -7,6 +7,7 @@ Pick a folder on your device and Ávido picks up every book inside it.
 ## Features
 
 - **Folder library** — choose a folder through Android's Storage Access Framework; Ávido scans it recursively and keeps it in sync. If the system picker doesn't work on a device, an in-app storage browser (all-files access) is available as a fallback.
+- **Discover classics** — browse, search and download public-domain EPUBs from [Project Gutenberg](https://www.gutenberg.org) straight into the books folder, filtered by Spanish, English or any language.
 - **Formats** — EPUB, PDF, TXT and Markdown (`.md`). EPUB/TXT/Markdown are reflowed with your typography settings; PDF is rendered page by page.
 - **Reader** — themes (Paper, Sepia, Dusk, Night, Ink (OLED), E-ink), custom typefaces (Literata, Newsreader, Fraunces, Atkinson Hyperlegible), font size, line height, margins, justification, table of contents and per-book progress.
 - **Gamification** — daily minute goal, streaks with freezes, streak XP multiplier, three daily quests, 32 achievements, yearly book challenge, activity heatmap and reminders. See [docs/gamification.md](docs/gamification.md).
