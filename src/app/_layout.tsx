@@ -1,0 +1,85 @@
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
+import React, { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaListener } from 'react-native-safe-area-context';
+import { Uniwind } from 'uniwind';
+
+import { CelebrationHost } from '@/components/celebration';
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import { usePalette } from '@/hooks/use-palette';
+import { scanLibrary } from '@/lib/library';
+import { scheduleReminders } from '@/lib/notifications';
+import { useGame } from '@/store/game';
+import { useLibrary } from '@/store/library';
+import { useSettings } from '@/store/settings';
+import '@/global.css';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+function useHydrated() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const stores = [useSettings, useLibrary, useGame];
+    const check = () => {
+      if (stores.every((s) => s.persist.hasHydrated())) setReady(true);
+    };
+    const unsubs = stores.map((s) => s.persist.onFinishHydration(check));
+    check();
+    return () => unsubs.forEach((u) => u());
+  }, []);
+  return ready;
+}
+
+export default function RootLayout() {
+  const ready = useHydrated();
+  const p = usePalette();
+  const mode = useSettings((s) => s.mode);
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(p.bg).catch(() => {});
+  }, [p.bg]);
+
+  useEffect(() => {
+    if (!ready) return;
+    SplashScreen.hideAsync().catch(() => {});
+    useGame.getState().reconcile();
+    useGame.getState().evaluate();
+    if (useLibrary.getState().folderUri) scanLibrary();
+    scheduleReminders();
+    const sub = AppState.addEventListener('change', (st) => {
+      if (st === 'active') {
+        useGame.getState().reconcile();
+        if (useLibrary.getState().folderUri) scanLibrary();
+      } else if (st === 'background') {
+        scheduleReminders();
+      }
+    });
+    return () => sub.remove();
+  }, [ready]);
+
+  if (!ready) return null;
+
+  const navTheme = mode === 'dark' ? DarkTheme : DefaultTheme;
+
+  return (
+    <SafeAreaListener onChange={({ insets }) => Uniwind.updateInsets(insets)}>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: p.bg }}>
+        <GluestackUIProvider mode={mode}>
+          <ThemeProvider value={{ ...navTheme, colors: { ...navTheme.colors, background: p.bg, card: p.bg, text: p.text, border: p.line, primary: p.ember } }}>
+            <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: p.bg }, animation: 'fade_from_bottom' }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="onboarding" options={{ animation: 'fade', gestureEnabled: false }} />
+              <Stack.Screen name="reader/[id]" options={{ animation: 'slide_from_bottom' }} />
+            </Stack>
+            <CelebrationHost />
+          </ThemeProvider>
+        </GluestackUIProvider>
+      </GestureHandlerRootView>
+    </SafeAreaListener>
+  );
+}

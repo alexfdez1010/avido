@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@import 'uniwind';
+/* ─── UniWind theme variants ─────────────────────────────────────
+   Switched at runtime via Uniwind.setTheme('light' | 'dark' | 'adaptive').
+   Variable values match the nativewind config.ts tokens so that the
+   same Tailwind utility classes (bg-primary, text-foreground, etc.)
+   produce identical output regardless of styling engine.                */
+@layer theme {
+  :root {
+    @variant light {
+      --primary: 255 91 36;
+      --primary-foreground: 255 250 244;
+      --card: 251 248 242;
+      --secondary: 234 227 214;
+      --secondary-foreground: 27 25 22;
+      --background: 244 239 230;
+      --popover: 251 248 242;
+      --popover-foreground: 27 25 22;
+      --muted: 234 227 214;
+      --muted-foreground: 128 119 105;
+      --destructive: 208 52 44;
+      --foreground: 27 25 22;
+      --border: 222 214 199;
+      --input: 222 214 199;
+      --ring: 255 91 36;
+      --accent: 234 227 214;
+      --accent-foreground: 27 25 22;
+    }
+
+    @variant dark {
+      --primary: 255 91 36;
+      --primary-foreground: 255 250 244;
+      --card: 26 23 19;
+      --secondary: 36 32 27;
+      --secondary-foreground: 243 237 226;
+      --background: 16 14 11;
+      --popover: 26 23 19;
+      --popover-foreground: 243 237 226;
+      --muted: 36 32 27;
+      --muted-foreground: 140 132 118;
+      --destructive: 255 100 90;
+      --foreground: 243 237 226;
+      --border: 44 40 34;
+      --input: 44 40 34;
+      --ring: 255 91 36;
+      --accent: 36 32 27;
+      --accent-foreground: 243 237 226;
+    }
+  }
+}
+
+/* ─── Tailwind v4 color mappings ─────────────────────────────────
+   Maps the theme CSS variables above to Tailwind color utilities.
+   bg-primary → rgb(var(--primary)), text-foreground → rgb(var(--foreground)), etc. */
+@theme inline {
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-card: rgb(var(--card));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-background: rgb(var(--background));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-foreground: rgb(var(--foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+}
+
+@theme {
+  --font-sans: 'BricolageGrotesque_500Medium';
+  --font-body: 'BricolageGrotesque_400Regular';
+  --font-display: 'Fraunces_600SemiBold';
+  --font-mono: 'JetBrainsMono_400Regular';
+}
