@@ -45,12 +45,12 @@ async function openPackage(uri: string): Promise<Package> {
   const bytes = await new File(uri).bytes();
   const zip = await JSZip.loadAsync(bytes);
   const container = await zipFile(zip, 'META-INF/container.xml')?.async('string');
-  if (!container) throw new Error('EPUB sin container.xml');
+  if (!container) throw new Error('EPUB is missing META-INF/container.xml');
   const rootfile = findAll(parseXml(container), (n) => localName(n) === 'rootfile')[0];
   const opfPath = rootfile?.attribs?.['full-path'];
-  if (!opfPath) throw new Error('EPUB sin OPF');
+  if (!opfPath) throw new Error('EPUB container does not reference an OPF package');
   const opfXml = await zipFile(zip, opfPath)?.async('string');
-  if (!opfXml) throw new Error('OPF ilegible');
+  if (!opfXml) throw new Error('EPUB OPF package could not be read');
   const opf = parseXml(opfXml);
   const opfDir = dirname(opfPath);
 

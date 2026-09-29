@@ -85,6 +85,6 @@ jobs:
           make_latest: true
           files: dist/*.apk
           body: |
-            APK de Ávido generado automáticamente desde `${{ github.sha }}`.
+            Ávido APK built automatically from `${{ github.sha }}`.
 
-            Descarga `avido-${{ env.APP_VERSION }}.apk` e instálalo en Android (permite "instalar apps de origen desconocido").
+            Download `avido-${{ env.APP_VERSION }}.apk` and install it on Android (allow "install unknown apps").

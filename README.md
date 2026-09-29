@@ -1,40 +1,57 @@
 # Ávido
 
-Lector de libros para Android que convierte la lectura en un juego: XP, niveles, rachas, misiones diarias, logros y un reto anual para leer más libros.
+An Android book reader that turns reading into a game — XP, levels, streaks, daily quests, achievements and a yearly challenge — built to make you finish more books.
 
-- Elige una carpeta del dispositivo y Ávido detecta tus **EPUB, PDF, TXT y Markdown** (recursivo).
-- Lector con temas Papel / Sepia / Ocaso / Noche / Tinta, tipografías Literata, Newsreader, Fraunces y Atkinson Hyperlegible, tamaño, interlineado, márgenes y justificación.
-- Progreso guardado por libro, índice de capítulos y tiempo de lectura.
-- Gamificación: meta diaria de minutos, racha con protectores, multiplicador de XP, tres misiones al día, 32 logros, heatmap de constancia y recordatorios.
+Pick a folder on your device and Ávido picks up every book inside it.
 
-Construido con Expo SDK 57, React Native, Expo Router y gluestack-ui.
+## Features
 
-## Instalar
+- **Folder library** — choose a folder through Android's Storage Access Framework; Ávido scans it recursively and keeps it in sync.
+- **Formats** — EPUB, PDF, TXT and Markdown (`.md`). EPUB/TXT/Markdown are reflowed with your typography settings; PDF is rendered page by page.
+- **Reader** — themes (Paper, Sepia, Dusk, Night, Ink (OLED), E-ink), custom typefaces (Literata, Newsreader, Fraunces, Atkinson Hyperlegible), font size, line height, margins, justification, table of contents and per-book progress.
+- **Gamification** — daily minute goal, streaks with freezes, streak XP multiplier, three daily quests, 32 achievements, yearly book challenge, activity heatmap and reminders. See [docs/gamification.md](docs/gamification.md).
+- **E-ink mode** — pure black-and-white palette, no animations and tap-to-turn pages. Enabled automatically on known e-ink Android devices, or manually from Profile.
+- **Languages** — Spanish (Spain) and English, selected from the device language (English fallback).
 
-Cada push a `main` genera un APK firmado en [Releases](../../releases). Descárgalo e instálalo en Android.
+## Install
 
-Para firmar con tu propia clave, añade estos secrets al repositorio (si no existen se usa la clave debug):
+Every push to `main` builds a signed APK and publishes it on [Releases](../../releases). Download the latest `avido-<version>.apk` and install it on Android.
 
-| Secret | Contenido |
-| --- | --- |
-| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 release.keystore` |
-| `ANDROID_KEYSTORE_PASSWORD` | contraseña del keystore |
-| `ANDROID_KEY_ALIAS` | alias de la clave |
-| `ANDROID_KEY_PASSWORD` | contraseña de la clave |
+## Development
 
-## Desarrollo
+Requirements: Node 22, JDK 17 and the Android SDK.
 
 ```bash
 npm ci
 npx expo prebuild --platform android --clean
-npx expo run:android          # build de desarrollo
-npx tsc --noEmit && npx expo lint
+npx expo run:android            # development build on a device/emulator
 ```
 
-APK release local:
+Checks to run before pushing:
+
+```bash
+npx tsc --noEmit
+npx expo lint
+npx expo-doctor
+```
+
+Local release APK:
 
 ```bash
 npx expo prebuild --platform android --clean --no-install
 cd android && ./gradlew assembleRelease
-# android/app/build/outputs/apk/release/app-release.apk
+# → android/app/build/outputs/apk/release/app-release.apk
 ```
+
+`android/` is generated (Continuous Native Generation) — never edit it by hand; use `app.config.ts` and config plugins in `plugins/`.
+
+## Documentation
+
+- [Architecture](docs/architecture.md) — project layout, data flow and key modules.
+- [Gamification](docs/gamification.md) — XP, levels, streaks, quests and achievements.
+- [Internationalization](docs/i18n.md) — how UI strings are translated.
+- [Releasing](docs/releasing.md) — CI workflow, versioning and signing.
+
+## Tech stack
+
+Expo SDK 57 · React Native · Expo Router · TypeScript · gluestack-ui v5 (UniWind / Tailwind CSS 4) · Zustand · Reanimated · FlashList · JSZip · react-native-pdf.
