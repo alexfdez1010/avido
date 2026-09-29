@@ -4,12 +4,13 @@ import { View } from 'react-native';
 import { Sheet, Tap, Txt } from '@/components/kit';
 import type { Chapter } from '@/lib/types';
 import type { ReaderTheme } from '@/theme/palette';
+import { tx } from '@/i18n';
 
 export function TocSheet({ open, onClose, chapters, current, theme, onPick }: { open: boolean; onClose: () => void; chapters: Chapter[]; current: number; theme: ReaderTheme; onPick: (i: number) => void }) {
   return (
     <Sheet open={open} onClose={onClose} bg={theme.bg} fg={theme.muted} scroll maxHeight="80%">
       <Txt v="eyebrow" color={theme.muted} style={{ marginTop: 8, marginBottom: 8 }}>
-        Índice · {chapters.length} capítulos
+        {tx('Índice', 'Contents')} · {chapters.length} {tx('capítulos', 'chapters')}
       </Txt>
       {chapters.map((c, i) => {
         const on = i === current;
@@ -24,7 +25,7 @@ export function TocSheet({ open, onClose, chapters, current, theme, onPick }: { 
               </Txt>
             </View>
             <Txt v="caption" color={theme.muted}>
-              {Math.max(1, Math.round(c.chars / 1500))} pág
+              {Math.max(1, Math.round(c.chars / 1500))} {tx('pág', 'pp')}
             </Txt>
           </Tap>
         );

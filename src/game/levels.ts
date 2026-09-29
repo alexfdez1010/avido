@@ -1,16 +1,8 @@
-export const LEVEL_TITLES = [
-  'Curioso',
-  'Hojeador',
-  'Aprendiz de tinta',
-  'Lector constante',
-  'Devoralibros',
-  'Ratón de biblioteca',
-  'Bibliófilo',
-  'Erudito',
-  'Sabio de papel',
-  'Guardián del canon',
-  'Leyenda de tinta',
-];
+import { isEs } from '@/i18n';
+
+export const LEVEL_TITLES = isEs
+  ? ['Curioso', 'Hojeador', 'Aprendiz de tinta', 'Lector constante', 'Devoralibros', 'Ratón de biblioteca', 'Bibliófilo', 'Erudito', 'Sabio de papel', 'Guardián del canon', 'Leyenda de tinta']
+  : ['Curious', 'Page-flipper', 'Ink apprentice', 'Steady reader', 'Book devourer', 'Bookworm', 'Bibliophile', 'Scholar', 'Paper sage', 'Keeper of the canon', 'Ink legend'];
 
 export function xpForLevel(level: number): number {
   if (level <= 1) return 0;

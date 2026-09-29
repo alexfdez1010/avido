@@ -2,6 +2,7 @@ import { File } from 'expo-file-system';
 
 import type { Block, BookContent, Chapter, Span } from './types';
 import { CONTENT_VERSION } from './types';
+import { tx } from '@/i18n';
 
 const HEADING_RE =
   /^(cap[ií]tulo|chapter|parte|part|libro|book|pr[oó]logo|prologue|ep[ií]logo|epilogue|introducci[oó]n|introduction|acto|act|canto)\b[^\n]{0,80}$/i;
@@ -122,11 +123,11 @@ export function parsePlainText(raw: string, markdown: boolean, fallbackTitle: st
     const size = 80;
     for (let i = 0; i < all.length; i += size) {
       const blocks = all.slice(i, i + size);
-      result.push({ title: `Parte ${result.length + 1}`, blocks, chars: blocks.reduce((a, b) => a + b.c, 0) });
+      result.push({ title: `${tx('Parte', 'Part')} ${result.length + 1}`, blocks, chars: blocks.reduce((a, b) => a + b.c, 0) });
     }
   }
   result.forEach((c, i) => {
-    if (!c.title) c.title = i === 0 ? 'Inicio' : `Sección ${i + 1}`;
+    if (!c.title) c.title = i === 0 ? tx('Inicio', 'Start') : `${tx('Sección', 'Section')} ${i + 1}`;
   });
 
   return {

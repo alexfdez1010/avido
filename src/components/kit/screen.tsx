@@ -1,17 +1,12 @@
-import React from "react";
-import { ScrollView, View, type ScrollViewProps } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React from 'react';
+import { ScrollView, View, type ScrollViewProps } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { usePalette } from "@/hooks/use-palette";
+import { usePalette } from '@/hooks/use-palette';
 
 export const TAB_BAR_SPACE = 96;
 
-export function Screen({
-  children,
-  scroll = true,
-  pad = 22,
-  ...rest
-}: ScrollViewProps & { scroll?: boolean; pad?: number }) {
+export function Screen({ children, scroll = true, pad = 22, ...rest }: ScrollViewProps & { scroll?: boolean; pad?: number }) {
   const p = usePalette();
   const insets = useSafeAreaInsets();
   if (!scroll)
@@ -44,7 +39,7 @@ export function Screen({
       <View
         pointerEvents="none"
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
@@ -57,15 +52,7 @@ export function Screen({
   );
 }
 
-export function Card({
-  children,
-  style,
-  tint,
-}: {
-  children: React.ReactNode;
-  style?: object;
-  tint?: string;
-}) {
+export function Card({ children, style, tint }: { children: React.ReactNode; style?: object; tint?: string }) {
   const p = usePalette();
   return (
     <View
@@ -85,19 +72,13 @@ export function Card({
   );
 }
 
-export function SectionTitle({
-  children,
-  right,
-}: {
-  children: React.ReactNode;
-  right?: React.ReactNode;
-}) {
+export function SectionTitle({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
   return (
     <View
       style={{
-        flexDirection: "row",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
         marginTop: 30,
         marginBottom: 12,
       }}

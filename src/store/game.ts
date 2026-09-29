@@ -11,6 +11,7 @@ import { addDays, dayKey, parseDayKey } from '@/lib/dates';
 import { useLibrary } from './library';
 import { useSettings } from './settings';
 import { jsonStorage } from './storage';
+import { isEs, tx } from '@/i18n';
 
 export type FinishedEntry = { id: string; title: string; at: number; days: number };
 
@@ -74,7 +75,7 @@ export const useGame = create<GameState>()(
         set((s) => ({ xp, days: { ...s.days, [key]: log } }));
         const after = levelFromXp(xp);
         if (after > before) {
-          push({ kind: 'level', title: `Nivel ${after}`, subtitle: levelTitle(after), big: String(after) });
+          push({ kind: 'level', title: `${tx('Nivel', 'Level')} ${after}`, subtitle: levelTitle(after), big: String(after) });
         }
         return log;
       };
@@ -116,8 +117,10 @@ export const useGame = create<GameState>()(
             set({ days, freezes: s.freezes - gap.length, lastReconciled: key });
             push({
               kind: 'freeze',
-              title: 'Racha salvada',
-              subtitle: `Usaste ${gap.length === 1 ? 'un protector' : `${gap.length} protectores`} de racha. No te quedan muchos.`,
+              title: tx('Racha salvada', 'Streak saved'),
+              subtitle: isEs
+                ? `Usaste ${gap.length === 1 ? 'un protector' : `${gap.length} protectores`} de racha. No te quedan muchos.`
+                : `You used ${gap.length === 1 ? 'a streak freeze' : `${gap.length} streak freezes`}. Don't run out.`,
               big: '❄',
             });
           } else {
@@ -176,8 +179,8 @@ export const useGame = create<GameState>()(
             set({ bestStreak });
             push({
               kind: 'goal',
-              title: 'Meta cumplida',
-              subtitle: streak > 1 ? `${streak} días seguidos. No rompas la cadena.` : 'Primer día de una nueva racha.',
+              title: tx('Meta cumplida', 'Goal reached'),
+              subtitle: streak > 1 ? tx(`${streak} días seguidos. No rompas la cadena.`, `${streak} days in a row. Don't break the chain.`) : tx('Primer día de una nueva racha.', 'Day one of a new streak.'),
               big: String(streak),
               xp: bonus,
             });
@@ -187,7 +190,7 @@ export const useGame = create<GameState>()(
             }
             if (streak > 0 && streak % 7 === 0 && get().freezes < 3) {
               set((s) => ({ freezes: s.freezes + 1 }));
-              push({ kind: 'freeze', title: 'Protector ganado', subtitle: `${streak} días de racha te dan un protector. Salva un día perdido.`, big: '❄' });
+              push({ kind: 'freeze', title: tx('Protector ganado', 'Freeze earned'), subtitle: tx(`${streak} días de racha te dan un protector. Salva un día perdido.`, `${streak} days of streak earn you a freeze. It saves a missed day.`), big: '❄' });
             }
           }
 
@@ -198,10 +201,10 @@ export const useGame = create<GameState>()(
               log = { ...log, quests: [...log.quests, q.id] };
               set((s) => ({ days: { ...s.days, [key]: log }, questsDone: s.questsDone + 1 }));
               log = gainXp(q.xp, log, key);
-              push({ kind: 'quest', title: 'Misión completada', subtitle: q.title, xp: q.xp, big: '✦' });
+              push({ kind: 'quest', title: tx('Misión completada', 'Quest complete'), subtitle: q.title, xp: q.xp, big: '✦' });
               if (log.quests.length === quests.length) {
                 log = gainXp(100, log, key);
-                push({ kind: 'quest', title: 'Pleno diario', subtitle: 'Las tres misiones de hoy. Imbatible.', xp: 100, big: '✦✦✦' });
+                push({ kind: 'quest', title: tx('Pleno diario', 'Clean sweep'), subtitle: tx('Las tres misiones de hoy. Imbatible.', "All three of today's quests. Unstoppable."), xp: 100, big: '✦✦✦' });
               }
             }
           }
@@ -234,8 +237,8 @@ export const useGame = create<GameState>()(
           const thisYear = get().finished.filter((f) => new Date(f.at).getFullYear() === year).length;
           push({
             kind: 'finish',
-            title: 'Libro terminado',
-            subtitle: `${book.title} · ${thisYear} de ${useSettings.getState().yearlyGoal} este año`,
+            title: tx('Libro terminado', 'Book finished'),
+            subtitle: `${book.title} · ${thisYear} ${tx('de', 'of')} ${useSettings.getState().yearlyGoal} ${tx('este año', 'this year')}`,
             big: String(thisYear),
             xp: reward,
           });

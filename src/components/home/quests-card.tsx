@@ -9,6 +9,7 @@ import { usePalette } from '@/hooks/use-palette';
 import { dayKey } from '@/lib/dates';
 import { useGame } from '@/store/game';
 import { useSettings } from '@/store/settings';
+import { tx } from '@/i18n';
 
 function untilMidnight() {
   const now = new Date();
@@ -29,10 +30,10 @@ export function QuestsCard() {
     <Card>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
         <Txt v="eyebrow" tone="muted">
-          Misiones · {done}/{quests.length}
+          {tx('Misiones', 'Quests')} · {done}/{quests.length}
         </Txt>
         <Txt v="mono" tone="faint" style={{ fontSize: 10.5 }}>
-          renuevan en {untilMidnight()}
+          {tx('renuevan en', 'reset in')} {untilMidnight()}
         </Txt>
       </View>
       {quests.map((q, i) => {
@@ -79,7 +80,7 @@ export function QuestsCard() {
       })}
       <View style={{ marginTop: 6, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: p.goldSoft, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 9 }}>
         <Txt v="caption" color={p.gold}>
-          Completa las 3 y gana un bonus
+          {tx('Completa las 3 y gana un bonus', 'Complete all 3 for a bonus')}
         </Txt>
         <Txt v="mono" color={p.gold}>
           +100 XP

@@ -20,6 +20,7 @@ import { usePalette } from '@/hooks/use-palette';
 import { seededRandom } from '@/lib/hash';
 import { useGame } from '@/store/game';
 import { fonts } from '@/theme/fonts';
+import { tx } from '@/i18n';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -49,13 +50,13 @@ function Glow({ color }: { color: string }) {
 }
 
 const KIND_LABEL: Record<Celebration['kind'], string> = {
-  level: 'Subes de nivel',
-  achievement: 'Logro desbloqueado',
-  goal: 'Racha',
-  finish: 'Libro terminado',
-  quest: 'Misión',
-  freeze: 'Protector de racha',
-  streak: 'Racha',
+  level: tx('Subes de nivel', 'Level up'),
+  achievement: tx('Logro desbloqueado', 'Achievement unlocked'),
+  goal: tx('Racha', 'Streak'),
+  finish: tx('Libro terminado', 'Book finished'),
+  quest: tx('Misión', 'Quest'),
+  freeze: tx('Protector de racha', 'Streak freeze'),
+  streak: tx('Racha', 'Streak'),
 };
 
 function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
@@ -112,7 +113,7 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
           </View>
         )}
         <View style={{ alignSelf: 'stretch', marginTop: 24 }}>
-          <Cta label="¡Vamos!" onPress={onDone} />
+          <Cta label={tx('¡Vamos!', "Let's go!")} onPress={onDone} />
         </View>
       </Animated.View>
     </Animated.View>

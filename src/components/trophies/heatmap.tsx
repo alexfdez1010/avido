@@ -6,6 +6,7 @@ import { usePalette } from '@/hooks/use-palette';
 import { addDays, dayKey, monthShort } from '@/lib/dates';
 import { useGame } from '@/store/game';
 import { useSettings } from '@/store/settings';
+import { tx } from '@/i18n';
 
 export function Heatmap({ weeks = 17 }: { weeks?: number }) {
   const p = usePalette();
@@ -55,17 +56,17 @@ export function Heatmap({ weeks = 17 }: { weeks?: number }) {
         </Txt>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <Txt v="mono" tone="faint" style={{ fontSize: 10 }}>
-            menos
+            {tx('menos', 'less')}
           </Txt>
           {[0, 0.2, 0.5, 0.8, 1.2].map((r) => (
             <View key={r} style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: shade(r * goal) }} />
           ))}
           <Txt v="mono" tone="faint" style={{ fontSize: 10 }}>
-            meta
+            {tx('meta', 'goal')}
           </Txt>
         </View>
         <Txt v="mono" tone="faint" style={{ fontSize: 10 }}>
-          hoy
+          {tx('hoy', 'today')}
         </Txt>
       </View>
     </View>

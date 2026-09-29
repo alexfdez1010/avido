@@ -25,6 +25,7 @@ import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { readingFonts } from '@/theme/fonts';
 import { readerThemes, type ReaderTheme } from '@/theme/palette';
+import { tx } from '@/i18n';
 
 type Item = { key: string; type: 'head' } | { key: string; type: 'block'; block: Block; i: number } | { key: string; type: 'foot' };
 
@@ -211,10 +212,10 @@ export default function ReaderScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
         <Txt v="title" color={theme.text}>
-          Libro no encontrado
+          {tx('Libro no encontrado', 'Book not found')}
         </Txt>
         <View style={{ marginTop: 20 }}>
-          <Cta label="Volver" onPress={() => router.back()} />
+          <Cta label={tx('Volver', 'Back')} onPress={() => router.back()} />
         </View>
       </View>
     );
@@ -230,7 +231,7 @@ export default function ReaderScreen() {
       return (
         <View style={{ paddingHorizontal: prefs.margin, paddingTop: insets.top + 64, paddingBottom: 18 }}>
           <Txt v="eyebrow" color={theme.accent}>
-            Capítulo {chapter + 1} de {content?.chapters.length}
+            {tx('Capítulo', 'Chapter')} {chapter + 1} {tx('de', 'of')} {content?.chapters.length}
           </Txt>
           {ch && !/^h[12]$/.test(ch.blocks[0]?.k ?? '') && (
             <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: prefs.size * 1.4, lineHeight: prefs.size * 1.7, color: theme.text, marginTop: 10 }}>{ch.title}</Txt>
@@ -243,21 +244,21 @@ export default function ReaderScreen() {
         <View style={{ borderTopWidth: 1, borderTopColor: theme.line, paddingTop: 28, alignItems: 'center' }}>
           {isLast ? (
             <>
-              <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 44, color: theme.accent }}>Fin</Txt>
+              <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 44, color: theme.accent }}>{tx('Fin', 'The end')}</Txt>
               <Txt v="body" color={theme.muted} center style={{ marginTop: 6, marginBottom: 20 }}>
-                Márcalo como terminado y cobra tu recompensa.
+                {tx('Márcalo como terminado y cobra tu recompensa.', 'Mark it as finished and claim your reward.')}
               </Txt>
-              <Cta label={book.finishedAt ? 'Volver a la biblioteca' : 'Terminar libro  ·  +XP'} onPress={book.finishedAt ? () => router.back() : finish} />
+              <Cta label={book.finishedAt ? tx('Volver a la biblioteca', 'Back to library') : tx('Terminar libro  ·  +XP', 'Finish book  ·  +XP')} onPress={book.finishedAt ? () => router.back() : finish} />
             </>
           ) : (
             <>
               <Txt v="eyebrow" color={theme.muted}>
-                Capítulo completado · +15 XP
+                {tx('Capítulo completado', 'Chapter complete')} · +15 XP
               </Txt>
               <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 22, color: theme.text, marginTop: 10, marginBottom: 22, textAlign: 'center' }} numberOfLines={2}>
                 {content?.chapters[chapter + 1]?.title}
               </Txt>
-              <Cta label="Siguiente capítulo" icon={<ChevronRight size={18} color="#fff" />} onPress={() => goChapter(chapter + 1, true)} />
+              <Cta label={tx('Siguiente capítulo', 'Next chapter')} icon={<ChevronRight size={18} color="#fff" />} onPress={() => goChapter(chapter + 1, true)} />
             </>
           )}
         </View>
@@ -274,20 +275,20 @@ export default function ReaderScreen() {
       {error ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Txt v="title" color={theme.text} center>
-            No se pudo abrir el libro
+            {tx('No se pudo abrir el libro', 'Couldn\'t open the book')}
           </Txt>
           <Txt v="body" color={theme.muted} center style={{ marginTop: 10 }}>
             {error}
           </Txt>
           <View style={{ marginTop: 22 }}>
-            <Cta label="Volver" onPress={() => router.back()} />
+            <Cta label={tx('Volver', 'Back')} onPress={() => router.back()} />
           </View>
         </View>
       ) : loading ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
           <ActivityIndicator color={theme.accent} />
           <Txt v="mono" color={theme.muted}>
-            Preparando páginas{loadPct ? ` · ${Math.round(loadPct * 100)}%` : '…'}
+            {tx('Preparando páginas', 'Preparing pages')}{loadPct ? ` · ${Math.round(loadPct * 100)}%` : '…'}
           </Txt>
         </View>
       ) : isPdf ? (
@@ -330,7 +331,7 @@ export default function ReaderScreen() {
         <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 8), backgroundColor: theme.bg }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: prefs.margin, paddingBottom: 6 }}>
             <Txt v="mono" color={theme.muted} style={{ fontSize: 10.5 }}>
-              {isPdf ? `${book.pdfPage ?? 1} / ${pdfTotal || '–'}` : `${minsLeft} min en el capítulo`}
+              {isPdf ? `${book.pdfPage ?? 1} / ${pdfTotal || '–'}` : tx(`${minsLeft} min en el capítulo`, `${minsLeft} min left in chapter`)}
             </Txt>
             <Txt v="mono" color={theme.muted} style={{ fontSize: 10.5 }}>
               {Math.floor(pos * 100)}%
@@ -358,7 +359,7 @@ export default function ReaderScreen() {
                   {book.title}
                 </Txt>
                 <Txt v="caption" color={theme.muted} numberOfLines={1}>
-                  {isPdf ? `Página ${book.pdfPage ?? 1} de ${pdfTotal || '–'}` : ch?.title}
+                  {isPdf ? `${tx('Página', 'Page')} ${book.pdfPage ?? 1} ${tx('de', 'of')} ${pdfTotal || '–'}` : ch?.title}
                 </Txt>
               </View>
               {!isPdf && (
@@ -382,7 +383,7 @@ export default function ReaderScreen() {
               <Txt v="number" color={theme.text}>
                 {Math.floor(pos * 100)}
                 <Txt v="mono" color={theme.muted}>
-                  {' '}% del libro
+                  {' '}{tx('% del libro', '% of book')}
                 </Txt>
               </Txt>
               <View style={{ alignItems: 'flex-end' }}>
@@ -390,7 +391,7 @@ export default function ReaderScreen() {
                   {formatClock(tracker.sessionSec)}
                 </Txt>
                 <Txt v="caption" color={theme.muted}>
-                  {tracker.idle ? 'en pausa' : 'sesión'}
+                  {tracker.idle ? tx('en pausa', 'paused') : tx('sesión', 'session')}
                 </Txt>
               </View>
             </View>
@@ -399,10 +400,10 @@ export default function ReaderScreen() {
               <GoalChip theme={theme} />
               {!isPdf && content && (
                 <Txt v="mono" color={theme.muted}>
-                  cap. {chapter + 1}/{content.chapters.length} · {minsLeft} min
+                  {tx('cap.', 'ch.')} {chapter + 1}/{content.chapters.length} · {minsLeft} min
                 </Txt>
               )}
-              {isPdf && !book.finishedAt && pdfTotal > 0 && (book.pdfPage ?? 1) >= pdfTotal && <Cta compact label="Terminar" onPress={finish} />}
+              {isPdf && !book.finishedAt && pdfTotal > 0 && (book.pdfPage ?? 1) >= pdfTotal && <Cta compact label={tx('Terminar', 'Finish')} onPress={finish} />}
             </View>
           </Animated.View>
         </>

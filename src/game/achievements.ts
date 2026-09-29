@@ -1,3 +1,5 @@
+import { isEs } from '@/i18n';
+
 export type AchievementContext = {
   totalSec: number;
   totalPages: number;
@@ -25,10 +27,45 @@ export type Achievement = {
   target: number;
 };
 
+const EN: Record<string, [string, string]> = {
+  open1: ['First page', 'Open your first book'],
+  lib10: ['Bookshelf', 'Have 10 books in your library'],
+  fin1: ['The end', 'Finish your first book'],
+  fin5: ['Collector', 'Finish 5 books'],
+  fin12: ['One a month', 'Finish 12 books'],
+  fin25: ['Devourer', 'Finish 25 books'],
+  fin50: ['Walking library', 'Finish 50 books'],
+  streak3: ['Spark', '3-day streak'],
+  streak7: ['Week on fire', '7-day streak'],
+  streak14: ['Habit', '14-day streak'],
+  streak30: ['Unstoppable', '30-day streak'],
+  streak100: ['Centurion', '100-day streak'],
+  hour1: ['First hour', '1 hour of total reading'],
+  hour10: ['Ten hours', '10 hours of total reading'],
+  hour50: ['Fifty hours', '50 hours of total reading'],
+  hour100: ['Hundred hours', '100 hours of total reading'],
+  pages100: ['Hundred pages', 'Read 100 pages'],
+  pages1000: ['Thousand pages', 'Read 1,000 pages'],
+  pages5000: ['Five thousand', 'Read 5,000 pages'],
+  session30: ['Immersion', 'A 30-minute session'],
+  session60: ['Marathon', 'A 60-minute session'],
+  goal7: ['Reliable', 'Hit your goal on 7 days'],
+  goal30: ['Discipline', 'Hit your goal on 30 days'],
+  quest10: ['Adventurer', 'Complete 10 quests'],
+  quest50: ['Ink mercenary', 'Complete 50 quests'],
+  level5: ['Level 5', 'Reach level 5'],
+  level10: ['Level 10', 'Reach level 10'],
+  level20: ['Level 20', 'Reach level 20'],
+  owl: ['Night owl', 'Read past midnight'],
+  lark: ['Early bird', 'Read before 7:00'],
+  weekend: ['Weekend reader', 'Read on Saturday and Sunday in a row'],
+  speed: ['Speed reader', 'Finish a book in under 7 days'],
+};
+
 const count = (id: string, title: string, desc: string, glyph: string, xp: number, target: number, metric: (c: AchievementContext) => number): Achievement => ({
   id,
-  title,
-  desc,
+  title: isEs ? title : (EN[id]?.[0] ?? title),
+  desc: isEs ? desc : (EN[id]?.[1] ?? desc),
   glyph,
   xp,
   target,

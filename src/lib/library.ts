@@ -5,6 +5,7 @@ import { useLibrary, useScan } from '@/store/library';
 import { readEpubMeta } from './epub';
 import { hashString, hueFor } from './hash';
 import type { Book, BookFormat } from './types';
+import { tx } from '@/i18n';
 
 const EXT: Record<string, BookFormat> = { epub: 'epub', pdf: 'pdf', txt: 'txt', md: 'md', markdown: 'md' };
 
@@ -44,7 +45,7 @@ export async function pickFolder(): Promise<boolean> {
     const dir = await Directory.pickDirectoryAsync(useLibrary.getState().folderUri);
     if (!dir) return false;
     const decoded = decodeURIComponent(dir.uri);
-    const name = decoded.split(/[:/]/).filter(Boolean).pop() ?? dir.name ?? 'Libros';
+    const name = decoded.split(/[:/]/).filter(Boolean).pop() ?? dir.name ?? tx('Libros', 'Books');
     useLibrary.getState().setFolder(dir.uri, name);
     await scanLibrary();
     return true;
@@ -64,7 +65,7 @@ async function doScan() {
   const { folderUri, books: prev, replaceBooks } = useLibrary.getState();
   const scan = useScan.getState();
   if (!folderUri) return;
-  scan.set({ scanning: true, progress: 0, message: 'Buscando libros…' });
+  scan.set({ scanning: true, progress: 0, message: tx('Buscando libros…', 'Looking for books…') });
   try {
     const files: File[] = [];
     collect(new Directory(folderUri), 0, files);
@@ -101,7 +102,7 @@ async function doScan() {
     const pending = Object.values(next).filter((b) => !b.metaLoaded && !b.missing);
     for (let i = 0; i < pending.length; i++) {
       const b = pending[i];
-      scan.set({ progress: (i + 1) / pending.length, message: `Leyendo portadas · ${i + 1}/${pending.length}` });
+      scan.set({ progress: (i + 1) / pending.length, message: `${tx('Leyendo portadas', 'Reading covers')} · ${i + 1}/${pending.length}` });
       try {
         const meta = await readEpubMeta(b.uri, b.id);
         useLibrary.getState().updateBook(b.id, {

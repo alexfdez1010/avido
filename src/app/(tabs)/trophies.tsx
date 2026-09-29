@@ -1,31 +1,18 @@
-import { Lock } from "lucide-react-native";
-import React, { useMemo, useState } from "react";
-import { View } from "react-native";
+import { Lock } from 'lucide-react-native';
+import React, { useMemo, useState } from 'react';
+import { View } from 'react-native';
 
-import {
-  Bar,
-  Card,
-  Cover,
-  Ring,
-  Screen,
-  SectionTitle,
-  Sheet,
-  Tap,
-  Txt,
-} from "@/components/kit";
-import { Heatmap } from "@/components/trophies/heatmap";
-import {
-  ACHIEVEMENTS,
-  type Achievement,
-  type AchievementContext,
-} from "@/game/achievements";
-import { levelProgress, levelTitle, LEVEL_TITLES } from "@/game/levels";
-import { usePalette } from "@/hooks/use-palette";
-import { formatDuration } from "@/lib/dates";
-import { computeStreak, useGame } from "@/store/game";
-import { useLibrary } from "@/store/library";
-import { useSettings } from "@/store/settings";
-import { fonts } from "@/theme/fonts";
+import { Bar, Card, Cover, Ring, Screen, SectionTitle, Sheet, Tap, Txt } from '@/components/kit';
+import { Heatmap } from '@/components/trophies/heatmap';
+import { ACHIEVEMENTS, type Achievement, type AchievementContext } from '@/game/achievements';
+import { levelProgress, levelTitle, LEVEL_TITLES } from '@/game/levels';
+import { usePalette } from '@/hooks/use-palette';
+import { formatDuration } from '@/lib/dates';
+import { computeStreak, useGame } from '@/store/game';
+import { useLibrary } from '@/store/library';
+import { useSettings } from '@/store/settings';
+import { fonts } from '@/theme/fonts';
+import { isEs, LOCALE, tx } from '@/i18n';
 
 function useContext(): AchievementContext {
   const g = useGame();
@@ -51,47 +38,27 @@ function useContext(): AchievementContext {
   }, [g, books]);
 }
 
-function Badge({
-  a,
-  unlocked,
-  value,
-  onPress,
-}: {
-  a: Achievement;
-  unlocked: boolean;
-  value: number;
-  onPress: () => void;
-}) {
+function Badge({ a, unlocked, value, onPress }: { a: Achievement; unlocked: boolean; value: number; onPress: () => void }) {
   const p = usePalette();
   const ratio = Math.min(1, value / a.target);
   return (
-    <Tap
-      onPress={onPress}
-      style={{ width: "31%", alignItems: "center", marginBottom: 20 }}
-    >
-      <Ring
-        size={84}
-        stroke={4}
-        value={unlocked ? 1 : ratio}
-        color={unlocked ? p.gold : p.faint}
-        track={p.raised}
-      >
+    <Tap onPress={onPress} style={{ width: '31%', alignItems: 'center', marginBottom: 20 }}>
+      <Ring size={84} stroke={4} value={unlocked ? 1 : ratio} color={unlocked ? p.gold : p.faint} track={p.raised}>
         <View
           style={{
             width: 66,
             height: 66,
             borderRadius: 33,
             backgroundColor: unlocked ? p.goldSoft : p.surface,
-            alignItems: "center",
-            justifyContent: "center",
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           {unlocked ? (
             <Txt
               style={{
                 fontFamily: fonts.displayBlackItalic,
-                fontSize:
-                  a.glyph.length > 3 ? 17 : a.glyph.length > 2 ? 20 : 26,
+                fontSize: a.glyph.length > 3 ? 17 : a.glyph.length > 2 ? 20 : 26,
                 color: p.gold,
               }}
             >
@@ -102,13 +69,7 @@ function Badge({
           )}
         </View>
       </Ring>
-      <Txt
-        v="label"
-        center
-        numberOfLines={2}
-        tone={unlocked ? "text" : "muted"}
-        style={{ marginTop: 8, fontSize: 12.5, lineHeight: 16, minHeight: 32 }}
-      >
+      <Txt v="label" center numberOfLines={2} tone={unlocked ? 'text' : 'muted'} style={{ marginTop: 8, fontSize: 12.5, lineHeight: 16, minHeight: 32 }}>
         {a.title}
       </Txt>
     </Tap>
@@ -132,13 +93,11 @@ export default function Trophies() {
   const [sel, setSel] = useState<Achievement | null>(null);
 
   const year = new Date().getFullYear();
-  const thisYear = finished.filter(
-    (f) => new Date(f.at).getFullYear() === year,
-  );
-  const dayOfYear =
-    Math.floor((Date.now() - new Date(year, 0, 1).getTime()) / 86400000) + 1;
+  const thisYear = finished.filter((f) => new Date(f.at).getFullYear() === year);
+  const dayOfYear = Math.floor((Date.now() - new Date(year, 0, 1).getTime()) / 86400000) + 1;
   const expected = (yearlyGoal * dayOfYear) / 365;
   const ahead = thisYear.length - expected;
+  const pace = Math.max(1, Math.floor((365 - dayOfYear) / Math.max(1, yearlyGoal - thisYear.length)));
   const nUnlocked = ACHIEVEMENTS.filter((a) => unlocked[a.id]).length;
   const sorted = [...ACHIEVEMENTS].sort((a, b) => {
     const ua = unlocked[a.id] ? 1 : 0;
@@ -150,14 +109,14 @@ export default function Trophies() {
   return (
     <Screen>
       <Txt v="eyebrow" tone="muted">
-        {nUnlocked} de {ACHIEVEMENTS.length} logros
+        {nUnlocked} {tx('de', 'of')} {ACHIEVEMENTS.length} {tx('logros', 'achievements')}
       </Txt>
       <Txt v="display" style={{ marginTop: 6 }}>
-        Logros
+        {tx('Logros', 'Trophies')}
       </Txt>
 
-      <Card style={{ marginTop: 22, padding: 22, overflow: "hidden" }}>
-        <View style={{ position: "absolute", right: -30, top: -40 }}>
+      <Card style={{ marginTop: 22, padding: 22, overflow: 'hidden' }}>
+        <View style={{ position: 'absolute', right: -30, top: -40 }}>
           <Txt
             style={{
               fontFamily: fonts.displayBlackItalic,
@@ -170,43 +129,32 @@ export default function Trophies() {
           </Txt>
         </View>
         <Txt v="eyebrow" color={p.gold}>
-          Nivel {lp.level}
+          {tx('Nivel', 'Level')} {lp.level}
         </Txt>
         <Txt v="display" italic style={{ marginTop: 6 }}>
           {levelTitle(lp.level)}
         </Txt>
         <View style={{ marginTop: 18, gap: 8 }}>
           <Bar value={lp.ratio} color={p.gold} height={8} />
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Txt v="mono" tone="soft">
-              {Math.floor(xp).toLocaleString("es-ES")} XP
+              {Math.floor(xp).toLocaleString(LOCALE)} XP
             </Txt>
             <Txt v="mono" tone="muted">
-              {Math.round(lp.toNext)} para Nv {lp.level + 1}
+              {Math.round(lp.toNext)} {tx('para Nv', 'to Lv')} {lp.level + 1}
             </Txt>
           </View>
         </View>
         <Txt v="caption" tone="muted" style={{ marginTop: 12 }}>
-          Próximo rango:{" "}
-          {
-            LEVEL_TITLES[
-              Math.min(
-                LEVEL_TITLES.length - 1,
-                Math.floor((lp.level - 1) / 3) + 1,
-              )
-            ]
-          }{" "}
-          · nivel {Math.floor((lp.level - 1) / 3) * 3 + 4}
+          {tx('Próximo rango:', 'Next rank:')} {LEVEL_TITLES[Math.min(LEVEL_TITLES.length - 1, Math.floor((lp.level - 1) / 3) + 1)]} · {tx('nivel', 'level')} {Math.floor((lp.level - 1) / 3) * 3 + 4}
         </Txt>
       </Card>
 
       <Card
         style={{
           marginTop: 14,
-          flexDirection: "row",
-          alignItems: "center",
+          flexDirection: 'row',
+          alignItems: 'center',
           gap: 18,
         }}
       >
@@ -227,51 +175,43 @@ export default function Trophies() {
         </Ring>
         <View style={{ flex: 1, gap: 4 }}>
           <Txt v="eyebrow" tone="muted">
-            Reto {year}
+            {tx('Reto', 'Challenge')} {year}
           </Txt>
           <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
             {thisYear.length >= yearlyGoal
-              ? "¡Reto superado! Sube la apuesta."
+              ? tx('¡Reto superado! Sube la apuesta.', 'Challenge beaten! Raise the stakes.')
               : ahead >= 0
-                ? `Vas ${ahead >= 1 ? `${Math.floor(ahead)} por delante` : "al día"}. Sigue así.`
-                : `Un libro cada ${Math.max(1, Math.floor((365 - dayOfYear) / Math.max(1, yearlyGoal - thisYear.length)))} días y lo logras.`}
+                ? isEs ? `Vas ${ahead >= 1 ? `${Math.floor(ahead)} por delante` : 'al día'}. Sigue así.` : `${ahead >= 1 ? `${Math.floor(ahead)} ahead of pace` : 'Right on pace'}. Keep going.`
+                : tx(`Un libro cada ${pace} días y lo logras.`, `One book every ${pace} days and you'll make it.`)}
           </Txt>
           <Txt v="caption" tone="muted">
-            Faltan {Math.max(0, yearlyGoal - thisYear.length)} libros ·{" "}
-            {365 - dayOfYear} días
+            {tx(`Faltan ${Math.max(0, yearlyGoal - thisYear.length)} libros`, `${Math.max(0, yearlyGoal - thisYear.length)} books to go`)} · {365 - dayOfYear} {tx('días', 'days')}
           </Txt>
         </View>
       </Card>
 
       <SectionTitle>
         <Txt v="eyebrow" tone="muted">
-          Constancia
+          {tx('Constancia', 'Consistency')}
         </Txt>
       </SectionTitle>
       <Card>
-        <View style={{ flexDirection: "row", marginBottom: 18 }}>
+        <View style={{ flexDirection: 'row', marginBottom: 18 }}>
           {[
-            { k: "Racha", v: `${streak}`, u: "días" },
-            { k: "Mejor", v: `${Math.max(bestStreak, streak)}`, u: "días" },
+            { k: tx('Racha', 'Streak'), v: `${streak}`, u: tx('días', 'days') },
+            { k: tx('Mejor', 'Best'), v: `${Math.max(bestStreak, streak)}`, u: tx('días', 'days') },
             {
-              k: "Total",
-              v: formatDuration(totalSec)
-                .replace(" min", "′")
-                .replace(" h ", "h "),
-              u: "leído",
+              k: 'Total',
+              v: formatDuration(totalSec).replace(' min', '′').replace(' h ', 'h '),
+              u: tx('leído', 'read'),
             },
-            { k: "Páginas", v: `${Math.floor(totalPages)}`, u: "nuevas" },
+            { k: tx('Páginas', 'Pages'), v: `${Math.floor(totalPages)}`, u: tx('nuevas', 'new') },
           ].map((s) => (
             <View key={s.k} style={{ flex: 1 }}>
               <Txt v="eyebrow" tone="muted" style={{ fontSize: 9 }}>
                 {s.k}
               </Txt>
-              <Txt
-                v="number"
-                style={{ marginTop: 4, fontSize: 19 }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
+              <Txt v="number" style={{ marginTop: 4, fontSize: 19 }} numberOfLines={1} adjustsFontSizeToFit>
                 {s.v}
               </Txt>
               <Txt v="caption" tone="faint">
@@ -285,20 +225,12 @@ export default function Trophies() {
 
       <SectionTitle>
         <Txt v="eyebrow" tone="muted">
-          Vitrina
+          {tx('Vitrina', 'Showcase')}
         </Txt>
       </SectionTitle>
-      <View
-        style={{ flexDirection: "row", flexWrap: "wrap", columnGap: "3.5%" }}
-      >
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: '3.5%' }}>
         {sorted.map((a) => (
-          <Badge
-            key={a.id}
-            a={a}
-            unlocked={!!unlocked[a.id]}
-            value={a.metric(ctx)}
-            onPress={() => setSel(a)}
-          />
+          <Badge key={a.id} a={a} unlocked={!!unlocked[a.id]} value={a.metric(ctx)} onPress={() => setSel(a)} />
         ))}
       </View>
 
@@ -306,23 +238,19 @@ export default function Trophies() {
         <>
           <SectionTitle>
             <Txt v="eyebrow" tone="muted">
-              Terminados · {finished.length}
+              {tx('Terminados', 'Finished')} · {finished.length}
             </Txt>
           </SectionTitle>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {[...finished].reverse().map((f) => {
               const b = books[f.id];
               return b ? (
                 <View key={f.id} style={{ width: 72 }}>
                   <Cover book={b} width={72} radius={7} />
-                  <Txt
-                    v="mono"
-                    tone="faint"
-                    style={{ fontSize: 9.5, marginTop: 4 }}
-                  >
-                    {new Date(f.at).toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "short",
+                  <Txt v="mono" tone="faint" style={{ fontSize: 9.5, marginTop: 4 }}>
+                    {new Date(f.at).toLocaleDateString(LOCALE, {
+                      day: 'numeric',
+                      month: 'short',
                     })}
                   </Txt>
                 </View>
@@ -336,8 +264,8 @@ export default function Trophies() {
         {sel ? (
           <View
             style={{
-              width: "100%",
-              alignItems: "center",
+              width: '100%',
+              alignItems: 'center',
               paddingVertical: 14,
               gap: 8,
             }}
@@ -358,22 +286,18 @@ export default function Trophies() {
             <Txt v="body" tone="soft" center>
               {sel.desc}
             </Txt>
-            <View style={{ alignSelf: "stretch", marginTop: 14, gap: 8 }}>
-              <Bar
-                value={unlocked[sel.id] ? 1 : sel.metric(ctx) / sel.target}
-                color={p.gold}
-                height={6}
-              />
+            <View style={{ alignSelf: 'stretch', marginTop: 14, gap: 8 }}>
+              <Bar value={unlocked[sel.id] ? 1 : sel.metric(ctx) / sel.target} color={p.gold} height={6} />
               <View
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
                 }}
               >
                 <Txt v="mono" tone="muted">
                   {unlocked[sel.id]
-                    ? `Desbloqueado el ${new Date(unlocked[sel.id]).toLocaleDateString("es-ES")}`
-                    : `${Math.floor((Math.min(sel.metric(ctx), sel.target) * 100) / sel.target)}% completado`}
+                    ? `${tx('Desbloqueado el', 'Unlocked on')} ${new Date(unlocked[sel.id]).toLocaleDateString(LOCALE)}`
+                    : `${Math.floor((Math.min(sel.metric(ctx), sel.target) * 100) / sel.target)}% ${tx('completado', 'complete')}`}
                 </Txt>
                 <Txt v="mono" color={p.gold}>
                   +{sel.xp} XP

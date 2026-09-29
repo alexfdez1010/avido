@@ -5,6 +5,7 @@ import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { dayKey } from './dates';
+import { tx } from '@/i18n';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }),
@@ -13,7 +14,7 @@ Notifications.setNotificationHandler({
 export async function ensurePermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('reminders', {
-      name: 'Recordatorios de lectura',
+      name: tx('Recordatorios de lectura', 'Reading reminders'),
       importance: Notifications.AndroidImportance.HIGH,
       lightColor: '#FF5B24',
     });
@@ -25,9 +26,9 @@ export async function ensurePermission(): Promise<boolean> {
 }
 
 const DAILY = [
-  (s: number) => (s > 1 ? `Tu racha de ${s} días está en juego` : 'Tu próxima racha empieza hoy'),
-  () => 'Diez minutos. Solo diez. El libro te espera.',
-  (s: number) => (s > 0 ? `No dejes que se apague la llama de ${s} días` : 'Enciende la llama: lee unas páginas'),
+  (s: number) => (s > 1 ? tx(`Tu racha de ${s} días está en juego`, `Your ${s}-day streak is on the line`) : tx('Tu próxima racha empieza hoy', 'Your next streak starts today')),
+  () => tx('Diez minutos. Solo diez. El libro te espera.', 'Ten minutes. Just ten. Your book is waiting.'),
+  (s: number) => (s > 0 ? tx(`No dejes que se apague la llama de ${s} días`, `Don't let your ${s}-day flame go out`) : tx('Enciende la llama: lee unas páginas', 'Light the flame: read a few pages')),
 ];
 
 export async function scheduleReminders() {
@@ -42,7 +43,7 @@ export async function scheduleReminders() {
     const book = Object.values(useLibrary.getState().books)
       .filter((b) => b.lastOpenedAt && !b.finishedAt && !b.missing)
       .sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0))[0];
-    const body = book ? `Sigue con «${book.title}» · meta: ${dailyGoalMin} min` : `Tu meta de hoy: ${dailyGoalMin} minutos`;
+    const body = book ? tx(`Sigue con «${book.title}» · meta: ${dailyGoalMin} min`, `Continue “${book.title}” · goal: ${dailyGoalMin} min`) : tx(`Tu meta de hoy: ${dailyGoalMin} minutos`, `Today's goal: ${dailyGoalMin} minutes`);
     for (let i = 0; i < 3; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
@@ -58,7 +59,7 @@ export async function scheduleReminders() {
       late.setHours(22, 30, 0, 0);
       if (late.getTime() > Date.now() && reminderHour < 22)
         await Notifications.scheduleNotificationAsync({
-          content: { title: `Último aviso: ${streak} días en riesgo`, body: 'Queda poco para medianoche. Unas páginas bastan.' },
+          content: { title: tx(`Último aviso: ${streak} días en riesgo`, `Last call: ${streak} days at risk`), body: tx('Queda poco para medianoche. Unas páginas bastan.', "Midnight is close. A few pages will do.") },
           trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: late, channelId: 'reminders' },
         });
     }

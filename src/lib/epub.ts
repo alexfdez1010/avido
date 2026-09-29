@@ -5,6 +5,7 @@ import { findAll, htmlToBlocks, localName, parseXml, textOf } from './html';
 import { bookDir } from './paths';
 import type { BookContent, Chapter } from './types';
 import { CONTENT_VERSION } from './types';
+import { tx } from '@/i18n';
 
 type ManifestItem = { id: string; href: string; type: string; props: string };
 
@@ -187,7 +188,7 @@ export async function parseEpub(uri: string, id: string, onProgress?: (p: number
     const title =
       titles.get(item.href) ||
       (firstHeading?.s ? firstHeading.s.map((s) => s.t).join('').replace(/\s+/g, ' ').trim() : '') ||
-      `Sección ${chapters.length + 1}`;
+      `${tx('Sección', 'Section')} ${chapters.length + 1}`;
     chapters.push({ title: title.slice(0, 120), blocks, chars: blocks.reduce((a, b) => a + b.c, 0) });
     onProgress?.((i + 1) / pkg.spine.length);
     await new Promise((r) => setTimeout(r, 0));

@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { useSettings } from '@/store/settings';
 import { readingFonts, type ReadingFontId } from '@/theme/fonts';
 import { readerThemes, type ReaderThemeId } from '@/theme/palette';
+import { tx } from '@/i18n';
 
 function Stepper({ label, value, onMinus, onPlus, fg, line }: { label: string; value: string; onMinus: () => void; onPlus: () => void; fg: string; line: string }) {
   return (
@@ -38,7 +39,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
     <Sheet open={open} onClose={onClose} bg={t.bg} fg={t.muted}>
       <View style={{ width: '100%', paddingTop: 8 }}>
         <Txt v="eyebrow" color={t.muted}>
-          Tema
+          {tx('Tema', 'Theme')}
         </Txt>
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
           {(Object.keys(readerThemes) as ReaderThemeId[]).map((id) => {
@@ -58,7 +59,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
         </View>
 
         <Txt v="eyebrow" color={t.muted} style={{ marginTop: 22 }}>
-          Tipografía
+          {tx('Tipografía', 'Typeface')}
         </Txt>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
           {(Object.keys(readingFonts) as ReadingFontId[]).map((id) => {
@@ -81,19 +82,19 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
         </View>
 
         <View style={{ marginTop: 14 }}>
-          <Stepper label="Tamaño" value={`${r.size}`} fg={t.text} line={t.line} onMinus={() => setReader({ size: clamp(r.size - 1, 14, 30) })} onPlus={() => setReader({ size: clamp(r.size + 1, 14, 30) })} />
+          <Stepper label={tx('Tamaño', 'Size')} value={`${r.size}`} fg={t.text} line={t.line} onMinus={() => setReader({ size: clamp(r.size - 1, 14, 30) })} onPlus={() => setReader({ size: clamp(r.size + 1, 14, 30) })} />
           <Stepper
-            label="Interlineado"
+            label={tx('Interlineado', 'Line height')}
             value={r.lineHeight.toFixed(2)}
             fg={t.text}
             line={t.line}
             onMinus={() => setReader({ lineHeight: Math.round(clamp(r.lineHeight - 0.08, 1.2, 2.2) * 100) / 100 })}
             onPlus={() => setReader({ lineHeight: Math.round(clamp(r.lineHeight + 0.08, 1.2, 2.2) * 100) / 100 })}
           />
-          <Stepper label="Márgenes" value={`${r.margin}`} fg={t.text} line={t.line} onMinus={() => setReader({ margin: clamp(r.margin - 4, 12, 48) })} onPlus={() => setReader({ margin: clamp(r.margin + 4, 12, 48) })} />
+          <Stepper label={tx('Márgenes', 'Margins')} value={`${r.margin}`} fg={t.text} line={t.line} onMinus={() => setReader({ margin: clamp(r.margin - 4, 12, 48) })} onPlus={() => setReader({ margin: clamp(r.margin + 4, 12, 48) })} />
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 }}>
             <Txt v="label" color={t.text}>
-              Justificar texto
+              {tx('Justificar texto', 'Justify text')}
             </Txt>
             <Switch value={r.justify} onValueChange={(v) => setReader({ justify: v })} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
           </View>

@@ -15,13 +15,14 @@ import type { Book } from '@/lib/types';
 import { useGame } from '@/store/game';
 import { useLibrary, useScan } from '@/store/library';
 import { fonts } from '@/theme/fonts';
+import { tx } from '@/i18n';
 
 type Filter = 'all' | 'reading' | 'new' | 'done';
 const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'all', label: 'Todos' },
-  { id: 'reading', label: 'Leyendo' },
-  { id: 'new', label: 'Por empezar' },
-  { id: 'done', label: 'Terminados' },
+  { id: 'all', label: tx('Todos', 'All') },
+  { id: 'reading', label: tx('Leyendo', 'Reading') },
+  { id: 'new', label: tx('Por empezar', 'Not started') },
+  { id: 'done', label: tx('Terminados', 'Finished') },
 ];
 
 function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }) {
@@ -44,15 +45,15 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
               </Txt>
             )}
             <Txt v="mono" tone="faint" style={{ marginTop: 6 }} numberOfLines={1}>
-              {book.format.toUpperCase()} · {(book.size / 1024 / 1024).toFixed(1)} MB{pages ? ` · ~${pages} pág` : ''}
+              {book.format.toUpperCase()} · {(book.size / 1024 / 1024).toFixed(1)} MB{pages ? ` · ~${pages} ${tx('pág', 'pp')}` : ''}
             </Txt>
           </View>
         </View>
         <View style={{ flexDirection: 'row', marginTop: 20, gap: 10 }}>
           {[
-            { k: 'Progreso', v: `${Math.floor(book.progress * 100)}%` },
-            { k: 'Tiempo', v: book.readSeconds ? formatDuration(book.readSeconds) : '—' },
-            { k: 'Estado', v: book.finishedAt ? 'Leído' : book.lastOpenedAt ? 'Leyendo' : 'Nuevo' },
+            { k: tx('Progreso', 'Progress'), v: `${Math.floor(book.progress * 100)}%` },
+            { k: tx('Tiempo', 'Time'), v: book.readSeconds ? formatDuration(book.readSeconds) : '—' },
+            { k: tx('Estado', 'Status'), v: book.finishedAt ? tx('Leído', 'Read') : book.lastOpenedAt ? tx('Leyendo', 'Reading') : tx('Nuevo', 'New') },
           ].map((s) => (
             <View key={s.k} style={{ flex: 1, backgroundColor: p.raised, borderRadius: 16, padding: 12 }}>
               <Txt v="eyebrow" tone="muted" style={{ fontSize: 9 }}>
@@ -66,7 +67,7 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
         </View>
         <View style={{ marginTop: 20, gap: 10 }}>
           <Cta
-            label={book.finishedAt ? 'Releer' : book.progress > 0 ? 'Seguir leyendo' : 'Empezar a leer'}
+            label={book.finishedAt ? tx('Releer', 'Read again') : book.progress > 0 ? tx('Seguir leyendo', 'Keep reading') : tx('Empezar a leer', 'Start reading')}
             onPress={() => {
               onClose();
               router.push(`/reader/${book.id}`);
@@ -78,7 +79,7 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
                 <Cta
                   kind="quiet"
                   compact
-                  label="Ya lo terminé"
+                  label={tx('Ya lo terminé', 'I finished it')}
                   icon={<Check size={16} color={p.text} />}
                   onPress={() => {
                     useGame.getState().finishBook(book.id);
@@ -92,7 +93,7 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
                 <Cta
                   kind="ghost"
                   compact
-                  label="Reiniciar"
+                  label={tx('Reiniciar', 'Restart')}
                   icon={<RotateCcw size={15} color={p.text} />}
                   onPress={() => {
                     updateBook(book.id, { progress: 0, location: { chapter: 0, block: 0 }, pdfPage: 1 });
@@ -113,7 +114,7 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
               style={{ alignSelf: 'center', padding: 8 }}
             >
               <Txt v="caption" tone="muted">
-                Volver a procesar el archivo
+                {tx('Volver a procesar el archivo', 'Reprocess file')}
               </Txt>
             </Tap>
           )}
@@ -157,10 +158,10 @@ export default function Library() {
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <View style={{ flex: 1 }}>
           <Txt v="eyebrow" tone="muted">
-            {counts.all} libros · {counts.done} leídos
+            {counts.all} {tx('libros', 'books')} · {counts.done} {tx('leídos', 'read')}
           </Txt>
           <Txt v="display" style={{ marginTop: 6 }}>
-            Biblioteca
+            {tx('Biblioteca', 'Library')}
           </Txt>
         </View>
         <Tap onPress={() => scanLibrary()} style={{ width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: p.line, alignItems: 'center', justifyContent: 'center' }}>
@@ -170,7 +171,7 @@ export default function Library() {
       <Tap onPress={pickFolder} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
         <FolderOpen size={15} color={p.ember} />
         <Txt v="label" tone="ember" numberOfLines={1}>
-          {folderName ?? 'Elegir carpeta'}
+          {folderName ?? tx('Elegir carpeta', 'Choose folder')}
         </Txt>
         {scan.scanning && (
           <Txt v="mono" tone="muted" numberOfLines={1} style={{ flex: 1 }}>
@@ -187,7 +188,7 @@ export default function Library() {
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
-        <InputField value={q} onChangeText={setQ} placeholder="Buscar título o autor" placeholderTextColor={p.faint} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
+        <InputField value={q} onChangeText={setQ} placeholder={tx('Buscar título o autor', 'Search title or author')} placeholderTextColor={p.faint} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
         {!!q && (
           <InputSlot style={{ paddingRight: 14 }} onPress={() => setQ('')}>
             <X size={16} color={p.muted} />
@@ -216,14 +217,18 @@ export default function Library() {
     <View style={{ alignItems: 'center', paddingVertical: 50, paddingHorizontal: 20, gap: 10 }}>
       <Txt style={{ fontFamily: fonts.displayBlackItalic, fontSize: 64, color: p.faint }}>∅</Txt>
       <Txt v="title" center>
-        {!folderUri ? 'Sin carpeta' : q ? 'Nada por aquí' : 'Aún no hay libros'}
+        {!folderUri ? tx('Sin carpeta', 'No folder') : q ? tx('Nada por aquí', 'Nothing here') : tx('Aún no hay libros', 'No books yet')}
       </Txt>
       <Txt v="body" tone="muted" center>
-        {!folderUri ? 'Conecta la carpeta donde guardas tus libros.' : q ? 'Prueba con otra búsqueda.' : 'Copia archivos EPUB, PDF, TXT o MD en tu carpeta.'}
+        {!folderUri
+          ? tx('Conecta la carpeta donde guardas tus libros.', 'Connect the folder where you keep your books.')
+          : q
+            ? tx('Prueba con otra búsqueda.', 'Try another search.')
+            : tx('Copia archivos EPUB, PDF, TXT o MD en tu carpeta.', 'Copy EPUB, PDF, TXT or MD files into your folder.')}
       </Txt>
       {!folderUri && (
         <View style={{ marginTop: 10 }}>
-          <Cta label="Elegir carpeta" onPress={pickFolder} />
+          <Cta label={tx('Elegir carpeta', 'Choose folder')} onPress={pickFolder} />
         </View>
       )}
     </View>

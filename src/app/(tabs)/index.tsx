@@ -16,6 +16,7 @@ import { useGame, useStreak } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { fonts } from '@/theme/fonts';
+import { tx } from '@/i18n';
 
 function Header() {
   const p = usePalette();
@@ -49,7 +50,7 @@ function Header() {
           </Txt>
         </View>
         <Txt v="mono" tone="muted">
-          Nv {level}
+          {tx('Nv', 'Lv')} {level}
         </Txt>
       </View>
     </View>
@@ -73,15 +74,19 @@ function GoalCard() {
       <Ring size={112} stroke={11} value={sec / (goal * 60)} color={met ? p.mint : p.ember}>
         <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 34, lineHeight: 38, color: p.text }}>{Math.floor(sec / 60)}</Txt>
         <Txt v="mono" tone="muted" style={{ marginTop: -2 }}>
-          de {goal} min
+          {tx('de', 'of')} {goal} min
         </Txt>
       </Ring>
       <View style={{ flex: 1, gap: 6 }}>
         <Txt v="eyebrow" color={met ? p.mint : danger ? p.ember : p.muted}>
-          {met ? 'Meta cumplida' : danger ? 'Racha en peligro' : 'Meta de hoy'}
+          {met ? tx('Meta cumplida', 'Goal reached') : danger ? tx('Racha en peligro', 'Streak at risk') : tx('Meta de hoy', "Today's goal")}
         </Txt>
         <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
-          {met ? 'Llama encendida. Todo lo que leas ahora suma extra.' : left <= 5 ? `¡Solo ${left} min más!` : `Te faltan ${left} minutos para encender la llama.`}
+          {met
+            ? tx('Llama encendida. Todo lo que leas ahora suma extra.', 'Flame lit. Everything you read now is a bonus.')
+            : left <= 5
+              ? tx(`¡Solo ${left} min más!`, `Only ${left} more min!`)
+              : tx(`Te faltan ${left} minutos para encender la llama.`, `${left} minutes left to light the flame.`)}
         </Txt>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
           <View style={{ backgroundColor: p.goldSoft, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
@@ -112,7 +117,7 @@ function ContinueCard({ book }: { book: Book }) {
         <View style={{ flex: 1, justifyContent: 'space-between' }}>
           <View>
             <Txt v="eyebrow" tone="ember">
-              {book.progress > 0 ? 'Continúa' : 'Empieza'}
+              {book.progress > 0 ? tx('Continúa', 'Continue') : tx('Empieza', 'Start')}
             </Txt>
             <Txt v="title" numberOfLines={2} style={{ marginTop: 6 }}>
               {book.title}
@@ -130,7 +135,7 @@ function ContinueCard({ book }: { book: Book }) {
               </Txt>
               {pages > 0 && (
                 <Txt v="mono" tone="muted">
-                  quedan {pages} pág
+                  {tx(`quedan ${pages} pág`, `${pages} pp left`)}
                 </Txt>
               )}
             </View>
@@ -139,7 +144,7 @@ function ContinueCard({ book }: { book: Book }) {
               <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: p.ember, alignItems: 'center', justifyContent: 'center' }}>
                 <Play size={15} color={p.onEmber} fill={p.onEmber} />
               </View>
-              <Txt v="label">{book.progress > 0 ? 'Seguir leyendo' : 'Empezar a leer'}</Txt>
+              <Txt v="label">{book.progress > 0 ? tx('Seguir leyendo', 'Keep reading') : tx('Empezar a leer', 'Start reading')}</Txt>
             </View>
           </View>
         </View>
@@ -163,7 +168,7 @@ function LevelStrip() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Txt v="headline">{levelTitle(lp.level)}</Txt>
               <Txt v="mono" tone="muted">
-                {Math.round(lp.toNext)} XP para Nv {lp.level + 1}
+                {Math.round(lp.toNext)} XP {tx('para Nv', 'to Lv')} {lp.level + 1}
               </Txt>
             </View>
             <Bar value={lp.ratio} color={p.gold} />
@@ -180,9 +185,9 @@ function EmptyLibrary() {
     <Tap onPress={pickFolder}>
       <View style={{ borderRadius: 26, borderWidth: 1.5, borderStyle: 'dashed', borderColor: p.ember, padding: 24, gap: 10, backgroundColor: p.emberSoft }}>
         <FolderOpen size={28} color={p.ember} />
-        <Txt v="title">Conecta tu carpeta de libros</Txt>
+        <Txt v="title">{tx('Conecta tu carpeta de libros', 'Connect your books folder')}</Txt>
         <Txt v="body" tone="soft">
-          Elige dónde guardas tus EPUB, PDF o TXT y empieza a sumar.
+          {tx('Elige dónde guardas tus EPUB, PDF o TXT y empieza a sumar.', 'Choose where you keep your EPUB, PDF or TXT files and start scoring.')}
         </Txt>
       </View>
     </Tap>
@@ -208,11 +213,11 @@ export default function Today() {
       <Animated.View entering={FadeInDown.delay(60).duration(380)} style={{ marginTop: 26 }}>
         {current ? <ContinueCard book={current} /> : suggestion ? <ContinueCard book={suggestion} /> : !folder ? <EmptyLibrary /> : (
           <Card>
-            <Txt v="title">Tu carpeta está vacía</Txt>
+            <Txt v="title">{tx('Tu carpeta está vacía', 'Your folder is empty')}</Txt>
             <Txt v="body" tone="soft" style={{ marginTop: 6, marginBottom: 16 }}>
-              Copia algún EPUB, PDF o TXT en ella y vuelve aquí.
+              {tx('Copia algún EPUB, PDF o TXT en ella y vuelve aquí.', 'Copy some EPUB, PDF or TXT files into it and come back.')}
             </Txt>
-            <Cta compact kind="quiet" label="Cambiar carpeta" onPress={pickFolder} />
+            <Cta compact kind="quiet" label={tx('Cambiar carpeta', 'Change folder')} onPress={pickFolder} />
           </Card>
         )}
       </Animated.View>
@@ -222,7 +227,7 @@ export default function Today() {
       <Animated.View entering={FadeInDown.delay(180).duration(380)}>
         <SectionTitle>
           <Txt v="eyebrow" tone="muted">
-            Esta semana
+            {tx('Esta semana', 'This week')}
           </Txt>
         </SectionTitle>
         <WeekStrip />
@@ -239,13 +244,13 @@ export default function Today() {
             right={
               <Tap onPress={() => router.push('/library')}>
                 <Txt v="label" tone="ember">
-                  Ver todo
+                  {tx('Ver todo', 'See all')}
                 </Txt>
               </Tap>
             }
           >
             <Txt v="eyebrow" tone="muted">
-              También leyendo
+              {tx('También leyendo', 'Also reading')}
             </Txt>
           </SectionTitle>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -22 }} contentContainerStyle={{ paddingHorizontal: 22, gap: 14 }}>

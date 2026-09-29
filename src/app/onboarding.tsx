@@ -13,12 +13,13 @@ import { ensurePermission, scheduleReminders } from '@/lib/notifications';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { fonts } from '@/theme/fonts';
+import { tx } from '@/i18n';
 
 const GOALS = [
-  { min: 10, label: 'Tranquilo', hint: 'Un hábito que no falla' },
-  { min: 20, label: 'Constante', hint: 'El punto dulce' },
-  { min: 30, label: 'Ambicioso', hint: '~20 libros al año' },
-  { min: 60, label: 'Voraz', hint: 'Sin piedad' },
+  { min: 10, label: tx('Tranquilo', 'Easy'), hint: tx('Un hábito que no falla', 'A habit that never fails') },
+  { min: 20, label: tx('Constante', 'Steady'), hint: tx('El punto dulce', 'The sweet spot') },
+  { min: 30, label: tx('Ambicioso', 'Ambitious'), hint: tx('~20 libros al año', '~20 books a year') },
+  { min: 60, label: tx('Voraz', 'Voracious'), hint: tx('Sin piedad', 'No mercy') },
 ];
 
 const YEARLY = [6, 12, 24, 52];
@@ -66,30 +67,30 @@ export default function Onboarding() {
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(220).springify()}>
         <Txt v="hero" style={{ marginTop: 20 }}>
-          Lee más.{'\n'}
+          {tx('Lee más.', 'Read more.')}{'\n'}
           <Txt v="hero" italic tone="ember">
-            Mucho más.
+            {tx('Mucho más.', 'Much more.')}
           </Txt>
         </Txt>
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(340).springify()}>
         <Txt v="body" tone="soft" style={{ marginTop: 18, fontSize: 17, lineHeight: 25 }}>
-          Ávido convierte cada página en progreso: rachas, niveles, misiones diarias y logros. Tú pones los libros; nosotros, las ganas de seguir.
+          {tx('Ávido convierte cada página en progreso: rachas, niveles, misiones diarias y logros. Tú pones los libros; nosotros, las ganas de seguir.', 'Ávido turns every page into progress: streaks, levels, daily quests and achievements. You bring the books; we bring the drive to keep going.')}
         </Txt>
       </Animated.View>
     </View>,
     <View key="1" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
-        01 · Presentaciones
+        01 · {tx('Presentaciones', 'Introductions')}
       </Txt>
       <Txt v="display" style={{ marginTop: 12 }}>
-        ¿Cómo te llamamos?
+        {tx('¿Cómo te llamamos?', 'What should we call you?')}
       </Txt>
       <Input style={{ marginTop: 28, borderWidth: 0, borderBottomWidth: 2, borderRadius: 0, borderBottomColor: p.ember, height: 64 }}>
         <InputField
           value={name}
           onChangeText={setName}
-          placeholder="Tu nombre"
+          placeholder={tx('Tu nombre', 'Your name')}
           placeholderTextColor={p.faint}
           autoFocus
           returnKeyType="next"
@@ -98,29 +99,29 @@ export default function Onboarding() {
         />
       </Input>
       <Txt v="caption" tone="muted" style={{ marginTop: 12 }}>
-        Opcional. Solo para saludarte.
+        {tx('Opcional. Solo para saludarte.', 'Optional. Just to say hi.')}
       </Txt>
     </View>,
     <View key="2" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
-        02 · Meta diaria
+        02 · {tx('Meta diaria', 'Daily goal')}
       </Txt>
       <Txt v="display" style={{ marginTop: 12, marginBottom: 22 }}>
-        ¿Cuánto lees al día?
+        {tx('¿Cuánto lees al día?', 'How much will you read a day?')}
       </Txt>
       {GOALS.map((g) => (
         <Choice key={g.min} on={s.dailyGoalMin === g.min} title={g.label} hint={g.hint} right={`${g.min}′`} onPress={() => s.set({ dailyGoalMin: g.min })} />
       ))}
       <Txt v="caption" tone="muted" style={{ marginTop: 6 }}>
-        Cumplirla mantiene viva tu racha. Puedes cambiarla cuando quieras.
+        {tx('Cumplirla mantiene viva tu racha. Puedes cambiarla cuando quieras.', 'Hitting it keeps your streak alive. You can change it anytime.')}
       </Txt>
     </View>,
     <View key="3" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
-        03 · Reto anual
+        03 · {tx('Reto anual', 'Yearly challenge')}
       </Txt>
       <Txt v="display" style={{ marginTop: 12, marginBottom: 22 }}>
-        ¿Cuántos libros este año?
+        {tx('¿Cuántos libros este año?', 'How many books this year?')}
       </Txt>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {YEARLY.map((y) => {
@@ -134,7 +135,7 @@ export default function Onboarding() {
             >
               <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 44, lineHeight: 48, color: on ? p.ember : p.text }}>{y}</Txt>
               <Txt v="caption" tone="muted">
-                {y === 6 ? 'Uno cada dos meses' : y === 12 ? 'Uno al mes' : y === 24 ? 'Dos al mes' : 'Uno por semana'}
+                {y === 6 ? tx('Uno cada dos meses', 'One every two months') : y === 12 ? tx('Uno al mes', 'One a month') : y === 24 ? tx('Dos al mes', 'Two a month') : tx('Uno por semana', 'One a week')}
               </Txt>
             </Tap>
           );
@@ -143,13 +144,13 @@ export default function Onboarding() {
     </View>,
     <View key="4" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
-        04 · Tu biblioteca
+        04 · {tx('Tu biblioteca', 'Your library')}
       </Txt>
       <Txt v="display" style={{ marginTop: 12 }}>
-        Elige la carpeta de tus libros
+        {tx('Elige la carpeta de tus libros', 'Pick your books folder')}
       </Txt>
       <Txt v="body" tone="soft" style={{ marginTop: 12 }}>
-        EPUB, PDF, TXT o Markdown. Ávido lee directamente de ahí y detecta los libros nuevos cada vez que abres la app.
+        {tx('EPUB, PDF, TXT o Markdown. Ávido lee directamente de ahí y detecta los libros nuevos cada vez que abres la app.', 'EPUB, PDF, TXT or Markdown. Ávido reads straight from there and picks up new books every time you open the app.')}
       </Txt>
       <Tap
         onPress={async () => {
@@ -161,9 +162,9 @@ export default function Onboarding() {
       >
         <FolderOpen size={28} color={folder ? p.mint : p.ember} />
         <View style={{ flex: 1 }}>
-          <Txt v="headline">{folder ? folder : picking ? 'Abriendo…' : 'Seleccionar carpeta'}</Txt>
+          <Txt v="headline">{folder ? folder : picking ? tx('Abriendo…', 'Opening…') : tx('Seleccionar carpeta', 'Select folder')}</Txt>
           <Txt v="caption" tone="muted">
-            {folder ? 'Carpeta conectada · toca para cambiar' : 'Por ejemplo: Descargas/Libros'}
+            {folder ? tx('Carpeta conectada · toca para cambiar', 'Folder connected · tap to change') : tx('Por ejemplo: Descargas/Libros', 'For example: Downloads/Books')}
           </Txt>
         </View>
       </Tap>
@@ -184,11 +185,11 @@ export default function Onboarding() {
           {steps[step]}
         </Animated.View>
         <View style={{ gap: 6, marginTop: 20 }}>
-          <Cta label={step === 0 ? 'Empezar' : last ? (folder ? 'A leer' : 'Elegir más tarde') : 'Continuar'} onPress={last ? done : next} kind={last && !folder ? 'quiet' : 'primary'} />
+          <Cta label={step === 0 ? tx('Empezar', 'Get started') : last ? (folder ? tx('A leer', "Let's read") : tx('Elegir más tarde', 'Choose later')) : tx('Continuar', 'Continue')} onPress={last ? done : next} kind={last && !folder ? 'quiet' : 'primary'} />
           {step > 0 && (
             <Tap onPress={() => setStep((x) => x - 1)} style={{ alignSelf: 'center', padding: 10 }}>
               <Txt v="label" tone="muted">
-                Atrás
+                {tx('Atrás', 'Back')}
               </Txt>
             </Tap>
           )}

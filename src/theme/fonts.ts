@@ -1,3 +1,5 @@
+import { tx } from '@/i18n';
+
 export const fonts = {
   display: 'Fraunces_600SemiBold',
   displayItalic: 'Fraunces_600SemiBold_Italic',
@@ -31,7 +33,7 @@ export const readingFonts: Record<ReadingFontId, ReadingFont> = {
     regular: 'Literata_400Regular',
     italic: 'Literata_400Regular_Italic',
     bold: 'Literata_700Bold',
-    hint: 'Clásica y serena',
+    hint: tx('Clásica y serena', 'Classic and calm'),
   },
   newsreader: {
     id: 'newsreader',
@@ -39,7 +41,7 @@ export const readingFonts: Record<ReadingFontId, ReadingFont> = {
     regular: 'Newsreader_400Regular',
     italic: 'Newsreader_400Regular_Italic',
     bold: 'Newsreader_700Bold',
-    hint: 'Editorial, compacta',
+    hint: tx('Editorial, compacta', 'Editorial, compact'),
   },
   fraunces: {
     id: 'fraunces',
@@ -47,7 +49,7 @@ export const readingFonts: Record<ReadingFontId, ReadingFont> = {
     regular: 'Fraunces_400Regular',
     italic: 'Fraunces_400Regular_Italic',
     bold: 'Fraunces_700Bold',
-    hint: 'Con carácter',
+    hint: tx('Con carácter', 'Full of character'),
   },
   atkinson: {
     id: 'atkinson',
@@ -55,6 +57,6 @@ export const readingFonts: Record<ReadingFontId, ReadingFont> = {
     regular: 'AtkinsonHyperlegible_400Regular',
     italic: 'AtkinsonHyperlegible_400Regular_Italic',
     bold: 'AtkinsonHyperlegible_700Bold',
-    hint: 'Máxima legibilidad',
+    hint: tx('Máxima legibilidad', 'Maximum legibility'),
   },
 };

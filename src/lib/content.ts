@@ -5,6 +5,7 @@ import { contentFile } from './paths';
 import { parsePlainText, readTextFile } from './plaintext';
 import type { Book, BookContent } from './types';
 import { CONTENT_VERSION } from './types';
+import { tx } from '@/i18n';
 
 const memory = new Map<string, BookContent>();
 
@@ -24,7 +25,7 @@ export async function loadContent(book: Book, onProgress?: (p: number) => void):
   let content: BookContent;
   if (book.format === 'epub') content = await parseEpub(book.uri, book.id, onProgress);
   else content = parsePlainText(await readTextFile(book.uri), book.format === 'md', book.title);
-  if (!content.chapters.length) throw new Error('El libro está vacío o no se pudo leer.');
+  if (!content.chapters.length) throw new Error(tx('El libro está vacío o no se pudo leer.', 'The book is empty or could not be read.'));
   try {
     const out = new File(contentFile(book.id).uri);
     if (out.exists) out.delete();

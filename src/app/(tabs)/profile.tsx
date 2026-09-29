@@ -13,6 +13,7 @@ import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { fonts } from '@/theme/fonts';
+import { tx } from '@/i18n';
 
 function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean }) {
   const p = usePalette();
@@ -72,19 +73,19 @@ export default function Profile() {
           <Txt style={{ fontFamily: fonts.displayBlackItalic, fontSize: 44, lineHeight: 52, color: p.ember }}>{(s.name || 'L').slice(0, 1).toUpperCase()}</Txt>
         </View>
         <Txt v="display" style={{ marginTop: 14 }}>
-          {s.name || 'Lector'}
+          {s.name || tx('Lector', 'Reader')}
         </Txt>
         <Txt v="mono" tone="muted" style={{ marginTop: 4 }}>
-          Nv {lp.level} · {levelTitle(lp.level)}
+          {tx('Nv', 'Lv')} {lp.level} · {levelTitle(lp.level)}
         </Txt>
       </View>
 
       <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
         {[
-          { k: 'Libros', v: `${finished}` },
-          { k: 'Racha', v: `${streak}` },
-          { k: 'Días', v: `${activeDays}` },
-          { k: 'Horas', v: `${Math.floor(totalSec / 3600)}` },
+          { k: tx('Libros', 'Books'), v: `${finished}` },
+          { k: tx('Racha', 'Streak'), v: `${streak}` },
+          { k: tx('Días', 'Days'), v: `${activeDays}` },
+          { k: tx('Horas', 'Hours'), v: `${Math.floor(totalSec / 3600)}` },
         ].map((x) => (
           <View key={x.k} style={{ flex: 1, backgroundColor: p.surface, borderRadius: 18, borderWidth: 1, borderColor: p.line, paddingVertical: 14, alignItems: 'center' }}>
             <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 26, lineHeight: 30, color: p.text }}>{x.v}</Txt>
@@ -95,30 +96,30 @@ export default function Profile() {
         ))}
       </View>
       <Txt v="caption" tone="faint" center style={{ marginTop: 10 }}>
-        {formatDuration(totalSec)} leyendo con Ávido
+        {formatDuration(totalSec)} {tx('leyendo con Ávido', 'reading with Ávido')}
       </Txt>
 
       <SectionTitle>
         <Txt v="eyebrow" tone="muted">
-          Retos
+          {tx('Retos', 'Challenges')}
         </Txt>
       </SectionTitle>
       <Card style={{ paddingVertical: 4 }}>
-        <Row icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.ember }}>′</Txt>} title="Meta diaria" hint="Mantiene viva la racha" right={<Stepper value={s.dailyGoalMin} unit="′" step={5} min={5} max={180} onChange={(v) => s.set({ dailyGoalMin: v })} />} />
-        <Row icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.gold }}>#</Txt>} title="Libros este año" hint="Tu reto anual" last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
+        <Row icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.ember }}>′</Txt>} title={tx('Meta diaria', 'Daily goal')} hint={tx('Mantiene viva la racha', 'Keeps the streak going')} right={<Stepper value={s.dailyGoalMin} unit="′" step={5} min={5} max={180} onChange={(v) => s.set({ dailyGoalMin: v })} />} />
+        <Row icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.gold }}>#</Txt>} title={tx('Libros este año', 'Books this year')} hint={tx('Tu reto anual', 'Your yearly challenge')} last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
       </Card>
 
       <SectionTitle>
         <Txt v="eyebrow" tone="muted">
-          Ajustes
+          {tx('Ajustes', 'Settings')}
         </Txt>
       </SectionTitle>
       <Card style={{ paddingVertical: 4 }}>
-        <Row icon={<FolderOpen size={17} color={p.soft} />} title="Carpeta de libros" hint={folderName ?? 'Sin seleccionar'} onPress={pickFolder} right={<Txt v="label" tone="ember">Cambiar</Txt>} />
+        <Row icon={<FolderOpen size={17} color={p.soft} />} title={tx('Carpeta de libros', 'Books folder')} hint={folderName ?? tx('Sin seleccionar', 'Not selected')} onPress={pickFolder} right={<Txt v="label" tone="ember">{tx('Cambiar', 'Change')}</Txt>} />
         <Row
           icon={<Bell size={17} color={p.soft} />}
-          title="Recordatorios"
-          hint={s.reminders ? `Cada día a las ${s.reminderHour}:00` : 'Desactivados'}
+          title={tx('Recordatorios', 'Reminders')}
+          hint={s.reminders ? tx(`Cada día a las ${s.reminderHour}:00`, `Every day at ${s.reminderHour}:00`) : tx('Desactivados', 'Off')}
           right={sw(s.reminders, (v) => {
             s.set({ reminders: v });
             setTimeout(scheduleReminders, 0);
@@ -127,7 +128,7 @@ export default function Profile() {
         {s.reminders && (
           <Row
             icon={<Txt style={{ fontFamily: fonts.monoBold, color: p.soft }}>h</Txt>}
-            title="Hora del aviso"
+            title={tx('Hora del aviso', 'Reminder time')}
             right={
               <Stepper
                 value={s.reminderHour}
@@ -143,17 +144,17 @@ export default function Profile() {
             }
           />
         )}
-        <Row icon={<Vibrate size={17} color={p.soft} />} title="Vibración" hint="Respuesta háptica" right={sw(s.haptics, (v) => s.set({ haptics: v }))} />
+        <Row icon={<Vibrate size={17} color={p.soft} />} title={tx('Vibración', 'Vibration')} hint={tx('Respuesta háptica', 'Haptic feedback')} right={sw(s.haptics, (v) => s.set({ haptics: v }))} />
         <Row
           icon={s.mode === 'dark' ? <Moon size={17} color={p.soft} /> : <Sun size={17} color={p.soft} />}
-          title="Tema oscuro"
-          hint="Interfaz de la app"
+          title={tx('Tema oscuro', 'Dark mode')}
+          hint={tx('Interfaz de la app', 'App interface')}
           last
           right={sw(s.mode === 'dark', (v) => s.set({ mode: v ? 'dark' : 'light' }))}
         />
       </Card>
       <Txt v="mono" tone="faint" center style={{ marginTop: 26 }}>
-        Ávido · lee con hambre
+        {tx('Ávido · lee con hambre', 'Ávido · read hungry')}
       </Txt>
     </Screen>
   );

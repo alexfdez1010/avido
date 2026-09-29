@@ -7,9 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tap, Txt } from '@/components/kit';
 import { usePalette } from '@/hooks/use-palette';
 import { useSettings } from '@/store/settings';
+import { tx } from '@/i18n';
 
 const ICONS = { index: FlameIcon, library: BookOpen, trophies: Trophy, profile: UserRound } as const;
-const LABELS = { index: 'Hoy', library: 'Biblioteca', trophies: 'Logros', profile: 'Tú' } as const;
+const LABELS = { index: tx('Hoy', 'Today'), library: tx('Biblioteca', 'Library'), trophies: tx('Logros', 'Trophies'), profile: tx('Tú', 'You') } as const;
 
 type TabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>>[0];
 

@@ -1,3 +1,5 @@
+import { isEs, tx } from '@/i18n';
+
 export function dayKey(d: Date = new Date()): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -20,8 +22,10 @@ export function daySeed(key: string): number {
   return Number(key.replace(/-/g, ''));
 }
 
-const WEEKDAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const WEEKDAYS = isEs ? ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'] : ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const MONTHS = isEs
+  ? ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+  : ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
 export function weekdayShort(d: Date) {
   return WEEKDAYS[d.getDay()];
@@ -32,6 +36,7 @@ export function monthShort(d: Date) {
 }
 
 export function formatLongDate(d: Date = new Date()): string {
+  if (!isEs) return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const long = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   return `${long[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]}`;
@@ -55,8 +60,8 @@ export function formatClock(totalSec: number): string {
 
 export function greeting(d: Date = new Date()): string {
   const h = d.getHours();
-  if (h < 6) return 'Buenas noches, lector nocturno';
-  if (h < 13) return 'Buenos días';
-  if (h < 21) return 'Buenas tardes';
-  return 'Buenas noches';
+  if (h < 6) return tx('Buenas noches, lector nocturno', 'Hello, night owl');
+  if (h < 13) return tx('Buenos días', 'Good morning');
+  if (h < 21) return tx('Buenas tardes', 'Good afternoon');
+  return tx('Buenas noches', 'Good evening');
 }

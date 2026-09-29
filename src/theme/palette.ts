@@ -1,5 +1,6 @@
-export type AppMode = 'dark' | 'light';
+import { tx } from '@/i18n';
 
+export type AppMode = 'dark' | 'light';
 export type Palette = {
   mode: AppMode;
   bg: string;
@@ -78,9 +79,9 @@ export type ReaderTheme = {
 };
 
 export const readerThemes: Record<ReaderThemeId, ReaderTheme> = {
-  paper: { id: 'paper', label: 'Papel', bg: '#F7F3EA', text: '#1F1C18', muted: '#8B8274', line: '#E4DCCD', accent: '#F04E17', statusBar: 'dark' },
+  paper: { id: 'paper', label: tx('Papel', 'Paper'), bg: '#F7F3EA', text: '#1F1C18', muted: '#8B8274', line: '#E4DCCD', accent: '#F04E17', statusBar: 'dark' },
   sepia: { id: 'sepia', label: 'Sepia', bg: '#EFE2C8', text: '#3A2E20', muted: '#8F7B5E', line: '#DCCBA9', accent: '#C4531D', statusBar: 'dark' },
-  dusk: { id: 'dusk', label: 'Ocaso', bg: '#2A2521', text: '#E6DDCF', muted: '#968A7A', line: '#3B342E', accent: '#FF7A45', statusBar: 'light' },
-  night: { id: 'night', label: 'Noche', bg: '#14120F', text: '#CFC6B8', muted: '#77705F', line: '#26221D', accent: '#FF5B24', statusBar: 'light' },
-  oled: { id: 'oled', label: 'Tinta', bg: '#000000', text: '#B9B2A6', muted: '#5F5A52', line: '#1A1815', accent: '#FF5B24', statusBar: 'light' },
+  dusk: { id: 'dusk', label: tx('Ocaso', 'Dusk'), bg: '#2A2521', text: '#E6DDCF', muted: '#968A7A', line: '#3B342E', accent: '#FF7A45', statusBar: 'light' },
+  night: { id: 'night', label: tx('Noche', 'Night'), bg: '#14120F', text: '#CFC6B8', muted: '#77705F', line: '#26221D', accent: '#FF5B24', statusBar: 'light' },
+  oled: { id: 'oled', label: tx('Tinta', 'Ink'), bg: '#000000', text: '#B9B2A6', muted: '#5F5A52', line: '#1A1815', accent: '#FF5B24', statusBar: 'light' },
 };
