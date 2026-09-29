@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
+import { Miga } from '@/components/mascot/miga';
 import { haptic, Txt } from '@/components/kit';
 import type { Celebration } from '@/game/types';
 import { useGame } from '@/store/game';
@@ -30,6 +31,7 @@ export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
       exiting={FadeOutUp.duration(200)}
       pointerEvents="none"
       style={{
+        maxWidth: '94%',
         position: 'absolute',
         top,
         alignSelf: 'center',
@@ -45,8 +47,9 @@ export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
         elevation: 10,
       }}
     >
+      <Miga size={38} mood="happy" still={theme.id === 'eink'} />
       <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 16, color: theme.id === 'eink' ? '#FFFFFF' : '#F2B544' }}>{item.big && item.big.length <= 3 ? item.big : '✦'}</Txt>
-      <Txt v="label" style={{ color: '#F3EDE2' }} numberOfLines={1}>
+      <Txt v="label" style={{ flexShrink: 1, color: '#F3EDE2' }} numberOfLines={1}>
         {item.title}
         {item.kind === 'quest' || item.kind === 'achievement' ? ` · ${item.subtitle}` : ''}
       </Txt>

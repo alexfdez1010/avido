@@ -1,10 +1,11 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { FolderOpen, Play, Snowflake } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Bar, Card, Cover, Cta, Flame, Ring, Screen, SectionTitle, Tap, Txt } from '@/components/kit';
+import { Miga } from '@/components/mascot/miga';
 import { QuestsCard } from '@/components/home/quests-card';
 import { WeekStrip } from '@/components/home/week-strip';
 import { levelProgress, levelTitle, streakMultiplier } from '@/game/levels';
@@ -62,27 +63,23 @@ function GoalCard() {
   const streak = useStreak();
   const sec = log?.sec ?? 0;
   const met = !!log?.goalMet;
-  const left = Math.max(0, Math.ceil(goal - sec / 60));
+  const [active, setActive] = useState(false);
+  useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
   const mult = streakMultiplier(streak);
   const hour = new Date().getHours();
   const danger = !met && streak > 0 && hour >= 18;
   return (
     <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
       <Ring size={112} stroke={11} value={sec / (goal * 60)} color={met ? p.mint : p.ember}>
-        <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 34, lineHeight: 38, color: p.text }}>{Math.floor(sec / 60)}</Txt>
-        <Txt v="mono" tone="muted" style={{ marginTop: -2 }}>
-          {tx('de', 'of')} {goal} min
-        </Txt>
+        <Miga size={94} mood={met ? 'happy' : 'reading'} active={active} interactive />
       </Ring>
       <View style={{ flex: 1, gap: 6 }}>
         <Txt v="eyebrow" color={met ? p.mint : danger ? p.ember : p.muted}>
           {met ? tx('Meta cumplida', 'Goal reached') : danger ? tx('Racha en peligro', 'Streak at risk') : tx('Meta de hoy', "Today's goal")}
         </Txt>
-        {!met && (
-          <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
-            {tx(`Faltan ${left} min`, `${left} min left`)}
-          </Txt>
-        )}
+        <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
+          {Math.floor(sec / 60)} {tx('de', 'of')} {goal} min
+        </Txt>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
           {mult > 1 && (
             <View style={{ backgroundColor: p.goldSoft, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>

@@ -1,8 +1,10 @@
 import { Bell, BookMarked, Clock, Contrast, FolderOpen, Minus, Moon, Plus, Sun, Timer, Vibrate } from 'lucide-react-native';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { View } from 'react-native';
 
 import { Card, Screen, SectionTitle, Tap, Txt } from '@/components/kit';
+import { Miga } from '@/components/mascot/miga';
 import { Switch } from '@/components/ui/switch';
 import { levelProgress, levelTitle } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
@@ -11,8 +13,8 @@ import { scheduleReminders } from '@/lib/notifications';
 import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
-import { fonts } from '@/theme/fonts';
 import { tx } from '@/i18n';
+import { fonts } from '@/theme/fonts';
 
 function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean }) {
   const p = usePalette();
@@ -54,6 +56,8 @@ function Stepper({ value, unit, onChange, step, min, max }: { value: number; uni
 
 export default function Profile() {
   const p = usePalette();
+  const [active, setActive] = useState(false);
+  useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
   const s = useSettings();
   const xp = useGame((g) => g.xp);
   const days = useGame((g) => g.days);
@@ -69,7 +73,7 @@ export default function Profile() {
     <Screen>
       <View style={{ alignItems: 'center', marginTop: 10 }}>
         <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: p.emberSoft, alignItems: 'center', justifyContent: 'center' }}>
-          <Txt style={{ fontFamily: fonts.displayBlackItalic, fontSize: 44, lineHeight: 52, color: p.ember }}>{(s.name || 'L').slice(0, 1).toUpperCase()}</Txt>
+          <Miga size={108} active={active} interactive />
         </View>
         <Txt v="display" style={{ marginTop: 14 }}>
           {s.name || tx('Lector', 'Reader')}

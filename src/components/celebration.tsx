@@ -14,7 +14,8 @@ import Animated, {
   ZoomIn,
 } from 'react-native-reanimated';
 
-import { Cta, Flame, haptic, Txt } from '@/components/kit';
+import { Miga } from '@/components/mascot/miga';
+import { Cta, haptic, Txt } from '@/components/kit';
 import type { Celebration } from '@/game/types';
 import { usePalette } from '@/hooks/use-palette';
 import { seededRandom } from '@/lib/hash';
@@ -91,7 +92,7 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
           <Animated.View style={[{ alignItems: 'center' }, popStyle]}>
             {c.kind === 'goal' || c.kind === 'streak' ? (
               <View style={{ alignItems: 'center' }}>
-                <Flame size={84} />
+                <Miga size={116} mood="happy" />
                 <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 40, lineHeight: 44, color: p.text, marginTop: -4 }}>{c.big}</Txt>
               </View>
             ) : (

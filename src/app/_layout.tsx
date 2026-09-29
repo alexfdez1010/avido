@@ -12,6 +12,7 @@ import { Uniwind } from 'uniwind';
 
 import { CelebrationHost } from '@/components/celebration';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import { useAppFonts } from '@/hooks/use-app-fonts';
 import { usePalette } from '@/hooks/use-palette';
 import { scanLibrary } from '@/lib/library';
 import { scheduleReminders } from '@/lib/notifications';
@@ -37,7 +38,9 @@ function useHydrated() {
 }
 
 export default function RootLayout() {
-  const ready = useHydrated();
+  const hydrated = useHydrated();
+  const fontsReady = useAppFonts();
+  const ready = hydrated && fontsReady;
   const p = usePalette();
   const mode = p.mode;
 
