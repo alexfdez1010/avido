@@ -11,7 +11,6 @@ import Animated, {
   withSequence,
   withSpring,
   withTiming,
-  ZoomIn,
 } from 'react-native-reanimated';
 
 import { Miga } from '@/components/mascot/miga';
@@ -65,10 +64,10 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
   const accent = c.kind === 'achievement' || c.kind === 'level' ? p.gold : c.kind === 'freeze' ? p.frost : c.kind === 'quest' ? p.mint : p.ember;
   const seed = c.id.length * 7 + c.title.length;
   const colors = [p.ember, p.gold, p.mint, p.violet, p.text];
-  const pop = useSharedValue(0.6);
+  const pop = useSharedValue(0.9);
   useEffect(() => {
     haptic(c.kind === 'quest' ? 'medium' : 'success');
-    pop.value = withSpring(1, { damping: 9, stiffness: 160 });
+    pop.value = withSpring(1, { damping: 20, stiffness: 220 });
   }, [c, pop]);
   const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
   const bigSize = (c.big?.length ?? 1) > 3 ? 44 : (c.big?.length ?? 1) > 2 ? 64 : 92;
@@ -81,7 +80,7 @@ function Card({ c, onDone }: { c: Celebration; onDone: () => void }) {
         ))}
       </View>
       <Animated.View
-        entering={ZoomIn.springify().damping(14)}
+        entering={FadeIn.duration(180)}
         style={{ width: W - 48, backgroundColor: p.surface, borderRadius: 32, borderWidth: p.ink ? 1.5 : 0, borderColor: p.text, paddingHorizontal: 26, paddingTop: 34, paddingBottom: 22, alignItems: 'center', overflow: 'hidden' }}
       >
         <Txt v="eyebrow" color={accent}>

@@ -77,11 +77,11 @@ export default function RootLayout() {
         <GluestackUIProvider mode={mode}>
           <ThemeProvider value={{ ...navTheme, colors: { ...navTheme.colors, background: p.bg, card: p.bg, text: p.text, border: p.line, primary: p.ember } }}>
             <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: p.bg }, animation: p.ink ? 'none' : 'fade_from_bottom' }}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: p.bg }, animation: p.ink ? 'none' : 'fade' }}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="onboarding" options={{ animation: p.ink ? 'none' : 'fade', gestureEnabled: false }} />
-              <Stack.Screen name="discover" options={{ animation: p.ink ? 'none' : 'slide_from_right' }} />
-              <Stack.Screen name="reader/[id]" options={{ animation: p.ink ? 'none' : 'slide_from_bottom' }} />
+              <Stack.Screen name="discover" options={{ animation: p.ink ? 'none' : 'fade' }} />
+              <Stack.Screen name="reader/[id]" options={{ animation: p.ink ? 'none' : 'fade' }} />
             </Stack>
             <FolderBrowserHost />
             <CelebrationHost />

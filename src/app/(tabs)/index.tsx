@@ -2,7 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { FolderOpen, Play, Snowflake } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Bar, Card, Cover, Cta, Flame, Ring, Screen, SectionTitle, Tap, Txt } from '@/components/kit';
 import { Miga } from '@/components/mascot/miga';
@@ -194,10 +194,10 @@ export default function Today() {
 
   return (
     <Screen>
-      <Animated.View entering={FadeInDown.duration(380)}>
+      <Animated.View entering={FadeIn.duration(180)}>
         <Header />
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(60).duration(380)} style={{ marginTop: 26 }}>
+      <Animated.View entering={FadeIn.duration(180)} style={{ marginTop: 26 }}>
         {current ? <ContinueCard book={current} /> : suggestion ? <ContinueCard book={suggestion} /> : !folder ? <EmptyLibrary /> : (
           <Card>
             <Txt v="title">{tx('Tu carpeta está vacía', 'Your folder is empty')}</Txt>
@@ -206,18 +206,18 @@ export default function Today() {
           </Card>
         )}
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(120).duration(380)} style={{ marginTop: 14 }}>
+      <Animated.View entering={FadeIn.duration(180)} style={{ marginTop: 14 }}>
         <GoalCard />
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(180).duration(380)}>
+      <Animated.View entering={FadeIn.duration(180)}>
         <View style={{ marginTop: 26 }}>
           <WeekStrip />
         </View>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(240).duration(380)} style={{ marginTop: 26 }}>
+      <Animated.View entering={FadeIn.duration(180)} style={{ marginTop: 26 }}>
         <QuestsCard />
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(300).duration(380)} style={{ marginTop: 14 }}>
+      <Animated.View entering={FadeIn.duration(180)} style={{ marginTop: 14 }}>
         <LevelStrip />
       </Animated.View>
       {shelf.length > 0 && (

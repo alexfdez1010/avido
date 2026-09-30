@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { FolderOpen } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, View } from 'react-native';
-import Animated, { FadeInDown, FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Cta, Flame, Tap, Txt } from '@/components/kit';
@@ -64,22 +64,22 @@ export default function Onboarding() {
 
   const steps = [
     <View key="0" style={{ flex: 1, justifyContent: 'flex-end' }}>
-      <Animated.View entering={FadeInDown.delay(100).springify()}>
+      <View>
         <Flame size={64} color={p.ember} inner={p.gold} />
-      </Animated.View>
-      <Animated.View entering={FadeInDown.delay(220).springify()}>
+      </View>
+      <View>
         <Txt v="hero" style={{ marginTop: 20 }}>
           {tx('Lee más.', 'Read more.')}{'\n'}
           <Txt v="hero" italic tone="ember">
             {tx('Mucho más.', 'Much more.')}
           </Txt>
         </Txt>
-      </Animated.View>
-      <Animated.View entering={FadeInDown.delay(340).springify()}>
+      </View>
+      <View>
         <Txt v="body" tone="soft" style={{ marginTop: 18, fontSize: 17, lineHeight: 25 }}>
           {tx('Rachas, niveles y misiones por cada página.', 'Streaks, levels and quests for every page.')}
         </Txt>
-      </Animated.View>
+      </View>
     </View>,
     <View key="1" style={{ flex: 1, justifyContent: 'center' }}>
       <Txt v="eyebrow" tone="ember">
@@ -185,7 +185,7 @@ export default function Onboarding() {
             <View key={i} style={{ flex: 1, height: 3, borderRadius: 3, backgroundColor: i <= step ? p.ember : p.line }} />
           ))}
         </View>
-        <Animated.View key={step} entering={FadeInRight.springify().damping(18)} exiting={FadeOutLeft.duration(150)} style={{ flex: 1 }}>
+        <Animated.View key={step} entering={p.ink ? undefined : FadeIn.duration(160)} style={{ flex: 1 }}>
           {steps[step]}
         </Animated.View>
         <View style={{ gap: 6, marginTop: 20 }}>

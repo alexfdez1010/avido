@@ -27,7 +27,7 @@ export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
   return (
     <Animated.View
       key={item.id}
-      entering={FadeInUp.springify().damping(16)}
+      entering={FadeInUp.duration(180)}
       exiting={FadeOutUp.duration(200)}
       pointerEvents="none"
       style={{
