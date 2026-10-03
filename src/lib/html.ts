@@ -63,20 +63,133 @@ export function textOf(n: Node): string {
 
 export type ImageResolver = (src: string) => string | undefined;
 
+const MONO = new Set(['code', 'kbd', 'samp', 'tt']);
+const CODE_CLASS = /(^|[\s_-])(code|programlisting|screen|listing|sourcecode|codeblock|pre)(\d*)(?=[\s_-]|$)/i;
+const RAW_WS = /white-space\s*:\s*(pre|break-spaces)/i;
+
+type RawSpan = Span & { raw?: boolean };
+
+const sameStyle = (a: Span, b: Span) => a.i === b.i && a.b === b.b && a.m === b.m;
+
+function mergeSpans(spans: Span[]): Span[] {
+  const out: Span[] = [];
+  for (const s of spans) {
+    const last = out[out.length - 1];
+    if (last && sameStyle(last, s)) last.t += s.t;
+    else out.push({ ...s });
+  }
+  return out;
+}
+
+const textOfSpans = (spans: Span[]) => spans.map((s) => s.t).join('');
+
+function codeLines(spans: RawSpan[]): Span[][] {
+  const lines: Span[][] = [[]];
+  for (const s of spans) {
+    s.t
+      .replace(/\r\n?/g, '\n')
+      .split('\n')
+      .forEach((part, idx) => {
+        if (idx > 0) lines.push([]);
+        const line = lines[lines.length - 1];
+        let t = part;
+        if (!s.raw && line.length === 0) t = t.replace(/^[ \t]+/, '');
+        t = t.replace(/\t/g, '    ').replace(/\u00a0/g, ' ');
+        if (t) line.push({ t, ...(s.b ? { b: 1 as const } : {}) });
+      });
+  }
+  for (const line of lines) {
+    const last = line[line.length - 1];
+    if (last) last.t = last.t.replace(/\s+$/, '');
+  }
+  const blank = (l: Span[]) => textOfSpans(l).trim() === '';
+  while (lines.length && blank(lines[0])) lines.shift();
+  while (lines.length && blank(lines[lines.length - 1])) lines.pop();
+  return lines;
+}
+
+function joinLines(lines: Span[][]): Span[] {
+  const out: Span[] = [];
+  lines.forEach((line, idx) => {
+    if (idx > 0) out.push({ t: '\n' });
+    out.push(...line);
+  });
+  return mergeSpans(out).filter((s) => s.t.length > 0);
+}
+
+function dedent(spans: Span[]): Span[] {
+  const lines: Span[][] = [[]];
+  for (const s of spans) {
+    s.t.split('\n').forEach((part, idx) => {
+      if (idx > 0) lines.push([]);
+      if (part) lines[lines.length - 1].push({ ...s, t: part });
+    });
+  }
+  const indents = lines.map(textOfSpans).filter((t) => t.trim()).map((t) => /^ */.exec(t)![0].length);
+  const cut = indents.length ? Math.min(...indents) : 0;
+  if (cut === 0) return spans;
+  const out = lines.map((line) => {
+    let left = cut;
+    const kept: Span[] = [];
+    for (const s of line) {
+      const n = Math.min(left, /^ */.exec(s.t)![0].length);
+      const t = s.t.slice(n);
+      left = t.length > 0 ? 0 : left - n;
+      if (t) kept.push({ ...s, t });
+    }
+    return kept;
+  });
+  return joinLines(out);
+}
+
 export function htmlToBlocks(html: string, resolveImage: ImageResolver): Block[] {
   const doc = parseDocument(html, { decodeEntities: true, lowerCaseTags: true }) as unknown as Node;
   const blocks: Block[] = [];
-  let spans: Span[] = [];
-  const style = { i: 0, b: 0 };
+  let spans: RawSpan[] = [];
+  const style = { i: 0, b: 0, m: 0 };
 
-  const flush = (kind: BlockKind) => {
-    if (spans.length === 0) return;
-    const merged: Span[] = [];
-    for (const s of spans) {
-      const last = merged[merged.length - 1];
-      if (last && last.i === s.i && last.b === s.b) last.t += s.t;
-      else merged.push({ ...s });
+  // Code listings split over sibling elements (one <p class="code"> per line) are joined
+  // back into one block: `true` always joins, a string joins only with the same source.
+  type Join = boolean | string;
+  let codeKey: string | undefined;
+  let blankLines = 0;
+
+  const pushBlock = (kind: BlockKind, s: Span[], join: Join) => {
+    const chars = s.reduce((a, x) => a + x.t.length, 0);
+    const last = blocks[blocks.length - 1];
+    const joins = kind === 'pre' && last?.k === 'pre' && !!last.s && (join === true || (!!join && join === codeKey));
+    if (chars === 0) {
+      if (joins && kind === 'pre') blankLines++;
+      return;
     }
+    if (joins && last.s) {
+      const gap = '\n'.repeat(1 + blankLines);
+      last.s = mergeSpans([...last.s, { t: gap }, ...s]);
+      last.c += chars + gap.length;
+    } else {
+      blocks.push({ k: kind, s, c: chars });
+      codeKey = undefined;
+    }
+    blankLines = 0;
+    if (kind === 'pre' && typeof join === 'string') codeKey = join;
+  };
+
+  const flush = (kind: BlockKind, join: Join = false) => {
+    if (spans.length === 0) {
+      if (kind === 'pre') pushBlock('pre', [], join);
+      return;
+    }
+    const visible = spans.filter((s) => s.t.trim());
+    if (kind === 'p' && visible.length > 0 && visible.every((s) => s.m)) {
+      kind = 'pre';
+      join = 'mono';
+    }
+    if (kind === 'pre') {
+      pushBlock('pre', joinLines(codeLines(spans)), join);
+      spans = [];
+      return;
+    }
+    const merged = mergeSpans(spans.map(({ raw: _raw, ...s }) => s));
     if (merged.length) {
       merged[0].t = merged[0].t.replace(/^\s+/, '');
       const lastSpan = merged[merged.length - 1];
@@ -85,17 +198,18 @@ export function htmlToBlocks(html: string, resolveImage: ImageResolver): Block[]
     const clean = merged
       .map((s) => ({ ...s, t: s.t.replace(/[ \t]*\n[ \t]*/g, '\n') }))
       .filter((s) => s.t.length > 0);
-    const chars = clean.reduce((a, s) => a + s.t.length, 0);
-    if (chars > 0) blocks.push({ k: kind, s: clean, c: chars });
+    pushBlock(kind, clean, false);
     spans = [];
   };
 
   const pushText = (t: string, pre: boolean) => {
-    const text = pre ? t : t.replace(/\s+/g, ' ');
+    const text = pre ? t : t.replace(/[ \t\n\r\f]+/g, ' ');
     if (!text) return;
-    const span: Span = { t: text };
+    const span: RawSpan = { t: text };
     if (style.i > 0) span.i = 1;
     if (style.b > 0) span.b = 1;
+    if (style.m > 0) span.m = 1;
+    if (pre) span.raw = true;
     spans.push(span);
   };
 
@@ -111,7 +225,7 @@ export function htmlToBlocks(html: string, resolveImage: ImageResolver): Block[]
     const name = localName(n);
     if (SKIP.has(name)) return;
     if (name === 'br') {
-      spans.push({ t: '\n' });
+      spans.push({ t: '\n', raw: true });
       return;
     }
     if (name === 'hr') {
@@ -128,24 +242,37 @@ export function htmlToBlocks(html: string, resolveImage: ImageResolver): Block[]
       }
       return;
     }
+    const rawWs = name === 'pre' || RAW_WS.test(n.attribs?.style ?? '');
     const blockKind = BLOCK_KIND[name];
-    const isItalic = name === 'em' || name === 'i' || name === 'cite' || name === 'var';
-    const isBold = name === 'strong' || name === 'b';
     if (blockKind) {
-      flush(kind);
-      const inner: BlockKind = blockKind === 'p' && kind !== 'p' ? kind : blockKind;
-      n.children?.forEach((c) => walk(c, inner, pre || name === 'pre'));
-      flush(inner);
+      const isCode = blockKind === 'pre' || (blockKind === 'p' && (rawWs || CODE_CLASS.test(n.attribs?.class ?? '')));
+      const inCode = kind === 'pre';
+      flush(kind, inCode);
+      const start = blocks.length;
+      const inner: BlockKind = isCode ? 'pre' : blockKind === 'p' && kind !== 'p' ? kind : blockKind;
+      n.children?.forEach((c) => walk(c, inner, pre || rawWs));
+      const key = isCode && name !== 'pre' ? `${name}.${n.attribs?.class ?? ''}` : false;
+      flush(inner, inCode || blocks.length > start || key);
       return;
     }
+    const isItalic = name === 'em' || name === 'i' || name === 'cite' || name === 'var';
+    const isBold = name === 'strong' || name === 'b';
+    const isMono = MONO.has(name);
     if (isItalic) style.i++;
     if (isBold) style.b++;
-    n.children?.forEach((c) => walk(c, kind, pre));
+    if (isMono) style.m++;
+    n.children?.forEach((c) => walk(c, kind, pre || rawWs));
     if (isItalic) style.i--;
     if (isBold) style.b--;
+    if (isMono) style.m--;
   };
 
   walk(doc, 'p', false);
   flush('p');
+  for (const b of blocks) {
+    if (b.k !== 'pre' || !b.s) continue;
+    b.s = dedent(b.s);
+    b.c = b.s.reduce((a, x) => a + x.t.length, 0);
+  }
   return blocks;
 }

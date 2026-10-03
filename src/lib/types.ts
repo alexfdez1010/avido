@@ -28,7 +28,7 @@ export type Book = {
   error?: string;
 };
 
-export type Span = { t: string; i?: 1; b?: 1 };
+export type Span = { t: string; i?: 1; b?: 1; m?: 1 };
 
 export type BlockKind = 'p' | 'h1' | 'h2' | 'h3' | 'q' | 'li' | 'hr' | 'img' | 'pre';
 
@@ -49,6 +49,6 @@ export type BookContent = {
   totalChars: number;
 };
 
-export const CONTENT_VERSION = 3;
+export const CONTENT_VERSION = 4;
 
 export const CHARS_PER_PAGE = 1500;

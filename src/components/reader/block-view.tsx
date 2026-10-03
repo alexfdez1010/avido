@@ -1,22 +1,50 @@
 import { Image } from 'expo-image';
 import React, { memo, useState } from 'react';
-import { Text, View, useWindowDimensions } from 'react-native';
+import { ScrollView, Text, View, useWindowDimensions } from 'react-native';
 
 import type { Block } from '@/lib/types';
-import type { ReadingFont } from '@/theme/fonts';
+import { fonts, type ReadingFont } from '@/theme/fonts';
 import type { ReaderTheme } from '@/theme/palette';
 
 export type BlockStyle = { font: ReadingFont; size: number; lineHeight: number; margin: number; justify: boolean; theme: ReaderTheme };
 
+const codeBg = (t: ReaderTheme) => (t.id === 'eink' ? 'transparent' : `${t.line}B3`);
+
 function Spans({ block, st, base }: { block: Block; st: BlockStyle; base: string }) {
   return (
     <>
-      {block.s?.map((s, i) => (
-        <Text key={i} style={s.b ? { fontFamily: st.font.bold } : s.i ? { fontFamily: st.font.italic } : { fontFamily: base }}>
-          {s.t}
-        </Text>
-      ))}
+      {block.s?.map((s, i) =>
+        s.m ? (
+          <Text key={i} style={{ fontFamily: s.b ? fonts.monoBold : fonts.mono, fontSize: st.size * 0.86, backgroundColor: codeBg(st.theme) }}>
+            {`\u2009${s.t}\u2009`}
+          </Text>
+        ) : (
+          <Text key={i} style={s.b ? { fontFamily: st.font.bold } : s.i ? { fontFamily: st.font.italic } : { fontFamily: base }}>
+            {s.t}
+          </Text>
+        )
+      )}
     </>
+  );
+}
+
+function Code({ block, st }: { block: Block; st: BlockStyle }) {
+  const t = st.theme;
+  const size = Math.max(11, Math.round(st.size * 0.8));
+  return (
+    <View style={{ paddingHorizontal: st.margin, marginTop: 6, marginBottom: Math.round(st.size * st.lineHeight * 0.75) }}>
+      <View style={{ backgroundColor: codeBg(t), borderRadius: 8, borderWidth: t.id === 'eink' ? 1 : 0, borderColor: t.line, borderLeftWidth: 3, borderLeftColor: t.accent, overflow: 'hidden' }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 14, paddingVertical: 12 }}>
+          <Text style={{ color: t.text, fontFamily: fonts.mono, fontSize: size, lineHeight: Math.round(size * 1.6), textAlign: 'left' }}>
+            {block.s?.map((s, i) => (
+              <Text key={i} style={s.b ? { fontFamily: fonts.monoBold } : undefined}>
+                {s.t}
+              </Text>
+            ))}
+          </Text>
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
@@ -88,11 +116,7 @@ export const BlockView = memo(function BlockView({ block, st, first }: { block: 
         </View>
       );
     case 'pre':
-      return (
-        <View style={[pad, { marginVertical: 8 }]}>
-          <Text style={{ color: t.text, fontFamily: 'JetBrainsMono_400Regular', fontSize: st.size * 0.72, lineHeight: st.size * 1.1 }}>{block.s?.map((s) => s.t).join('')}</Text>
-        </View>
-      );
+      return <Code block={block} st={st} />;
     default:
       return (
         <View style={[pad, { marginBottom: Math.round(lh * 0.55) }]}>
