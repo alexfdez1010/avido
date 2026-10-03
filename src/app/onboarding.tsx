@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { FolderOpen } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, View } from 'react-native';
+import { View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

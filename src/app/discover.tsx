@@ -162,7 +162,7 @@ export default function Discover() {
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
-        <InputField value={q} onChangeText={setQ} placeholder={tx('Título o autor', 'Title or author')} placeholderTextColor={p.faint} returnKeyType="search" onSubmitEditing={() => setQuery(q)} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
+        <InputField value={q} onChangeText={setQ} placeholder={tx('Título o autor', 'Title or author')} placeholderTextColor={p.faint} returnKeyType="search" autoCorrect={false} onSubmitEditing={() => setQuery(q)} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
         {!!q && (
           <InputSlot style={{ paddingRight: 14 }} onPress={() => setQ('')}>
             <X size={16} color={p.muted} />
@@ -223,6 +223,7 @@ export default function Discover() {
         onEndReached={loadMore}
         onEndReachedThreshold={0.6}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: insets.bottom + 20 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {

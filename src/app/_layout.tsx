@@ -6,6 +6,7 @@ import * as SystemUI from 'expo-system-ui';
 import React, { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaListener } from 'react-native-safe-area-context';
 import { Uniwind } from 'uniwind';
@@ -74,6 +75,7 @@ export default function RootLayout() {
     <SafeAreaListener onChange={({ insets }) => Uniwind.updateInsets(insets)}>
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: p.bg }}>
         <ReducedMotionConfig mode={p.ink ? ReduceMotion.Always : ReduceMotion.System} />
+        <KeyboardProvider>
         <GluestackUIProvider mode={mode}>
           <ThemeProvider value={{ ...navTheme, colors: { ...navTheme.colors, background: p.bg, card: p.bg, text: p.text, border: p.line, primary: p.ember } }}>
             <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
@@ -87,6 +89,7 @@ export default function RootLayout() {
             <CelebrationHost />
           </ThemeProvider>
         </GluestackUIProvider>
+        </KeyboardProvider>
       </GestureHandlerRootView>
     </SafeAreaListener>
   );

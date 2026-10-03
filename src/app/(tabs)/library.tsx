@@ -190,7 +190,7 @@ export default function Library() {
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
-        <InputField value={q} onChangeText={setQ} placeholder={tx('Buscar título o autor', 'Search title or author')} placeholderTextColor={p.faint} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
+        <InputField value={q} onChangeText={setQ} placeholder={tx('Buscar título o autor', 'Search title or author')} placeholderTextColor={p.faint} returnKeyType="search" autoCorrect={false} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
         {!!q && (
           <InputSlot style={{ paddingRight: 14 }} onPress={() => setQ('')}>
             <X size={16} color={p.muted} />
@@ -241,6 +241,8 @@ export default function Library() {
         ListEmptyComponent={empty}
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: insets.bottom + TAB_BAR_SPACE + 30 }}
         refreshControl={<RefreshControl refreshing={false} onRefresh={() => scanLibrary()} tintColor={p.ember} colors={[p.ember]} progressBackgroundColor={p.surface} />}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
         renderItem={({ item, index }) => (
           <View style={{ flex: 1, alignItems: index % cols === 0 ? 'flex-start' : index % cols === cols - 1 ? 'flex-end' : 'center', marginBottom: 22 }}>
