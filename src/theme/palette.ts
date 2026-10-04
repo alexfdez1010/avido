@@ -29,10 +29,10 @@ export type Palette = {
 export const palettes: Record<AppMode, Palette> = {
   dark: {
     mode: 'dark',
-    bg: '#100E0B',
-    surface: '#1A1713',
-    raised: '#24201B',
-    line: '#2C2822',
+    bg: '#0F0D0A',
+    surface: '#181511',
+    raised: '#231F19',
+    line: '#2B2620',
     text: '#F3EDE2',
     soft: '#CFC7B9',
     muted: '#8C8476',
@@ -53,10 +53,10 @@ export const palettes: Record<AppMode, Palette> = {
   },
   light: {
     mode: 'light',
-    bg: '#F4EFE6',
-    surface: '#FBF8F2',
+    bg: '#F3EDE2',
+    surface: '#FBF7EF',
     raised: '#EAE3D6',
-    line: '#DED6C7',
+    line: '#DDD3C1',
     text: '#1B1916',
     soft: '#4A443C',
     muted: '#807769',

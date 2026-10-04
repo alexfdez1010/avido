@@ -21,32 +21,33 @@ export function WeekStrip() {
         const future = d > today && !isToday;
         const lit = log?.goalMet;
         return (
-          <View key={key} style={{ alignItems: 'center', gap: 6 }}>
-            <Txt v="eyebrow" style={{ fontSize: 9.5 }} tone={isToday ? 'text' : 'muted'}>
-              {weekdayShort(d)}
-            </Txt>
+          <View key={key} style={{ alignItems: 'center', gap: 6, flex: 1 }}>
             <View
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 19,
+                width: 36,
+                height: 36,
+                borderRadius: 12,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: lit ? p.goldSoft : log?.frozen ? p.frostSoft : future ? 'transparent' : p.surface,
-                borderWidth: isToday ? 1.5 : 0,
-                borderColor: p.ember,
+                backgroundColor: lit ? p.goldSoft : log?.frozen ? p.frostSoft : 'transparent',
+                borderWidth: isToday ? 1.5 : lit || log?.frozen ? 0 : 1,
+                borderColor: isToday ? p.ember : future ? 'transparent' : p.line,
+                borderStyle: future ? 'dashed' : 'solid',
               }}
             >
               {lit ? (
-                <Flame size={20} />
+                <Flame size={19} />
               ) : log?.frozen ? (
-                <Txt style={{ color: p.frost, fontSize: 16 }}>❄</Txt>
+                <Txt style={{ color: p.frost, fontSize: 15 }}>❄</Txt>
               ) : (
-                <Txt v="mono" tone={future ? 'faint' : 'muted'}>
+                <Txt v="mono" tone={future ? 'faint' : isToday ? 'text' : 'muted'}>
                   {d.getDate()}
                 </Txt>
               )}
             </View>
+            <Txt v="eyebrow" style={{ fontSize: 9, letterSpacing: 1 }} tone={isToday ? 'ember' : 'faint'}>
+              {weekdayShort(d)}
+            </Txt>
           </View>
         );
       })}

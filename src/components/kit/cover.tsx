@@ -44,7 +44,7 @@ function Pattern({ seed, w, h, hue }: { seed: string; w: number; h: number; hue:
   );
 }
 
-export const Cover = memo(function Cover({ book, width, radius = 10 }: { book: Pick<Book, 'id' | 'title' | 'author' | 'coverUri' | 'hue' | 'format'>; width: number; radius?: number }) {
+export const Cover = memo(function Cover({ book, width, radius = 6 }: { book: Pick<Book, 'id' | 'title' | 'author' | 'coverUri' | 'hue' | 'format'>; width: number; radius?: number }) {
   const height = Math.round(width * 1.5);
   const small = width < 90;
   return (
@@ -56,7 +56,7 @@ export const Cover = memo(function Cover({ book, width, radius = 10 }: { book: P
         overflow: 'hidden',
         backgroundColor: hsl(book.hue, 32, 20),
         shadowColor: '#000',
-        shadowOpacity: 0.35,
+        shadowOpacity: 0.28,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 6 },
         elevation: 6,

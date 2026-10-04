@@ -4,10 +4,11 @@ import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Tap, Txt } from '@/components/kit';
+import { TAB_BAR_HEIGHT, Tap, Txt } from '@/components/kit';
 import { usePalette } from '@/hooks/use-palette';
 import { useSettings } from '@/store/settings';
 import { tx } from '@/i18n';
+import { fonts } from '@/theme/fonts';
 
 const ICONS = { index: FlameIcon, library: BookOpen, trophies: Trophy, profile: UserRound } as const;
 const LABELS = { index: tx('Hoy', 'Today'), library: tx('Biblioteca', 'Library'), trophies: tx('Logros', 'Trophies'), profile: tx('Tú', 'You') } as const;
@@ -18,23 +19,19 @@ function TabBar({ state, navigation }: TabBarProps) {
   const p = usePalette();
   const insets = useSafeAreaInsets();
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: Math.max(insets.bottom, 12), alignItems: 'center' }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          backgroundColor: p.ink ? p.bg : p.mode === 'dark' ? 'rgba(30,27,23,0.97)' : 'rgba(251,248,242,0.97)',
-          borderRadius: 999,
-          padding: 6,
-          gap: 4,
-          borderWidth: p.ink ? 1.5 : 0,
-          borderColor: p.text,
-          shadowColor: '#000',
-          shadowOpacity: p.ink ? 0 : 0.3,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: p.ink ? 0 : 12,
-        }}
-      >
+    <View
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingBottom: insets.bottom,
+        backgroundColor: p.ink ? p.bg : p.mode === 'dark' ? 'rgba(15,13,10,0.98)' : 'rgba(243,237,226,0.98)',
+        borderTopWidth: p.ink ? 1.5 : 1,
+        borderTopColor: p.ink ? p.text : p.line,
+      }}
+    >
+      <View style={{ flexDirection: 'row', height: TAB_BAR_HEIGHT, paddingHorizontal: 8 }}>
         {state.routes.map((route, i) => {
           const focused = state.index === i;
           const name = route.name as keyof typeof ICONS;
@@ -44,26 +41,31 @@ function TabBar({ state, navigation }: TabBarProps) {
             <Tap
               key={route.key}
               feedback="select"
+              scale={0.94}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={LABELS[name]}
               onPress={() => {
                 const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
                 if (!focused && !e.defaultPrevented) navigation.navigate(route.name);
               }}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 7,
-                height: 48,
-                paddingHorizontal: focused ? 18 : 15,
-                borderRadius: 999,
-                backgroundColor: focused ? p.ember : 'transparent',
-              }}
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 }}
             >
-              <Icon size={20} color={focused ? p.onEmber : p.muted} strokeWidth={focused ? 2.4 : 2} />
-              {focused && (
-                <Txt v="label" style={{ color: p.onEmber, fontSize: 13.5 }}>
-                  {LABELS[name]}
-                </Txt>
-              )}
+              <View
+                style={{
+                  width: 60,
+                  height: 32,
+                  borderRadius: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: focused ? (p.ink ? p.text : p.emberSoft) : 'transparent',
+                }}
+              >
+                <Icon size={21} color={focused ? (p.ink ? p.bg : p.ember) : p.muted} strokeWidth={focused ? 2.3 : 1.9} />
+              </View>
+              <Txt v="caption" style={{ fontSize: 12, fontFamily: focused ? fonts.uiBold : fonts.uiMedium }} color={focused ? p.text : p.muted}>
+                {LABELS[name]}
+              </Txt>
             </Tap>
           );
         })}

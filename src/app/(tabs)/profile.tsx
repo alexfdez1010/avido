@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { View } from 'react-native';
 
-import { Card, Screen, SectionTitle, Tap, Txt } from '@/components/kit';
+import { Card, PageHeader, Screen, SectionTitle, StatRow, Tap, Txt } from '@/components/kit';
 import { Miga } from '@/components/mascot/miga';
 import { Switch } from '@/components/ui/switch';
 import { levelProgress, levelTitle } from '@/game/levels';
@@ -14,13 +14,12 @@ import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { tx } from '@/i18n';
-import { fonts } from '@/theme/fonts';
 
 function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean }) {
   const p = usePalette();
   const body = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12 }}>
-      <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: p.raised, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 60, paddingVertical: 10, borderBottomWidth: last ? 0 : 1, borderBottomColor: p.ink ? p.faint : p.line }}>
+      <View style={{ width: 24, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
       <View style={{ flex: 1 }}>
         <Txt v="label">{title}</Txt>
         {!!hint && (
@@ -37,7 +36,7 @@ function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNod
 
 function Stepper({ value, unit, onChange, step, min, max }: { value: number; unit: string; onChange: (v: number) => void; step: number; min: number; max: number }) {
   const p = usePalette();
-  const btn = { width: 34, height: 34, borderRadius: 11, backgroundColor: p.raised, alignItems: 'center' as const, justifyContent: 'center' as const };
+  const btn = { width: 40, height: 40, borderRadius: 12, borderWidth: 1, borderColor: p.ink ? p.text : p.line, alignItems: 'center' as const, justifyContent: 'center' as const };
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <Tap feedback="select" onPress={() => onChange(Math.max(min, value - step))} style={btn}>
@@ -71,50 +70,39 @@ export default function Profile() {
 
   return (
     <Screen>
-      <View style={{ alignItems: 'center', marginTop: 10 }}>
-        <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: p.emberSoft, alignItems: 'center', justifyContent: 'center' }}>
-          <Miga size={108} active={active} interactive />
-        </View>
-        <Txt v="display" style={{ marginTop: 14 }}>
-          {s.name || tx('Lector', 'Reader')}
-        </Txt>
-        <Txt v="mono" tone="muted" style={{ marginTop: 4 }}>
-          {tx('Nv', 'Lv')} {lp.level} · {levelTitle(lp.level)}
-        </Txt>
-      </View>
-
-      <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
-        {[
-          { k: tx('Libros', 'Books'), v: `${finished}` },
-          { k: tx('Racha', 'Streak'), v: `${streak}` },
-          { k: tx('Días', 'Days'), v: `${activeDays}` },
-          { k: tx('Horas', 'Hours'), v: `${Math.floor(totalSec / 3600)}` },
-        ].map((x) => (
-          <View key={x.k} style={{ flex: 1, backgroundColor: p.surface, borderRadius: 18, paddingVertical: 14, alignItems: 'center' }}>
-            <Txt style={{ fontFamily: fonts.displayBlack, fontSize: 26, lineHeight: 30, color: p.text }}>{x.v}</Txt>
-            <Txt v="eyebrow" tone="muted" style={{ fontSize: 9, marginTop: 2 }}>
-              {x.k}
+      <PageHeader
+        eyebrow={`${tx('Nv', 'Lv')} ${lp.level} · ${levelTitle(lp.level)}`}
+        title={
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <Txt v="display" numberOfLines={1} adjustsFontSizeToFit style={{ flex: 1 }}>
+              {s.name || tx('Lector', 'Reader')}
             </Txt>
+            <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: p.emberSoft, alignItems: 'center', justifyContent: 'center', marginTop: -24 }}>
+              <Miga size={84} active={active} interactive />
+            </View>
           </View>
-        ))}
+        }
+      />
+
+      <View style={{ marginTop: 20 }}>
+        <StatRow
+          items={[
+            { label: tx('Libros', 'Books'), value: `${finished}` },
+            { label: tx('Racha', 'Streak'), value: `${streak}` },
+            { label: tx('Días', 'Days'), value: `${activeDays}` },
+            { label: tx('Horas', 'Hours'), value: `${Math.floor(totalSec / 3600)}` },
+          ]}
+        />
       </View>
 
-      <SectionTitle>
-        <Txt v="eyebrow" tone="muted">
-          {tx('Retos', 'Challenges')}
-        </Txt>
-      </SectionTitle>
-      <Card style={{ paddingVertical: 4 }}>
+      <SectionTitle>{tx('Retos', 'Challenges')}</SectionTitle>
+      <Card style={{ paddingVertical: 0 }}>
         <Row icon={<Timer size={17} color={p.ember} />} title={tx('Meta diaria', 'Daily goal')} right={<Stepper value={s.dailyGoalMin} unit="′" step={5} min={5} max={180} onChange={(v) => s.set({ dailyGoalMin: v })} />} />
         <Row icon={<BookMarked size={17} color={p.gold} />} title={tx('Libros este año', 'Books this year')} last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
       </Card>
 
-      <SectionTitle>
-        <Txt v="eyebrow" tone="muted">
-          {tx('Ajustes', 'Settings')}
-        </Txt>
-      </SectionTitle>
-      <Card style={{ paddingVertical: 4 }}>
+      <SectionTitle>{tx('Ajustes', 'Settings')}</SectionTitle>
+      <Card style={{ paddingVertical: 0 }}>
         <Row icon={<FolderOpen size={17} color={p.soft} />} title={tx('Carpeta de libros', 'Books folder')} hint={folderName ?? tx('Sin seleccionar', 'Not selected')} onPress={pickFolder} right={<Txt v="label" tone="ember">{tx('Cambiar', 'Change')}</Txt>} />
         <Row
           icon={<Bell size={17} color={p.soft} />}

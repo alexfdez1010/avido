@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Bar, Cover, Cta, Sheet, TAB_BAR_SPACE, Tap, Txt } from '@/components/kit';
+import { Bar, Cover, Cta, GUTTER, PageHeader, Sheet, TAB_BAR_SPACE, Tap, Txt } from '@/components/kit';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { usePalette } from '@/hooks/use-palette';
 import { formatDuration } from '@/lib/dates';
@@ -55,7 +55,7 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
             { k: tx('Tiempo', 'Time'), v: book.readSeconds ? formatDuration(book.readSeconds) : '—' },
             { k: tx('Estado', 'Status'), v: book.finishedAt ? tx('Leído', 'Read') : book.lastOpenedAt ? tx('Leyendo', 'Reading') : tx('Nuevo', 'New') },
           ].map((s) => (
-            <View key={s.k} style={{ flex: 1, backgroundColor: p.raised, borderRadius: 16, padding: 12 }}>
+            <View key={s.k} style={{ flex: 1, backgroundColor: p.raised, borderRadius: 12, padding: 12 }}>
               <Txt v="eyebrow" tone="muted" style={{ fontSize: 9 }}>
                 {s.k}
               </Txt>
@@ -138,7 +138,7 @@ export default function Library() {
 
   const cols = 3;
   const gap = 16;
-  const cw = Math.floor((width - 44 - gap * (cols - 1)) / cols);
+  const cw = Math.floor((width - GUTTER * 2 - gap * (cols - 1)) / cols);
 
   const all = useMemo(() => Object.values(books).filter((b) => !b.missing), [books]);
   const counts = useMemo(
@@ -153,40 +153,41 @@ export default function Library() {
       .sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0) || a.title.localeCompare(b.title));
   }, [all, filter, q]);
 
+  const iconBtn = { width: 48, height: 48, borderRadius: 14, borderWidth: 1, borderColor: p.ink ? p.text : p.line, alignItems: 'center' as const, justifyContent: 'center' as const };
   const header = (
-    <View style={{ paddingTop: insets.top + 14 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-        <View style={{ flex: 1 }}>
-          <Txt v="display">
-            {tx('Biblioteca', 'Library')}
+    <View style={{ paddingTop: insets.top + 18 }}>
+      <PageHeader
+        eyebrow={`${counts.all} ${tx('libros', 'books')}${counts.done ? ` · ${counts.done} ${tx('leídos', 'read')}` : ''}`}
+        title={tx('Biblioteca', 'Library')}
+        right={
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Tap onPress={() => scanLibrary()} accessibilityLabel={tx('Actualizar', 'Refresh')} style={iconBtn}>
+              <RefreshCw size={18} color={p.soft} />
+            </Tap>
+            <Tap onPress={() => router.push('/discover')} accessibilityLabel={tx('Descubrir', 'Discover')} style={[iconBtn, { backgroundColor: p.emberSoft, borderColor: 'transparent' }]}>
+              <Compass size={19} color={p.ember} />
+            </Tap>
+          </View>
+        }
+      >
+        <Tap onPress={pickFolder} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, minHeight: 32 }}>
+          <FolderOpen size={15} color={p.ember} />
+          <Txt v="label" tone="ember" numberOfLines={1}>
+            {folderName ?? tx('Elegir carpeta', 'Choose folder')}
           </Txt>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Tap onPress={() => scanLibrary()} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: p.surface, alignItems: 'center', justifyContent: 'center' }}>
-            <RefreshCw size={18} color={p.soft} />
-          </Tap>
-          <Tap onPress={() => router.push('/discover')} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: p.emberSoft, alignItems: 'center', justifyContent: 'center' }}>
-            <Compass size={19} color={p.ember} />
-          </Tap>
-        </View>
-      </View>
-      <Tap onPress={pickFolder} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
-        <FolderOpen size={15} color={p.ember} />
-        <Txt v="label" tone="ember" numberOfLines={1}>
-          {folderName ?? tx('Elegir carpeta', 'Choose folder')}
-        </Txt>
-        {scan.scanning && (
-          <Txt v="mono" tone="muted" numberOfLines={1} style={{ flex: 1 }}>
-            · {scan.message}
-          </Txt>
+          {scan.scanning && (
+            <Txt v="mono" tone="muted" numberOfLines={1} style={{ flex: 1 }}>
+              · {scan.message}
+            </Txt>
+          )}
+        </Tap>
+        {scan.scanning && scan.progress > 0 && scan.progress < 1 && (
+          <View style={{ marginTop: 10 }}>
+            <Bar value={scan.progress} height={3} />
+          </View>
         )}
-      </Tap>
-      {scan.scanning && scan.progress > 0 && scan.progress < 1 && (
-        <View style={{ marginTop: 10 }}>
-          <Bar value={scan.progress} height={3} />
-        </View>
-      )}
-      <Input style={{ marginTop: 18, backgroundColor: p.surface, borderWidth: 0, height: 48, borderRadius: 16 }}>
+      </PageHeader>
+      <Input style={{ marginTop: 18, backgroundColor: p.surface, borderWidth: 1, borderColor: p.ink ? p.text : p.line, height: 50, borderRadius: 14 }}>
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
@@ -197,17 +198,18 @@ export default function Library() {
           </InputSlot>
         )}
       </Input>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, marginBottom: 20, marginHorizontal: -22 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 22 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10, marginBottom: 22, marginHorizontal: -GUTTER, borderBottomWidth: 1, borderBottomColor: p.line }} contentContainerStyle={{ gap: 22, paddingHorizontal: GUTTER }}>
         {FILTERS.map((f) => {
           const on = f.id === filter;
           return (
-            <Tap key={f.id} feedback="select" onPress={() => setFilter(f.id)} style={{ paddingHorizontal: 14, height: 34, borderRadius: 999, backgroundColor: on ? p.text : p.surface, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Txt v="label" style={{ fontSize: 13 }} color={on ? p.bg : p.soft}>
+            <Tap key={f.id} feedback="select" scale={0.98} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => setFilter(f.id)} style={{ height: 46, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Txt v="label" style={{ fontSize: 14, fontFamily: on ? fonts.uiBold : fonts.uiMedium }} color={on ? p.text : p.muted}>
                 {f.label}
               </Txt>
-              <Txt v="mono" style={{ fontSize: 10.5 }} color={on ? p.bg : p.faint}>
+              <Txt v="mono" style={{ fontSize: 10.5 }} color={on ? p.ember : p.faint}>
                 {counts[f.id]}
               </Txt>
+              {on && <View style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2.5, borderRadius: 2, backgroundColor: p.ember }} />}
             </Tap>
           );
         })}
@@ -239,13 +241,13 @@ export default function Library() {
         keyExtractor={(b) => b.id}
         ListHeaderComponent={header}
         ListEmptyComponent={empty}
-        contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: insets.bottom + TAB_BAR_SPACE + 30 }}
+        contentContainerStyle={{ paddingHorizontal: GUTTER, paddingBottom: insets.bottom + TAB_BAR_SPACE + 24 }}
         refreshControl={<RefreshControl refreshing={false} onRefresh={() => scanLibrary()} tintColor={p.ember} colors={[p.ember]} progressBackgroundColor={p.surface} />}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
         renderItem={({ item, index }) => (
-          <View style={{ flex: 1, alignItems: index % cols === 0 ? 'flex-start' : index % cols === cols - 1 ? 'flex-end' : 'center', marginBottom: 22 }}>
+          <View style={{ flex: 1, alignItems: index % cols === 0 ? 'flex-start' : index % cols === cols - 1 ? 'flex-end' : 'center', marginBottom: 24 }}>
           <View style={{ width: cw }}>
             <Tap onPress={() => router.push(`/reader/${item.id}`)} onLongPress={() => setSelected(item)} delayLongPress={280}>
               <Cover book={item} width={cw} />
@@ -263,11 +265,11 @@ export default function Library() {
               </View>
             )}
             <Tap onPress={() => setSelected(item)} feedback={false}>
-              <Txt v="label" numberOfLines={2} style={{ marginTop: 8, fontSize: 13, lineHeight: 17 }}>
+              <Txt v="label" numberOfLines={2} style={{ marginTop: 10, fontSize: 13.5, lineHeight: 17, fontFamily: fonts.uiBold }}>
                 {item.title}
               </Txt>
               {!!item.author && (
-                <Txt v="caption" tone="muted" numberOfLines={1} style={{ fontSize: 11.5 }}>
+                <Txt v="caption" tone="muted" numberOfLines={1} style={{ fontSize: 12, marginTop: 1 }}>
                   {item.author}
                 </Txt>
               )}

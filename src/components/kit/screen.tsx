@@ -4,9 +4,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePalette } from '@/hooks/use-palette';
 
-export const TAB_BAR_SPACE = 96;
+import { Txt } from './txt';
 
-export function Screen({ children, scroll = true, pad = 22, ...rest }: ScrollViewProps & { scroll?: boolean; pad?: number }) {
+export const TAB_BAR_HEIGHT = 68;
+export const TAB_BAR_SPACE = TAB_BAR_HEIGHT + 8;
+export const GUTTER = 20;
+
+export function Screen({ children, scroll = true, pad = GUTTER, ...rest }: ScrollViewProps & { scroll?: boolean; pad?: number }) {
   const p = usePalette();
   const insets = useSafeAreaInsets();
   if (!scroll)
@@ -28,9 +32,9 @@ export function Screen({ children, scroll = true, pad = 22, ...rest }: ScrollVie
         {...rest}
         style={{ flex: 1, backgroundColor: p.bg }}
         contentContainerStyle={{
-          paddingTop: insets.top + 14,
+          paddingTop: insets.top + 18,
           paddingHorizontal: pad,
-          paddingBottom: insets.bottom + TAB_BAR_SPACE + 20,
+          paddingBottom: insets.bottom + TAB_BAR_SPACE + 24,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -52,14 +56,42 @@ export function Screen({ children, scroll = true, pad = 22, ...rest }: ScrollVie
   );
 }
 
-export function Card({ children, style, tint }: { children: React.ReactNode; style?: object; tint?: string }) {
+export function PageHeader({ eyebrow, title, right, children }: { eyebrow?: React.ReactNode; title: React.ReactNode; right?: React.ReactNode; children?: React.ReactNode }) {
+  const p = usePalette();
+  return (
+    <View style={{ paddingBottom: 18, borderBottomWidth: 1, borderBottomColor: p.ink ? p.text : p.line }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 32 }}>
+        {typeof eyebrow === 'string' ? (
+          <Txt v="eyebrow" tone="muted" numberOfLines={1} style={{ flex: 1 }}>
+            {eyebrow}
+          </Txt>
+        ) : (
+          <View style={{ flex: 1 }}>{eyebrow}</View>
+        )}
+        {right}
+      </View>
+      {typeof title === 'string' ? (
+        <Txt v="display" style={{ marginTop: 6 }}>
+          {title}
+        </Txt>
+      ) : (
+        <View style={{ marginTop: 6 }}>{title}</View>
+      )}
+      {children}
+    </View>
+  );
+}
+
+export function Card({ children, style, tint, flat }: { children: React.ReactNode; style?: object; tint?: string; flat?: boolean }) {
   const p = usePalette();
   return (
     <View
       style={[
         {
-          backgroundColor: tint ?? p.surface,
-          borderRadius: 22,
+          backgroundColor: flat ? 'transparent' : tint ?? p.surface,
+          borderRadius: 18,
+          borderWidth: p.ink ? 1.5 : 1,
+          borderColor: p.ink ? p.text : tint ? 'transparent' : p.line,
           padding: 18,
         },
         style,
@@ -70,19 +102,60 @@ export function Card({ children, style, tint }: { children: React.ReactNode; sty
   );
 }
 
-export function SectionTitle({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
+export function Divider({ inset = 0, style }: { inset?: number; style?: object }) {
+  const p = usePalette();
+  return <View style={[{ height: 1, marginLeft: inset, backgroundColor: p.ink ? p.faint : p.line }, style]} />;
+}
+
+export function SectionTitle({ children, right, first }: { children: React.ReactNode; right?: React.ReactNode; first?: boolean }) {
+  const p = usePalette();
   return (
     <View
       style={{
         flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'space-between',
-        marginTop: 30,
-        marginBottom: 12,
+        alignItems: 'center',
+        gap: 12,
+        marginTop: first ? 22 : 36,
+        marginBottom: 14,
+        minHeight: 24,
       }}
     >
-      {children}
+      {typeof children === 'string' ? (
+        <Txt v="eyebrow" tone="soft">
+          {children}
+        </Txt>
+      ) : (
+        children
+      )}
+      <View style={{ flex: 1, height: 1, backgroundColor: p.ink ? p.faint : p.line }} />
       {right}
+    </View>
+  );
+}
+
+export function Stat({ value, label, accent }: { value: string; label: string; accent?: string }) {
+  return (
+    <View style={{ flex: 1, gap: 2 }}>
+      <Txt v="numeral" color={accent} numberOfLines={1} adjustsFontSizeToFit style={{ fontSize: 24, lineHeight: 28 }}>
+        {value}
+      </Txt>
+      <Txt v="eyebrow" tone="muted" numberOfLines={1} style={{ fontSize: 9.5 }}>
+        {label}
+      </Txt>
+    </View>
+  );
+}
+
+export function StatRow({ items }: { items: { value: string; label: string; accent?: string }[] }) {
+  const p = usePalette();
+  return (
+    <View style={{ flexDirection: 'row' }}>
+      {items.map((it, i) => (
+        <View key={it.label} style={{ flex: 1, flexDirection: 'row' }}>
+          {i > 0 && <View style={{ width: 1, backgroundColor: p.ink ? p.faint : p.line, marginRight: 14 }} />}
+          <Stat {...it} />
+        </View>
+      ))}
     </View>
   );
 }

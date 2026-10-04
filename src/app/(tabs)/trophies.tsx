@@ -2,12 +2,11 @@ import { Lock } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
-import { Bar, Card, Cover, Ring, Screen, SectionTitle, Sheet, Tap, Txt } from '@/components/kit';
+import { Bar, Card, Cover, PageHeader, Ring, Screen, SectionTitle, Sheet, StatRow, Tap, Txt } from '@/components/kit';
 import { Heatmap } from '@/components/trophies/heatmap';
 import { ACHIEVEMENTS, type Achievement, type AchievementContext } from '@/game/achievements';
 import { levelProgress, levelTitle } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
-import { formatDuration } from '@/lib/dates';
 import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
@@ -108,34 +107,22 @@ export default function Trophies() {
 
   return (
     <Screen>
-      <Txt v="eyebrow" tone="muted">
-        {nUnlocked} {tx('de', 'of')} {ACHIEVEMENTS.length} {tx('logros', 'achievements')}
-      </Txt>
-      <Txt v="display" style={{ marginTop: 6 }}>
-        {tx('Logros', 'Trophies')}
-      </Txt>
+      <PageHeader eyebrow={`${nUnlocked} ${tx('de', 'of')} ${ACHIEVEMENTS.length} ${tx('logros', 'achievements')}`} title={tx('Logros', 'Trophies')} />
 
-      <Card style={{ marginTop: 22, padding: 22, overflow: 'hidden' }}>
-        <View style={{ position: 'absolute', right: -30, top: -40 }}>
-          <Txt
-            style={{
-              fontFamily: fonts.displayBlackItalic,
-              fontSize: 190,
-              lineHeight: 200,
-              color: p.goldSoft,
-            }}
-          >
-            {lp.level}
-          </Txt>
+      <View style={{ marginTop: 24, overflow: 'hidden' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 16 }}>
+          <Txt style={{ fontFamily: fonts.displayBlackItalic, fontSize: 96, lineHeight: 96, color: p.gold, letterSpacing: -3 }}>{lp.level}</Txt>
+          <View style={{ flex: 1, paddingBottom: 12 }}>
+            <Txt v="eyebrow" color={p.gold}>
+              {tx('Nivel', 'Level')} {lp.level}
+            </Txt>
+            <Txt v="title" italic style={{ marginTop: 4 }} numberOfLines={2}>
+              {levelTitle(lp.level)}
+            </Txt>
+          </View>
         </View>
-        <Txt v="eyebrow" color={p.gold}>
-          {tx('Nivel', 'Level')} {lp.level}
-        </Txt>
-        <Txt v="display" italic style={{ marginTop: 6 }}>
-          {levelTitle(lp.level)}
-        </Txt>
-        <View style={{ marginTop: 18, gap: 8 }}>
-          <Bar value={lp.ratio} color={p.gold} height={8} />
+        <View style={{ marginTop: 14, gap: 8 }}>
+          <Bar value={lp.ratio} color={p.gold} height={6} />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Txt v="mono" tone="soft">
               {Math.floor(xp).toLocaleString(LOCALE)} XP
@@ -145,25 +132,12 @@ export default function Trophies() {
             </Txt>
           </View>
         </View>
-      </Card>
+      </View>
 
-      <Card
-        style={{
-          marginTop: 14,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 18,
-        }}
-      >
-        <Ring size={96} stroke={9} value={thisYear.length / yearlyGoal}>
-          <Txt
-            style={{
-              fontFamily: fonts.displayBlack,
-              fontSize: 30,
-              lineHeight: 34,
-              color: p.text,
-            }}
-          >
+      <SectionTitle>{`${tx('Reto', 'Challenge')} ${year}`}</SectionTitle>
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
+        <Ring size={92} stroke={8} value={thisYear.length / yearlyGoal}>
+          <Txt v="numeral" style={{ fontSize: 30, lineHeight: 34 }}>
             {thisYear.length}
           </Txt>
           <Txt v="mono" tone="muted">
@@ -171,9 +145,6 @@ export default function Trophies() {
           </Txt>
         </Ring>
         <View style={{ flex: 1, gap: 4 }}>
-          <Txt v="eyebrow" tone="muted">
-            {tx('Reto', 'Challenge')} {year}
-          </Txt>
           <Txt v="headline" style={{ fontSize: 18, lineHeight: 23 }}>
             {thisYear.length >= yearlyGoal
               ? tx('Reto superado', 'Challenge beaten')
@@ -187,35 +158,22 @@ export default function Trophies() {
         </View>
       </Card>
 
-      <Card style={{ marginTop: 14 }}>
-        <View style={{ flexDirection: 'row', marginBottom: 18 }}>
-          {[
-            { k: tx('Racha', 'Streak'), v: `${streak}` },
-            { k: tx('Mejor', 'Best'), v: `${Math.max(bestStreak, streak)}` },
-            {
-              k: 'Total',
-              v: formatDuration(totalSec).replace(' min', '′').replace(' h ', 'h '),
-            },
-            { k: tx('Páginas', 'Pages'), v: `${Math.floor(totalPages)}` },
-          ].map((s) => (
-            <View key={s.k} style={{ flex: 1 }}>
-              <Txt v="eyebrow" tone="muted" style={{ fontSize: 9 }}>
-                {s.k}
-              </Txt>
-              <Txt v="number" style={{ marginTop: 4, fontSize: 19 }} numberOfLines={1} adjustsFontSizeToFit>
-                {s.v}
-              </Txt>
-            </View>
-          ))}
+      <SectionTitle>{tx('Constancia', 'Consistency')}</SectionTitle>
+      <Card>
+        <View style={{ marginBottom: 20 }}>
+          <StatRow
+            items={[
+              { label: tx('Racha', 'Streak'), value: `${streak}` },
+              { label: tx('Mejor', 'Best'), value: `${Math.max(bestStreak, streak)}` },
+              { label: tx('Horas', 'Hours'), value: `${Math.floor(totalSec / 3600)}` },
+              { label: tx('Páginas', 'Pages'), value: totalPages >= 1000 ? `${(totalPages / 1000).toFixed(1).replace(/\.0$/, '')}k` : `${Math.floor(totalPages)}` },
+            ]}
+          />
         </View>
         <Heatmap />
       </Card>
 
-      <SectionTitle>
-        <Txt v="eyebrow" tone="muted">
-          {tx('Vitrina', 'Showcase')}
-        </Txt>
-      </SectionTitle>
+      <SectionTitle right={<Txt v="mono" tone="muted">{nUnlocked}/{ACHIEVEMENTS.length}</Txt>}>{tx('Vitrina', 'Showcase')}</SectionTitle>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: '3.5%' }}>
         {sorted.map((a) => (
           <Badge key={a.id} a={a} unlocked={!!unlocked[a.id]} value={a.metric(ctx)} onPress={() => setSel(a)} />
@@ -224,17 +182,13 @@ export default function Trophies() {
 
       {finished.length > 0 && (
         <>
-          <SectionTitle>
-            <Txt v="eyebrow" tone="muted">
-              {tx('Terminados', 'Finished')} · {finished.length}
-            </Txt>
-          </SectionTitle>
+          <SectionTitle right={<Txt v="mono" tone="muted">{finished.length}</Txt>}>{tx('Terminados', 'Finished')}</SectionTitle>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {[...finished].reverse().map((f) => {
               const b = books[f.id];
               return b ? (
-                <View key={f.id} style={{ width: 72 }}>
-                  <Cover book={b} width={72} radius={7} />
+                <View key={f.id} style={{ width: 76 }}>
+                  <Cover book={b} width={76} radius={5} />
                   <Txt v="mono" tone="faint" style={{ fontSize: 9.5, marginTop: 4 }}>
                     {new Date(f.at).toLocaleDateString(LOCALE, {
                       day: 'numeric',
