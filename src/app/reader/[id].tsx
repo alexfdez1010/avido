@@ -10,7 +10,8 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Bar, Cta, Flame, Ring, Tap, Txt } from '@/components/kit';
-import { BlockView, type BlockStyle } from '@/components/reader/block-view';
+import { BlockView, type BlockStyle, type OnLines } from '@/components/reader/block-view';
+import { PagedView } from '@/components/reader/paged-view';
 import { LiveToast } from '@/components/reader/live-toast';
 import { PdfReader } from '@/components/reader/pdf-reader';
 import { ReaderSettingsSheet } from '@/components/reader/settings-sheet';
@@ -27,7 +28,7 @@ import { readingFonts } from '@/theme/fonts';
 import { readerThemes, type ReaderTheme } from '@/theme/palette';
 import { tx } from '@/i18n';
 
-type Item = { key: string; type: 'head' } | { key: string; type: 'block'; block: Block; i: number } | { key: string; type: 'foot' };
+type Item = { key: string; chars: number; type: 'head' } | { key: string; chars: number; type: 'block'; block: Block; i: number } | { key: string; chars: number; type: 'foot' };
 
 const WORDS_PER_MIN_CHARS = 1100;
 
@@ -68,6 +69,8 @@ export default function ReaderScreen() {
   const listRef = useRef<FlashListRef<Item>>(null);
   const maxRef = useRef(book?.maxProgress ?? 0);
   const [initialBlock, setInitialBlock] = useState(book?.location?.block ?? 0);
+  const [enterAtEnd, setEnterAtEnd] = useState(false);
+  const paged = prefs.layout === 'paged';
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollY = useRef(0);
   const viewH = useRef(0);
@@ -119,7 +122,7 @@ export default function ReaderScreen() {
   const items = useMemo<Item[]>(() => {
     const ch = content?.chapters[chapter];
     if (!ch) return [];
-    return [{ key: 'head', type: 'head' }, ...ch.blocks.map((b, i) => ({ key: `b${i}`, type: 'block' as const, block: b, i })), { key: 'foot', type: 'foot' }];
+    return [{ key: 'head', chars: 0, type: 'head' }, ...ch.blocks.map((b, i) => ({ key: `b${i}`, chars: b.c, type: 'block' as const, block: b, i })), { key: 'foot', chars: 0, type: 'foot' }];
   }, [content, chapter]);
 
   const prefix = useMemo(() => {
@@ -176,7 +179,7 @@ export default function ReaderScreen() {
   });
 
   const goChapter = useCallback(
-    (next: number, completeCurrent = false) => {
+    (next: number, completeCurrent = false, atEnd = false) => {
       if (!content) return;
       const n = Math.max(0, Math.min(content.chapters.length - 1, next));
       if (completeCurrent) {
@@ -187,6 +190,7 @@ export default function ReaderScreen() {
         record(offsets[n] / content.totalChars, { chapter: n, block: 0 });
       }
       setInitialBlock(0);
+      setEnterAtEnd(atEnd);
       scrollY.current = 0;
       setChapter(n);
       setSheet('none');
@@ -227,6 +231,31 @@ export default function ReaderScreen() {
       listRef.current?.scrollToOffset({ offset: next, animated: false });
     },
     [chapter, content, goChapter, insets.bottom, poke, prefs.lineHeight, prefs.size]
+  );
+
+  const onPagedPage = useCallback(
+    (first: number, last: number, atEnd: boolean) => {
+      if (!content) return;
+      const ch = content.chapters[chapter];
+      const firstItem = items[first];
+      const lastItem = items[last];
+      const blockIdx = firstItem?.type === 'block' ? firstItem.i : firstItem?.type === 'foot' ? Math.max(0, ch.blocks.length - 1) : 0;
+      let charPos: number;
+      if (atEnd || lastItem?.type === 'foot') charPos = offsets[chapter] + ch.chars;
+      else if (lastItem?.type === 'block') charPos = offsets[chapter] + prefix[lastItem.i] + lastItem.block.c;
+      else charPos = offsets[chapter];
+      record(Math.min(1, charPos / Math.max(1, content.totalChars)), { chapter, block: blockIdx });
+    },
+    [chapter, content, items, offsets, prefix, record]
+  );
+
+  const onPagedEdge = useCallback(
+    (dir: 1 | -1) => {
+      if (!content) return;
+      if (dir > 0 && chapter < content.chapters.length - 1) goChapter(chapter + 1, true);
+      else if (dir < 0 && chapter > 0) goChapter(chapter - 1, false, true);
+    },
+    [chapter, content, goChapter]
   );
 
   const onTap = useCallback(
@@ -286,10 +315,10 @@ export default function ReaderScreen() {
   const chapterLeftChars = ch ? Math.max(0, offsets[chapter] + ch.chars - pos * (content?.totalChars ?? 0)) : 0;
   const minsLeft = Math.max(1, Math.round(chapterLeftChars / WORDS_PER_MIN_CHARS));
 
-  const renderItem = ({ item }: { item: Item }) => {
+  const renderItem = ({ item }: { item: Item }, onLines?: OnLines) => {
     if (item.type === 'head')
       return (
-        <View style={{ paddingHorizontal: prefs.margin, paddingTop: insets.top + 64, paddingBottom: 18 }}>
+        <View style={{ paddingHorizontal: prefs.margin, paddingTop: paged ? 12 : insets.top + 64, paddingBottom: 18 }}>
           <Txt v="eyebrow" color={theme.accent}>
             {tx('Capítulo', 'Chapter')} {chapter + 1} {tx('de', 'of')} {content?.chapters.length}
           </Txt>
@@ -298,9 +327,9 @@ export default function ReaderScreen() {
           )}
         </View>
       );
-    if (item.type === 'block') return <BlockView block={item.block} st={st} first={item.i === 0} />;
+    if (item.type === 'block') return <BlockView block={item.block} st={st} first={item.i === 0} onLines={onLines} />;
     return (
-      <View style={{ paddingHorizontal: prefs.margin, paddingTop: 40, paddingBottom: insets.bottom + 120 }}>
+      <View style={{ paddingHorizontal: prefs.margin, paddingTop: 40, paddingBottom: paged ? 24 : insets.bottom + 120 }}>
         <View style={{ paddingTop: 28, alignItems: 'center' }}>
           {isLast ? (
             <>
@@ -363,6 +392,23 @@ export default function ReaderScreen() {
             poke();
             record(n <= 1 ? 1 : (page - 1) / (n - 1), undefined, page);
           }}
+        />
+      ) : paged ? (
+        <PagedView
+          key={`${chapter}`}
+          items={items}
+          renderItem={(item, _i, onLines) => renderItem({ item }, onLines)}
+          initialIndex={initialBlock > 0 ? initialBlock + 1 : 0}
+          startAtEnd={enterAtEnd}
+          bg={theme.bg}
+          topPad={insets.top + 8}
+          bottomPad={Math.max(insets.bottom, 8) + 34}
+          chrome={chrome}
+          layoutKey={`${prefs.font}-${prefs.size}-${prefs.lineHeight}-${prefs.margin}-${prefs.justify}`}
+          onPage={onPagedPage}
+          onEdge={onPagedEdge}
+          onToggle={toggle}
+          onTurn={poke}
         />
       ) : (
         <GestureDetector gesture={tap}>

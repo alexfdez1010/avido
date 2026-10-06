@@ -14,7 +14,13 @@ export type ReaderPrefs = {
   margin: number;
   theme: ReaderThemeId;
   justify: boolean;
+  layout: ReaderLayout;
 };
+
+export type ReaderLayout = 'scroll' | 'paged';
+
+export const FONT_SIZE_MIN = 12;
+export const FONT_SIZE_MAX = 40;
 
 const EINK_MAKERS = /onyx|boox|bigme|meebook|boyue|likebook|mudita|minimal|daylight|ratta|supernote|moaan|xplore/i;
 
@@ -57,10 +63,18 @@ export const useSettings = create<SettingsState>()(
       reminders: true,
       reminderHour: 21,
       haptics: true,
-      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false },
+      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false, layout: EINK ? 'paged' : 'scroll' },
       set: (patch) => set(patch),
       setReader: (patch) => set((s) => ({ reader: { ...s.reader, ...patch } })),
     }),
-    { name: 'avido.settings', storage: jsonStorage, version: 1 }
+    {
+      name: 'avido.settings',
+      storage: jsonStorage,
+      version: 1,
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<SettingsState>;
+        return { ...current, ...p, reader: { ...current.reader, ...p.reader } };
+      },
+    }
   )
 );

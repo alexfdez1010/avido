@@ -1,15 +1,15 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { Check, Compass, FolderOpen, RefreshCw, RotateCcw, Search, X } from 'lucide-react-native';
+import { Check, Compass, FolderOpen, RefreshCw, RotateCcw, Search, Trash2, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Bar, Cover, Cta, GUTTER, PageHeader, Sheet, TAB_BAR_SPACE, Tap, Txt } from '@/components/kit';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { usePalette } from '@/hooks/use-palette';
 import { formatDuration } from '@/lib/dates';
-import { pickFolder, scanLibrary } from '@/lib/library';
+import { deleteBook, pickFolder, scanLibrary } from '@/lib/library';
 import { clearBookCache } from '@/lib/paths';
 import type { Book } from '@/lib/types';
 import { useGame } from '@/store/game';
@@ -103,6 +103,29 @@ function BookSheet({ book, onClose }: { book: Book | null; onClose: () => void }
               </View>
             )}
           </View>
+          <Cta
+            kind="ghost"
+            compact
+            label={tx('Eliminar libro', 'Delete book')}
+            icon={<Trash2 size={15} color={p.text} />}
+            onPress={() =>
+              Alert.alert(
+                tx('¿Eliminar este libro?', 'Delete this book?'),
+                tx(`Se borrará «${book.title}» de tu carpeta y del dispositivo.`, `"${book.title}" will be removed from your folder and this device.`),
+                [
+                  { text: tx('Cancelar', 'Cancel'), style: 'cancel' },
+                  {
+                    text: tx('Eliminar', 'Delete'),
+                    style: 'destructive',
+                    onPress: () => {
+                      onClose();
+                      if (!deleteBook(book)) Alert.alert(tx('No se pudo eliminar el archivo', "Couldn't delete the file"));
+                    },
+                  },
+                ]
+              )
+            }
+          />
           {book.format === 'epub' && (
             <Tap
               onPress={() => {

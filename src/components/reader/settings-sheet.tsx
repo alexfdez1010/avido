@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { Sheet, Tap, Txt } from '@/components/kit';
 import { Switch } from '@/components/ui/switch';
-import { useSettings } from '@/store/settings';
+import { FONT_SIZE_MAX, FONT_SIZE_MIN, useSettings, type ReaderLayout } from '@/store/settings';
 import { readingFonts, type ReadingFontId } from '@/theme/fonts';
 import { readerThemes, type ReaderThemeId } from '@/theme/palette';
 import { tx } from '@/i18n';
@@ -30,15 +30,90 @@ function Stepper({ label, value, onMinus, onPlus, fg, line }: { label: string; v
   );
 }
 
+function Segmented<T extends string>({ options, value, onChange, fg, muted, line, accent }: { options: { id: T; label: string; hint: string }[]; value: T; onChange: (v: T) => void; fg: string; muted: string; line: string; accent: string }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <Tap
+            key={o.id}
+            onPress={() => onChange(o.id)}
+            feedback="select"
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, borderWidth: 2, borderColor: on ? accent : 'transparent', backgroundColor: on ? 'transparent' : line }}
+          >
+            <Txt v="label" color={fg}>
+              {o.label}
+            </Txt>
+            <Txt v="caption" color={muted}>
+              {o.hint}
+            </Txt>
+          </Tap>
+        );
+      })}
+    </View>
+  );
+}
+
 export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const r = useSettings((s) => s.reader);
   const setReader = useSettings((s) => s.setReader);
   const t = readerThemes[r.theme];
   const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
   return (
-    <Sheet open={open} onClose={onClose} bg={t.bg} fg={t.muted}>
+    <Sheet open={open} onClose={onClose} bg={t.bg} fg={t.muted} scroll>
       <View style={{ width: '100%', paddingTop: 8 }}>
         <Txt v="eyebrow" color={t.muted}>
+          {tx('Lectura', 'Reading')}
+        </Txt>
+        <Segmented<ReaderLayout>
+          value={r.layout}
+          onChange={(layout) => setReader({ layout })}
+          fg={t.text}
+          muted={t.muted}
+          line={t.line}
+          accent={t.accent}
+          options={[
+            { id: 'paged', label: tx('Páginas', 'Pages'), hint: tx('Toca o desliza para pasar', 'Tap or swipe to turn') },
+            { id: 'scroll', label: tx('Desplazamiento', 'Scroll'), hint: tx('Texto continuo', 'Continuous text') },
+          ]}
+        />
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
+          <Txt v="eyebrow" color={t.muted}>
+            {tx('Tamaño de letra', 'Text size')}
+          </Txt>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 }}>
+          <Tap
+            onPress={() => setReader({ size: clamp(r.size - 1, FONT_SIZE_MIN, FONT_SIZE_MAX) })}
+            feedback="select"
+            accessibilityLabel={tx('Reducir letra', 'Smaller text')}
+            style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: t.line, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Txt style={{ fontFamily: readingFonts[r.font].regular, fontSize: 16, color: t.text }}>A</Txt>
+          </Tap>
+          <View style={{ flex: 1, height: 56, alignItems: 'center', justifyContent: 'center' }}>
+            <Txt numberOfLines={1} style={{ fontFamily: readingFonts[r.font].regular, fontSize: Math.min(r.size, 34), lineHeight: Math.min(r.size, 34) * 1.25, color: t.text }}>
+              Aa
+            </Txt>
+            <Txt v="mono" color={t.muted} style={{ fontSize: 11 }}>
+              {r.size} pt
+            </Txt>
+          </View>
+          <Tap
+            onPress={() => setReader({ size: clamp(r.size + 1, FONT_SIZE_MIN, FONT_SIZE_MAX) })}
+            feedback="select"
+            accessibilityLabel={tx('Aumentar letra', 'Larger text')}
+            style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: t.line, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Txt style={{ fontFamily: readingFonts[r.font].regular, fontSize: 26, color: t.text }}>A</Txt>
+          </Tap>
+        </View>
+
+        <Txt v="eyebrow" color={t.muted} style={{ marginTop: 22 }}>
           {tx('Tema', 'Theme')}
         </Txt>
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
@@ -82,7 +157,6 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
         </View>
 
         <View style={{ marginTop: 14 }}>
-          <Stepper label={tx('Tamaño', 'Size')} value={`${r.size}`} fg={t.text} line={t.line} onMinus={() => setReader({ size: clamp(r.size - 1, 14, 30) })} onPlus={() => setReader({ size: clamp(r.size + 1, 14, 30) })} />
           <Stepper
             label={tx('Interlineado', 'Line height')}
             value={r.lineHeight.toFixed(2)}

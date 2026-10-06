@@ -3,6 +3,7 @@ import { Directory, File } from 'expo-file-system';
 import { useLibrary, useScan } from '@/store/library';
 
 import { readEpubMeta } from './epub';
+import { clearBookCache } from './paths';
 import { hashString, hueFor } from './hash';
 import type { Book, BookFormat } from './types';
 import { tx } from '@/i18n';
@@ -136,4 +137,19 @@ async function doScan() {
   } finally {
     scan.set({ scanning: false, progress: 1, message: undefined });
   }
+}
+
+export function deleteBook(book: Book): boolean {
+  try {
+    const file = new File(book.uri);
+    if (file.exists) file.delete();
+  } catch (e) {
+    if (!book.missing) {
+      console.warn('Delete failed', e);
+      return false;
+    }
+  }
+  clearBookCache(book.id);
+  useLibrary.getState().removeBook(book.id);
+  return true;
 }

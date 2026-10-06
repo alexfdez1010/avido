@@ -15,6 +15,7 @@ type LibraryState = {
   setFolder: (uri: string | undefined, name?: string) => void;
   replaceBooks: (books: Record<string, Book>) => void;
   updateBook: (id: string, patch: Partial<Book>) => void;
+  removeBook: (id: string) => void;
 };
 
 export const useLibrary = create<LibraryState>()(
@@ -27,6 +28,11 @@ export const useLibrary = create<LibraryState>()(
       replaceBooks: (books) => set({ books, lastScanAt: Date.now() }),
       updateBook: (id, patch) =>
         set((s) => (s.books[id] ? { books: { ...s.books, [id]: { ...s.books[id], ...patch } } } : s)),
+      removeBook: (id) =>
+        set((s) => {
+          const { [id]: _removed, ...books } = s.books;
+          return { books };
+        }),
     }),
     { name: 'avido.library', storage: jsonStorage, version: 1 }
   )

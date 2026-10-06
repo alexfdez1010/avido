@@ -137,7 +137,7 @@ export default function Profile() {
           title={tx('Tinta electrónica', 'E-ink screen')}
           last={s.eink}
           right={sw(s.eink, (v) =>
-            s.set({ eink: v, reader: { ...s.reader, theme: v ? 'eink' : s.reader.theme === 'eink' ? 'paper' : s.reader.theme } })
+            s.set({ eink: v, reader: { ...s.reader, theme: v ? 'eink' : s.reader.theme === 'eink' ? 'paper' : s.reader.theme, ...(v ? { layout: 'paged' as const } : {}) } })
           )}
         />
         {!s.eink && (

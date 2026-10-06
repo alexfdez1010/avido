@@ -6,6 +6,9 @@ import type { Block } from '@/lib/types';
 import { fonts, type ReadingFont } from '@/theme/fonts';
 import type { ReaderTheme } from '@/theme/palette';
 
+export type TextLine = { y: number; height: number };
+export type OnLines = (offset: number, lines: TextLine[]) => void;
+
 export type BlockStyle = { font: ReadingFont; size: number; lineHeight: number; margin: number; justify: boolean; theme: ReaderTheme };
 
 const codeBg = (t: ReaderTheme) => (t.id === 'eink' ? 'transparent' : `${t.line}B3`);
@@ -64,7 +67,8 @@ function Img({ src, st }: { src: string; st: BlockStyle }) {
   );
 }
 
-export const BlockView = memo(function BlockView({ block, st, first }: { block: Block; st: BlockStyle; first: boolean }) {
+export const BlockView = memo(function BlockView({ block, st, first, onLines }: { block: Block; st: BlockStyle; first: boolean; onLines?: OnLines }) {
+  const lines = (offset: number) => (onLines ? { onTextLayout: (e: { nativeEvent: { lines: TextLine[] } }) => onLines(offset, e.nativeEvent.lines) } : undefined);
   const t = st.theme;
   const lh = Math.round(st.size * st.lineHeight);
   const pad = { paddingHorizontal: st.margin };
@@ -80,9 +84,10 @@ export const BlockView = memo(function BlockView({ block, st, first }: { block: 
     case 'h1':
     case 'h2': {
       const size = block.k === 'h1' ? st.size * 1.55 : st.size * 1.3;
+      const top = first ? 8 : 36;
       return (
-        <View style={[pad, { marginTop: first ? 8 : 36, marginBottom: 18 }]}>
-          <Text style={{ color: t.text, fontFamily: 'Fraunces_600SemiBold', fontSize: size, lineHeight: size * 1.18, letterSpacing: -0.3 }}>
+        <View style={[pad, { marginTop: top, marginBottom: 18 }]}>
+          <Text {...lines(top)} style={{ color: t.text, fontFamily: 'Fraunces_600SemiBold', fontSize: size, lineHeight: size * 1.18, letterSpacing: -0.3 }}>
             <Spans block={block} st={{ ...st, font: { ...st.font, italic: 'Fraunces_600SemiBold_Italic', bold: 'Fraunces_900Black' } }} base="Fraunces_600SemiBold" />
           </Text>
         </View>
@@ -91,7 +96,7 @@ export const BlockView = memo(function BlockView({ block, st, first }: { block: 
     case 'h3':
       return (
         <View style={[pad, { marginTop: first ? 4 : 24, marginBottom: 10 }]}>
-          <Text style={{ color: t.text, fontFamily: st.font.bold, fontSize: st.size * 1.08, lineHeight: lh }}>
+          <Text {...lines(first ? 4 : 24)} style={{ color: t.text, fontFamily: st.font.bold, fontSize: st.size * 1.08, lineHeight: lh }}>
             <Spans block={block} st={st} base={st.font.bold} />
           </Text>
         </View>
@@ -100,7 +105,7 @@ export const BlockView = memo(function BlockView({ block, st, first }: { block: 
       return (
         <View style={[pad, { marginVertical: 8 }]}>
           <View style={{ borderLeftWidth: 2, borderLeftColor: t.accent, paddingLeft: 14 }}>
-            <Text style={{ color: t.text, opacity: 0.85, fontFamily: st.font.italic, fontSize: st.size * 0.96, lineHeight: lh }}>
+            <Text {...lines(8)} style={{ color: t.text, opacity: 0.85, fontFamily: st.font.italic, fontSize: st.size * 0.96, lineHeight: lh }}>
               <Spans block={block} st={st} base={st.font.italic} />
             </Text>
           </View>
@@ -110,7 +115,7 @@ export const BlockView = memo(function BlockView({ block, st, first }: { block: 
       return (
         <View style={[pad, { flexDirection: 'row', marginBottom: 6 }]}>
           <Text style={{ color: t.accent, fontFamily: st.font.regular, fontSize: st.size, lineHeight: lh, width: 18 }}>•</Text>
-          <Text style={{ flex: 1, color: t.text, fontFamily: st.font.regular, fontSize: st.size, lineHeight: lh }}>
+          <Text {...lines(0)} style={{ flex: 1, color: t.text, fontFamily: st.font.regular, fontSize: st.size, lineHeight: lh }}>
             <Spans block={block} st={st} base={st.font.regular} />
           </Text>
         </View>
@@ -120,7 +125,7 @@ export const BlockView = memo(function BlockView({ block, st, first }: { block: 
     default:
       return (
         <View style={[pad, { marginBottom: Math.round(lh * 0.55) }]}>
-          <Text style={{ color: t.text, fontFamily: st.font.regular, fontSize: st.size, lineHeight: lh, textAlign: st.justify ? 'justify' : 'left' }}>
+          <Text {...lines(0)} style={{ color: t.text, fontFamily: st.font.regular, fontSize: st.size, lineHeight: lh, textAlign: st.justify ? 'justify' : 'left' }}>
             <Spans block={block} st={st} base={st.font.regular} />
           </Text>
         </View>
