@@ -14,6 +14,7 @@ export type ReaderPrefs = {
   margin: number;
   theme: ReaderThemeId;
   justify: boolean;
+  volumeKeys: boolean;
   layout: ReaderLayout;
 };
 
@@ -63,7 +64,7 @@ export const useSettings = create<SettingsState>()(
       reminders: true,
       reminderHour: 21,
       haptics: true,
-      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false, layout: EINK ? 'paged' : 'scroll' },
+      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false, volumeKeys: false, layout: EINK ? 'paged' : 'scroll' },
       set: (patch) => set(patch),
       setReader: (patch) => set((s) => ({ reader: { ...s.reader, ...patch } })),
     }),

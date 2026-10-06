@@ -142,6 +142,44 @@ function dedent(spans: Span[]): Span[] {
   return joinLines(out);
 }
 
+const CODE_CHARS = /[{}<>=;|\\$#`~^]/g;
+
+// Converters like Pandoc turn indented prose (typically block quotes) into <pre><code>.
+function looksLikeProse(text: string): boolean {
+  const body = text.replace(/\s+/g, '');
+  if (body.length < 80) return false;
+  const letters = (body.match(/\p{L}/gu) ?? []).length;
+  const code = (body.match(CODE_CHARS) ?? []).length;
+  const lines = text.split('\n').filter((l) => l.trim());
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const stops = (text.match(/[,.;:!?…]["”»)]?(\s|$)/g) ?? []).length;
+  const flags = /(^|\s)(--[a-z]|-[a-z](\s|$))/i.test(text);
+  return !flags && letters / body.length > 0.85 && code / body.length < 0.005 && words / lines.length >= 6 && stops >= Math.max(2, words / 40);
+}
+
+function proseQuotes(spans: Span[]): Block[] {
+  const out: Block[] = [];
+  let cur: Span[] = [];
+  const push = () => {
+    const s = mergeSpans(cur.map((x) => ({ ...x, t: x.t.replace(/\s+/g, ' ') }))).filter((x) => x.t);
+    if (s.length) {
+      s[0].t = s[0].t.trimStart();
+      s[s.length - 1].t = s[s.length - 1].t.trimEnd();
+      const c = s.reduce((a, x) => a + x.t.length, 0);
+      if (c) out.push({ k: 'q', s, c });
+    }
+    cur = [];
+  };
+  for (const span of spans) {
+    span.t.split(/\n[ \t]*\n/).forEach((part, idx) => {
+      if (idx > 0) push();
+      if (part) cur.push({ ...span, t: part });
+    });
+  }
+  push();
+  return out;
+}
+
 export function htmlToBlocks(html: string, resolveImage: ImageResolver): Block[] {
   const doc = parseDocument(html, { decodeEntities: true, lowerCaseTags: true }) as unknown as Node;
   const blocks: Block[] = [];
@@ -269,10 +307,11 @@ export function htmlToBlocks(html: string, resolveImage: ImageResolver): Block[]
 
   walk(doc, 'p', false);
   flush('p');
-  for (const b of blocks) {
-    if (b.k !== 'pre' || !b.s) continue;
+  return blocks.flatMap((b) => {
+    if (b.k !== 'pre' || !b.s) return [b];
+    if (looksLikeProse(textOfSpans(b.s))) return proseQuotes(b.s);
     b.s = dedent(b.s);
     b.c = b.s.reduce((a, x) => a + x.t.length, 0);
-  }
-  return blocks;
+    return [b];
+  });
 }

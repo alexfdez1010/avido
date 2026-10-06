@@ -101,16 +101,20 @@ export const BlockView = memo(function BlockView({ block, st, first, onLines }: 
           </Text>
         </View>
       );
-    case 'q':
+    case 'q': {
+      const size = st.size * 0.92;
+      const top = Math.round(lh * 0.15);
       return (
-        <View style={[pad, { marginVertical: 8 }]}>
-          <View style={{ borderLeftWidth: 2, borderLeftColor: t.accent, paddingLeft: 14 }}>
-            <Text {...lines(8)} style={{ color: t.text, opacity: 0.85, fontFamily: st.font.italic, fontSize: st.size * 0.96, lineHeight: lh }}>
-              <Spans block={block} st={st} base={st.font.italic} />
-            </Text>
-          </View>
+        <View style={[pad, { marginTop: top, marginBottom: Math.round(lh * 0.8) }]}>
+          <Text
+            {...lines(top)}
+            style={{ paddingLeft: 20, color: t.text, opacity: 0.8, fontFamily: st.font.regular, fontSize: size, lineHeight: Math.round(size * st.lineHeight), textAlign: st.justify ? 'justify' : 'left' }}
+          >
+            <Spans block={block} st={st} base={st.font.regular} />
+          </Text>
         </View>
       );
+    }
     case 'li':
       return (
         <View style={[pad, { flexDirection: 'row', marginBottom: 6 }]}>

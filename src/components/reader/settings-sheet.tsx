@@ -1,6 +1,6 @@
 import { Minus, Plus } from 'lucide-react-native';
 import React from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { Sheet, Tap, Txt } from '@/components/kit';
 import { Switch } from '@/components/ui/switch';
@@ -172,6 +172,14 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             </Txt>
             <Switch value={r.justify} onValueChange={(v) => setReader({ justify: v })} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
           </View>
+          {Platform.OS === 'android' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 }}>
+              <Txt v="label" color={t.text}>
+                {tx('Pasar página con el volumen', 'Turn pages with volume keys')}
+              </Txt>
+              <Switch value={r.volumeKeys} onValueChange={(v) => setReader({ volumeKeys: v })} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
+            </View>
+          )}
         </View>
       </View>
     </Sheet>

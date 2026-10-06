@@ -34,6 +34,7 @@ type Props<T extends PagedItem> = {
   onToggle: () => void;
   onTurn?: () => void;
   animate: boolean;
+  turnRef?: React.RefObject<((dir: 1 | -1) => void) | null>;
   canPrev: boolean;
   canNext: boolean;
 };
@@ -73,7 +74,7 @@ function paginate(boxes: Box[], height: number): Page[] {
   return pages;
 }
 
-export function PagedView<T extends PagedItem>({ items, renderItem, initialIndex, startAtEnd, bg, topPad, bottomPad, chrome, layoutKey, onPage, onEdge, onToggle, onTurn, animate, canPrev, canNext }: Props<T>) {
+export function PagedView<T extends PagedItem>({ items, renderItem, initialIndex, startAtEnd, bg, topPad, bottomPad, chrome, layoutKey, onPage, onEdge, onToggle, onTurn, animate, canPrev, canNext, turnRef }: Props<T>) {
   const segments = useMemo(() => segmentsOf(items), [items]);
   const initialSeg = useMemo(() => {
     if (startAtEnd) return segments.length - 1;
@@ -264,6 +265,13 @@ export function PagedView<T extends PagedItem>({ items, renderItem, initialIndex
   useLayoutEffect(() => {
     handlers.current = { turn, animatedTurn, prepare, finish, cancel, onToggle, chrome, width };
   });
+  useLayoutEffect(() => {
+    if (!turnRef) return;
+    turnRef.current = (dir) => (animate ? handlers.current.animatedTurn(dir) : handlers.current.turn(dir));
+    return () => {
+      turnRef.current = null;
+    };
+  }, [animate, turnRef]);
 
   const gesture = useMemo(() => {
     /* eslint-disable react-hooks/refs -- gesture callbacks run outside render */

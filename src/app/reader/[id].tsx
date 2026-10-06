@@ -27,8 +27,9 @@ import { useSettings } from '@/store/settings';
 import { readingFonts } from '@/theme/fonts';
 import { readerThemes, type ReaderTheme } from '@/theme/palette';
 import { tx } from '@/i18n';
+import { captureVolumeKeys } from '../../../modules/volume-keys';
 
-type Item = { key: string; chars: number; type: 'head' } | { key: string; chars: number; type: 'block'; block: Block; i: number } | { key: string; chars: number; type: 'foot' };
+type Item = { key: string; chars: number; type: 'head'; ch: number } | { key: string; chars: number; type: 'block'; ch: number; block: Block; i: number } | { key: string; chars: number; type: 'foot' };
 
 const WORDS_PER_MIN_CHARS = 1100;
 
@@ -119,23 +120,49 @@ export default function ReaderScreen() {
     return out;
   }, [content]);
 
-  const items = useMemo<Item[]>(() => {
-    const ch = content?.chapters[chapter];
-    if (!ch) return [];
-    return [{ key: 'head', chars: 0, type: 'head' }, ...ch.blocks.map((b, i) => ({ key: `b${i}`, chars: b.c, type: 'block' as const, block: b, i })), { key: 'foot', chars: 0, type: 'foot' }];
-  }, [content, chapter]);
+  const chapterItems = useCallback(
+    (c: number): Item[] => {
+      const ch = content?.chapters[c];
+      if (!ch) return [];
+      return [{ key: `h${c}`, chars: 0, type: 'head', ch: c }, ...ch.blocks.map((b, i) => ({ key: `${c}-${i}`, chars: b.c, type: 'block' as const, ch: c, block: b, i }))];
+    },
+    [content]
+  );
 
-  const prefix = useMemo(() => {
-    const ch = content?.chapters[chapter];
-    if (!ch) return [];
-    const out: number[] = [];
-    let acc = 0;
-    for (const b of ch.blocks) {
-      out.push(acc);
-      acc += b.c;
-    }
+  const items = useMemo<Item[]>(() => {
+    if (!content) return [];
+    const out = chapterItems(chapter);
+    if (chapter === content.chapters.length - 1) out.push({ key: 'foot', chars: 0, type: 'foot' });
     return out;
-  }, [content, chapter]);
+  }, [chapterItems, content, chapter]);
+
+  const { scrollItems, chapterStart } = useMemo(() => {
+    const all: Item[] = [];
+    const starts: number[] = [];
+    if (content) {
+      content.chapters.forEach((_, c) => {
+        starts.push(all.length);
+        all.push(...chapterItems(c));
+      });
+      all.push({ key: 'foot', chars: 0, type: 'foot' });
+    }
+    return { scrollItems: all, chapterStart: starts };
+  }, [chapterItems, content]);
+
+  const prefixes = useMemo(
+    () =>
+      (content?.chapters ?? []).map((ch) => {
+        const out: number[] = [];
+        let acc = 0;
+        for (const b of ch.blocks) {
+          out.push(acc);
+          acc += b.c;
+        }
+        return out;
+      }),
+    [content]
+  );
+  const prefix = useMemo(() => prefixes[chapter] ?? [], [prefixes, chapter]);
 
   const record = useCallback(
     (progress: number, location?: { chapter: number; block: number }, pdfPage?: number) => {
@@ -159,20 +186,28 @@ export default function ReaderScreen() {
   const handleViewable = ({ viewableItems }: { viewableItems: ViewToken<Item>[] }) => {
     if (!content) return;
     poke();
-    const blocks = viewableItems.filter((v) => v.item?.type === 'block') as ViewToken<Extract<Item, { type: 'block' }>>[];
+    const visible = viewableItems.map((v) => v.item).filter((it): it is Exclude<Item, { type: 'foot' }> => !!it && it.type !== 'foot');
+    const blocks = visible.filter((it): it is Extract<Item, { type: 'block' }> => it.type === 'block');
     const sawFoot = viewableItems.some((v) => v.item?.type === 'foot');
-    const ch = content.chapters[chapter];
+    let c: number;
     let charPos: number;
     let blockIdx = 0;
     if (sawFoot) {
-      charPos = offsets[chapter] + ch.chars;
-      blockIdx = Math.max(0, ch.blocks.length - 1);
-    } else if (blocks.length) {
-      blockIdx = blocks[0].item.i;
-      const last = blocks[blocks.length - 1].item;
-      charPos = offsets[chapter] + prefix[last.i] + last.block.c;
+      c = content.chapters.length - 1;
+      charPos = content.totalChars;
+      blockIdx = Math.max(0, content.chapters[c].blocks.length - 1);
+    } else if (visible.length) {
+      const first = visible[0];
+      c = first.ch;
+      blockIdx = first.type === 'block' ? first.i : 0;
+      const last = blocks[blocks.length - 1];
+      charPos = last ? offsets[last.ch] + prefixes[last.ch][last.i] + last.block.c : offsets[c];
     } else return;
-    record(Math.min(1, charPos / Math.max(1, content.totalChars)), { chapter, block: blockIdx });
+    if (c !== chapter) {
+      if (c > chapter && offsets[c] / content.totalChars >= maxRef.current - 0.0005) useGame.getState().chapterDone();
+      setChapter(c);
+    }
+    record(Math.min(1, charPos / Math.max(1, content.totalChars)), { chapter: c, block: blockIdx });
   };
   useLayoutEffect(() => {
     viewHandler.current = handleViewable;
@@ -191,12 +226,11 @@ export default function ReaderScreen() {
       }
       setInitialBlock(0);
       setEnterAtEnd(atEnd);
-      scrollY.current = 0;
       setChapter(n);
       setSheet('none');
-      requestAnimationFrame(() => listRef.current?.scrollToOffset({ offset: 0, animated: false }));
+      if (!paged) requestAnimationFrame(() => listRef.current?.scrollToIndex({ index: chapterStart[n] ?? 0, animated: false }));
     },
-    [book?.location?.chapter, chapter, content, offsets, record]
+    [book?.location?.chapter, chapter, chapterStart, content, offsets, paged, record]
   );
 
   const finish = useCallback(() => {
@@ -217,20 +251,12 @@ export default function ReaderScreen() {
       poke();
       const max = Math.max(0, contentH.current - viewH.current);
       const y = scrollY.current;
-      if (dir > 0 && y >= max - 2) {
-        if (chapter < content.chapters.length - 1) goChapter(chapter + 1, true);
-        return;
-      }
-      if (dir < 0 && y <= 2) {
-        if (chapter > 0) goChapter(chapter - 1);
-        return;
-      }
       const step = viewH.current - insets.bottom - 48 - prefs.size * prefs.lineHeight;
       const next = Math.max(0, Math.min(max, y + dir * step));
       scrollY.current = next;
-      listRef.current?.scrollToOffset({ offset: next, animated: false });
+      listRef.current?.scrollToOffset({ offset: next, animated: !eink });
     },
-    [chapter, content, goChapter, insets.bottom, poke, prefs.lineHeight, prefs.size]
+    [content, eink, insets.bottom, poke, prefs.lineHeight, prefs.size]
   );
 
   const onPagedPage = useCallback(
@@ -269,6 +295,17 @@ export default function ReaderScreen() {
     [chrome, eink, toggle, turnPage]
   );
 
+  const pagedTurn = useRef<((dir: 1 | -1) => void) | null>(null);
+  const volumeHandler = useRef<(dir: 1 | -1) => void>(() => {});
+  useLayoutEffect(() => {
+    volumeHandler.current = (dir) => (paged ? pagedTurn.current?.(dir) : turnPage(dir));
+  });
+  const volumeOn = prefs.volumeKeys && !!content && sheet === 'none';
+  useEffect(() => {
+    if (!volumeOn) return;
+    return captureVolumeKeys((dir) => volumeHandler.current(dir));
+  }, [volumeOn]);
+
   const tapHandler = useRef<(x: number) => void>(() => {});
   useLayoutEffect(() => {
     tapHandler.current = onTap;
@@ -286,6 +323,7 @@ export default function ReaderScreen() {
 
   const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollY.current = e.nativeEvent.contentOffset.y;
+    contentH.current = e.nativeEvent.contentSize.height;
   }, []);
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     viewH.current = e.nativeEvent.layout.height;
@@ -311,19 +349,18 @@ export default function ReaderScreen() {
   }
 
   const ch = content?.chapters[chapter];
-  const isLast = content ? chapter >= content.chapters.length - 1 : false;
   const chapterLeftChars = ch ? Math.max(0, offsets[chapter] + ch.chars - pos * (content?.totalChars ?? 0)) : 0;
   const minsLeft = Math.max(1, Math.round(chapterLeftChars / WORDS_PER_MIN_CHARS));
 
   const renderItem = ({ item }: { item: Item }, onLines?: OnLines) => {
     if (item.type === 'head')
       return (
-        <View style={{ paddingHorizontal: prefs.margin, paddingTop: paged ? 12 : insets.top + 64, paddingBottom: 18 }}>
+        <View style={{ paddingHorizontal: prefs.margin, paddingTop: paged ? 12 : item.ch === 0 ? insets.top + 64 : 72, paddingBottom: 18 }}>
           <Txt v="eyebrow" color={theme.accent}>
-            {tx('Capítulo', 'Chapter')} {chapter + 1} {tx('de', 'of')} {content?.chapters.length}
+            {tx('Capítulo', 'Chapter')} {item.ch + 1} {tx('de', 'of')} {content?.chapters.length}
           </Txt>
-          {ch && !/^h[12]$/.test(ch.blocks[0]?.k ?? '') && (
-            <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: prefs.size * 1.4, lineHeight: prefs.size * 1.7, color: theme.text, marginTop: 10 }}>{ch.title}</Txt>
+          {content && !/^h[12]$/.test(content.chapters[item.ch].blocks[0]?.k ?? '') && (
+            <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: prefs.size * 1.4, lineHeight: prefs.size * 1.7, color: theme.text, marginTop: 10 }}>{content.chapters[item.ch].title}</Txt>
           )}
         </View>
       );
@@ -331,23 +368,9 @@ export default function ReaderScreen() {
     return (
       <View style={{ paddingHorizontal: prefs.margin, paddingTop: 40, paddingBottom: paged ? 24 : insets.bottom + 120 }}>
         <View style={{ paddingTop: 28, alignItems: 'center' }}>
-          {isLast ? (
-            <>
-              <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 44, color: theme.accent }}>{tx('Fin', 'The end')}</Txt>
-              <View style={{ height: 20 }} />
-              <Cta label={book.finishedAt ? tx('Volver a la biblioteca', 'Back to library') : tx('Terminar libro  ·  +XP', 'Finish book  ·  +XP')} onPress={book.finishedAt ? () => router.back() : finish} />
-            </>
-          ) : (
-            <>
-              <Txt v="eyebrow" color={theme.muted}>
-                {tx('Capítulo completado', 'Chapter complete')} · +15 XP
-              </Txt>
-              <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 22, color: theme.text, marginTop: 10, marginBottom: 22, textAlign: 'center' }} numberOfLines={2}>
-                {content?.chapters[chapter + 1]?.title}
-              </Txt>
-              <Cta label={tx('Siguiente capítulo', 'Next chapter')} onPress={() => goChapter(chapter + 1, true)} />
-            </>
-          )}
+          <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 44, color: theme.accent }}>{tx('Fin', 'The end')}</Txt>
+          <View style={{ height: 20 }} />
+          <Cta label={book.finishedAt ? tx('Volver a la biblioteca', 'Back to library') : tx('Terminar libro  ·  +XP', 'Finish book  ·  +XP')} onPress={book.finishedAt ? () => router.back() : finish} />
         </View>
       </View>
     );
@@ -410,6 +433,7 @@ export default function ReaderScreen() {
           onToggle={toggle}
           onTurn={poke}
           animate={!eink}
+          turnRef={pagedTurn}
           canPrev={chapter > 0}
           canNext={!!content && chapter < content.chapters.length - 1}
         />
@@ -418,12 +442,11 @@ export default function ReaderScreen() {
           <View style={{ flex: 1 }} onLayout={onLayout}>
             <FlashList
               ref={listRef}
-              key={`${chapter}`}
-              data={items}
+              data={scrollItems}
               renderItem={renderItem}
               keyExtractor={(it) => it.key}
               getItemType={(it) => (it.type === 'block' ? it.block.k : it.type)}
-              initialScrollIndex={initialBlock > 0 ? initialBlock + 1 : undefined}
+              initialScrollIndex={(chapterStart[chapter] ?? 0) + (initialBlock > 0 ? initialBlock + 1 : 0) || undefined}
               onViewableItemsChanged={onViewable}
               viewabilityConfig={{ itemVisiblePercentThreshold: 60, minimumViewTime: 250 }}
               onScrollBeginDrag={poke}

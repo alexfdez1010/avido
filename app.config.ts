@@ -83,6 +83,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'react-native-blob-util',
     './plugins/with-release-signing',
+    './plugins/with-volume-keys',
   ],
   experiments: {
     typedRoutes: true,

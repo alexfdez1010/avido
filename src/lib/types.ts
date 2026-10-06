@@ -49,6 +49,6 @@ export type BookContent = {
   totalChars: number;
 };
 
-export const CONTENT_VERSION = 4;
+export const CONTENT_VERSION = 5;
 
 export const CHARS_PER_PAGE = 1500;
