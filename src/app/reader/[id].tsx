@@ -409,6 +409,9 @@ export default function ReaderScreen() {
           onEdge={onPagedEdge}
           onToggle={toggle}
           onTurn={poke}
+          animate={!eink}
+          canPrev={chapter > 0}
+          canNext={!!content && chapter < content.chapters.length - 1}
         />
       ) : (
         <GestureDetector gesture={tap}>
