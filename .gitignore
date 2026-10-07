@@ -16,3 +16,7 @@ npm-debug.*
 .env*.local
 *.tsbuildinfo
 /coverage
+
+# Local Expo module build output
+modules/*/android/build/
+modules/*/android/.gradle/
