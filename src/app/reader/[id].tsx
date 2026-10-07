@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bar, Cta, Flame, Ring, Tap, Txt } from '@/components/kit';
 import { BlockView, type BlockStyle, type OnLines } from '@/components/reader/block-view';
 import { PagedView } from '@/components/reader/paged-view';
+import { ReaderFooter, footerHeight, formatMinutes } from '@/components/reader/reader-footer';
 import { LiveToast } from '@/components/reader/live-toast';
 import { PdfReader } from '@/components/reader/pdf-reader';
 import { ReaderSettingsSheet } from '@/components/reader/settings-sheet';
@@ -19,6 +20,7 @@ import { TocSheet } from '@/components/reader/toc-sheet';
 import { useReadingTracker } from '@/hooks/use-reading-tracker';
 import { loadContent } from '@/lib/content';
 import { dayKey, formatClock } from '@/lib/dates';
+import { personalCharsPerMin } from '@/lib/stats';
 import type { Block, BookContent } from '@/lib/types';
 import { CHARS_PER_PAGE } from '@/lib/types';
 import { useGame } from '@/store/game';
@@ -31,7 +33,6 @@ import { captureVolumeKeys } from '../../../modules/volume-keys';
 
 type Item = { key: string; chars: number; type: 'head'; ch: number } | { key: string; chars: number; type: 'block'; ch: number; block: Block; i: number } | { key: string; chars: number; type: 'foot' };
 
-const WORDS_PER_MIN_CHARS = 1100;
 
 function GoalChip({ theme }: { theme: ReaderTheme }) {
   const goal = useSettings((s) => s.dailyGoalMin);
@@ -72,6 +73,7 @@ export default function ReaderScreen() {
   const [initialBlock, setInitialBlock] = useState(book?.location?.block ?? 0);
   const [enterAtEnd, setEnterAtEnd] = useState(false);
   const paged = prefs.layout === 'paged';
+  const charsPerMin = useMemo(() => personalCharsPerMin(useGame.getState().days), []);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollY = useRef(0);
   const viewH = useRef(0);
@@ -348,9 +350,21 @@ export default function ReaderScreen() {
     );
   }
 
+  const isPdf = book.format === 'pdf';
   const ch = content?.chapters[chapter];
   const chapterLeftChars = ch ? Math.max(0, offsets[chapter] + ch.chars - pos * (content?.totalChars ?? 0)) : 0;
-  const minsLeft = Math.max(1, Math.round(chapterLeftChars / WORDS_PER_MIN_CHARS));
+  const minsLeft = Math.max(1, Math.round(chapterLeftChars / charsPerMin));
+  const totalChars = isPdf ? (pdfTotal || book.pdfPages || 0) * CHARS_PER_PAGE : (content?.totalChars ?? book.totalChars ?? 0);
+  const totalPages = isPdf ? pdfTotal || book.pdfPages || 0 : Math.max(1, Math.round(totalChars / CHARS_PER_PAGE));
+  const footerInput = {
+    progress: pos,
+    chapterLeftMin: isPdf || !ch ? null : chapterLeftChars / charsPerMin,
+    bookLeftMin: ((1 - pos) * totalChars) / charsPerMin,
+    page: isPdf ? (book.pdfPage ?? 1) : Math.min(totalPages, Math.floor(pos * totalPages) + 1),
+    pages: totalPages,
+    chapterTitle: isPdf ? undefined : ch?.title,
+    sessionSec: tracker.sessionSec,
+  };
 
   const renderItem = ({ item }: { item: Item }, onLines?: OnLines) => {
     if (item.type === 'head')
@@ -376,7 +390,6 @@ export default function ReaderScreen() {
     );
   };
 
-  const isPdf = book.format === 'pdf';
   const loading = !isPdf && !content && !error;
 
   return (
@@ -425,9 +438,9 @@ export default function ReaderScreen() {
           startAtEnd={enterAtEnd}
           bg={theme.bg}
           topPad={insets.top + 8}
-          bottomPad={Math.max(insets.bottom, 8) + 34}
+          bottomPad={footerHeight(prefs.footer) ? Math.max(insets.bottom, 8) + footerHeight(prefs.footer) + 8 : Math.max(insets.bottom, 12) + 8}
           chrome={chrome}
-          layoutKey={`${prefs.font}-${prefs.size}-${prefs.lineHeight}-${prefs.margin}-${prefs.justify}`}
+          layoutKey={`${prefs.font}-${prefs.size}-${prefs.lineHeight}-${prefs.margin}-${prefs.justify}-${footerHeight(prefs.footer)}`}
           onPage={onPagedPage}
           onEdge={onPagedEdge}
           onToggle={toggle}
@@ -462,21 +475,7 @@ export default function ReaderScreen() {
         </GestureDetector>
       )}
 
-      {!chrome && !error && !loading && (
-        <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 8), backgroundColor: theme.bg }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: prefs.margin, paddingBottom: 6 }}>
-            <Txt v="mono" color={theme.muted} style={{ fontSize: 10.5 }}>
-              {isPdf ? `${book.pdfPage ?? 1} / ${pdfTotal || '–'}` : `${minsLeft} min`}
-            </Txt>
-            <Txt v="mono" color={theme.muted} style={{ fontSize: 10.5 }}>
-              {Math.floor(pos * 100)}%
-            </Txt>
-          </View>
-          <View style={{ height: 2, backgroundColor: theme.line }}>
-            <View style={{ height: 2, width: `${pos * 100}%`, backgroundColor: theme.accent }} />
-          </View>
-        </View>
-      )}
+      {!chrome && !error && !loading && <ReaderFooter prefs={prefs.footer} input={footerInput} theme={theme} margin={prefs.margin} bottomInset={insets.bottom} />}
 
       {chrome && (
         <>
@@ -537,7 +536,7 @@ export default function ReaderScreen() {
               <GoalChip theme={theme} />
               {!isPdf && content && (
                 <Txt v="mono" color={theme.muted}>
-                  {tx('cap.', 'ch.')} {chapter + 1}/{content.chapters.length} · {minsLeft} min
+                  {tx('cap.', 'ch.')} {chapter + 1}/{content.chapters.length} · {formatMinutes(minsLeft)}
                 </Txt>
               )}
               {isPdf && !book.finishedAt && pdfTotal > 0 && (book.pdfPage ?? 1) >= pdfTotal && <Cta compact label={tx('Terminar', 'Finish')} onPress={finish} />}

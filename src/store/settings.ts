@@ -16,9 +16,19 @@ export type ReaderPrefs = {
   justify: boolean;
   volumeKeys: boolean;
   layout: ReaderLayout;
+  footer: ReaderFooter;
 };
 
 export type ReaderLayout = 'scroll' | 'paged';
+
+export type FooterSlot = 'none' | 'chapterLeft' | 'bookLeft' | 'percent' | 'pages' | 'chapter' | 'clock' | 'session';
+export type ReaderFooter = { left: FooterSlot; right: FooterSlot; bar: boolean };
+
+export const DEFAULT_FOOTER: ReaderFooter = { left: 'chapterLeft', right: 'percent', bar: true };
+
+export function footerEmpty(f: ReaderFooter): boolean {
+  return f.left === 'none' && f.right === 'none' && !f.bar;
+}
 
 export const FONT_SIZE_MIN = 12;
 export const FONT_SIZE_MAX = 40;
@@ -64,7 +74,7 @@ export const useSettings = create<SettingsState>()(
       reminders: true,
       reminderHour: 21,
       haptics: true,
-      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false, volumeKeys: false, layout: EINK ? 'paged' : 'scroll' },
+      reader: { font: 'literata', size: 19, lineHeight: 1.62, margin: 24, theme: EINK ? 'eink' : 'night', justify: false, volumeKeys: false, layout: EINK ? 'paged' : 'scroll', footer: DEFAULT_FOOTER },
       set: (patch) => set(patch),
       setReader: (patch) => set((s) => ({ reader: { ...s.reader, ...patch } })),
     }),
@@ -74,7 +84,7 @@ export const useSettings = create<SettingsState>()(
       version: 1,
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<SettingsState>;
-        return { ...current, ...p, reader: { ...current.reader, ...p.reader } };
+        return { ...current, ...p, reader: { ...current.reader, ...p.reader, footer: { ...current.reader.footer, ...p.reader?.footer } } };
       },
     }
   )

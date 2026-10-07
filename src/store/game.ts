@@ -160,6 +160,10 @@ export const useGame = create<GameState>()(
             pages: log.pages + pages,
             longest: Math.max(log.longest, sessionSec),
           };
+          if (sec > 0) {
+            const h = String(new Date().getHours());
+            log = { ...log, hours: { ...log.hours, [h]: (log.hours?.[h] ?? 0) + sec } };
+          }
           set((s) => ({
             days: { ...s.days, [key]: log },
             totalSec: s.totalSec + sec,

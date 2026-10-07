@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { BookOpen, Flame as FlameIcon, Trophy, UserRound } from 'lucide-react-native';
+import { BookOpen, ChartColumn, Flame as FlameIcon, Trophy, UserRound } from 'lucide-react-native';
 import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,8 +10,8 @@ import { useSettings } from '@/store/settings';
 import { tx } from '@/i18n';
 import { fonts } from '@/theme/fonts';
 
-const ICONS = { index: FlameIcon, library: BookOpen, trophies: Trophy, profile: UserRound } as const;
-const LABELS = { index: tx('Hoy', 'Today'), library: tx('Biblioteca', 'Library'), trophies: tx('Logros', 'Trophies'), profile: tx('Tú', 'You') } as const;
+const ICONS = { index: FlameIcon, library: BookOpen, stats: ChartColumn, trophies: Trophy, profile: UserRound } as const;
+const LABELS = { index: tx('Hoy', 'Today'), library: tx('Biblioteca', 'Library'), stats: tx('Datos', 'Stats'), trophies: tx('Logros', 'Trophies'), profile: tx('Tú', 'You') } as const;
 
 type TabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>>[0];
 
@@ -53,7 +53,7 @@ function TabBar({ state, navigation }: TabBarProps) {
             >
               <View
                 style={{
-                  width: 60,
+                  width: 56,
                   height: 32,
                   borderRadius: 16,
                   alignItems: 'center',
@@ -82,6 +82,7 @@ export default function TabsLayout() {
     <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: p.bg }, animation: 'shift' }}>
       <Tabs.Screen name="index" />
       <Tabs.Screen name="library" />
+      <Tabs.Screen name="stats" />
       <Tabs.Screen name="trophies" />
       <Tabs.Screen name="profile" />
     </Tabs>

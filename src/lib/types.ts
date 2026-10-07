@@ -23,6 +23,7 @@ export type Book = {
   pdfPages?: number;
   totalChars?: number;
   readSeconds: number;
+  readPages?: number;
   metaLoaded: boolean;
   missing?: boolean;
   error?: string;

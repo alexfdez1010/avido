@@ -22,7 +22,7 @@ export function useReadingTracker(bookId: string) {
     pendingPages.current = 0;
     useGame.getState().addReading(sec, pages, session.current);
     const b = useLibrary.getState().books[bookId];
-    if (b) useLibrary.getState().updateBook(bookId, { readSeconds: b.readSeconds + sec });
+    if (b) useLibrary.getState().updateBook(bookId, { readSeconds: b.readSeconds + sec, readPages: (b.readPages ?? 0) + pages });
   }, [bookId]);
 
   const poke = useCallback(() => {

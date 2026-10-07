@@ -4,7 +4,8 @@ import { Platform, View } from 'react-native';
 
 import { Sheet, Tap, Txt } from '@/components/kit';
 import { Switch } from '@/components/ui/switch';
-import { FONT_SIZE_MAX, FONT_SIZE_MIN, useSettings, type ReaderLayout } from '@/store/settings';
+import { FOOTER_SLOTS, ReaderFooter } from '@/components/reader/reader-footer';
+import { DEFAULT_FOOTER, FONT_SIZE_MAX, FONT_SIZE_MIN, footerEmpty, useSettings, type FooterSlot, type ReaderLayout } from '@/store/settings';
 import { readingFonts, type ReadingFontId } from '@/theme/fonts';
 import { readerThemes, type ReaderThemeId } from '@/theme/palette';
 import { tx } from '@/i18n';
@@ -57,6 +58,37 @@ function Segmented<T extends string>({ options, value, onChange, fg, muted, line
   );
 }
 
+function SlotPicker({ label, value, onChange, fg, muted, line, accent }: { label: string; value: FooterSlot; onChange: (v: FooterSlot) => void; fg: string; muted: string; line: string; accent: string }) {
+  return (
+    <View style={{ marginTop: 14 }}>
+      <Txt v="caption" color={muted}>
+        {label}
+      </Txt>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+        {FOOTER_SLOTS.map((o) => {
+          const on = o.id === value;
+          return (
+            <Tap
+              key={o.id}
+              onPress={() => onChange(o.id)}
+              feedback="select"
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, borderRadius: 22, borderWidth: 2, borderColor: on ? accent : 'transparent', backgroundColor: on ? 'transparent' : line }}
+            >
+              <Txt v="label" color={on ? fg : muted} style={{ fontSize: 13.5 }}>
+                {o.label}
+              </Txt>
+            </Tap>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const PREVIEW = { progress: 0.42, chapterLeftMin: 12, bookLeftMin: 254, page: 128, pages: 304, chapterTitle: tx('La casa del árbol', 'The tree house'), sessionSec: 1104 };
+
 export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const r = useSettings((s) => s.reader);
   const setReader = useSettings((s) => s.setReader);
@@ -80,6 +112,41 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             { id: 'scroll', label: tx('Desplazamiento', 'Scroll'), hint: tx('Texto continuo', 'Continuous text') },
           ]}
         />
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
+          <Txt v="eyebrow" color={t.muted}>
+            {tx('Pie de página', 'Footer')}
+          </Txt>
+          <Tap
+            onPress={() => setReader({ footer: footerEmpty(r.footer) ? DEFAULT_FOOTER : { left: 'none', right: 'none', bar: false } })}
+            feedback="select"
+            accessibilityRole="button"
+            style={{ minHeight: 44, justifyContent: 'center', paddingLeft: 12 }}
+          >
+            <Txt v="label" color={t.accent} style={{ fontSize: 13.5 }}>
+              {footerEmpty(r.footer) ? tx('Restaurar', 'Restore') : tx('Vaciar', 'Clear all')}
+            </Txt>
+          </Tap>
+        </View>
+        <View style={{ marginTop: 8, height: 46, borderRadius: 16, overflow: 'hidden', backgroundColor: t.line, justifyContent: 'center' }}>
+          {footerEmpty(r.footer) ? (
+            <Txt v="caption" color={t.muted} style={{ textAlign: 'center' }}>
+              {tx('Solo texto', 'Just the text')}
+            </Txt>
+          ) : (
+            <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 }}>
+              <ReaderFooter prefs={r.footer} input={PREVIEW} theme={{ ...t, bg: 'transparent' }} margin={16} bottomInset={10} />
+            </View>
+          )}
+        </View>
+        <SlotPicker label={tx('Izquierda', 'Left')} value={r.footer.left} onChange={(left) => setReader({ footer: { ...r.footer, left } })} fg={t.text} muted={t.muted} line={t.line} accent={t.accent} />
+        <SlotPicker label={tx('Derecha', 'Right')} value={r.footer.right} onChange={(right) => setReader({ footer: { ...r.footer, right } })} fg={t.text} muted={t.muted} line={t.line} accent={t.accent} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, marginTop: 6 }}>
+          <Txt v="label" color={t.text}>
+            {tx('Barra de progreso', 'Progress bar')}
+          </Txt>
+          <Switch value={r.footer.bar} onValueChange={(bar) => setReader({ footer: { ...r.footer, bar } })} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
+        </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
           <Txt v="eyebrow" color={t.muted}>

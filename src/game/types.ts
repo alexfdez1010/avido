@@ -11,6 +11,8 @@ export type DayLog = {
   goalMet?: boolean;
   frozen?: boolean;
   quests: string[];
+  /** Reading seconds by local hour of day ("0"–"23"). */
+  hours?: Record<string, number>;
 };
 
 export type CelebrationKind = 'level' | 'achievement' | 'goal' | 'finish' | 'quest' | 'freeze' | 'streak';
