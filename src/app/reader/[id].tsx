@@ -31,6 +31,8 @@ import { readerThemes, type ReaderTheme } from '@/theme/palette';
 import { tx } from '@/i18n';
 import { captureVolumeKeys } from '../../../modules/volume-keys';
 
+const FINISH_THRESHOLD = 0.8;
+
 type Item = { key: string; chars: number; type: 'head'; ch: number } | { key: string; chars: number; type: 'block'; ch: number; block: Block; i: number } | { key: string; chars: number; type: 'foot' };
 
 
@@ -391,6 +393,7 @@ export default function ReaderScreen() {
   };
 
   const loading = !isPdf && !content && !error;
+  const canFinish = !book.finishedAt && (pos >= FINISH_THRESHOLD || (isPdf && pdfTotal > 0 && (book.pdfPage ?? 1) >= pdfTotal));
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
@@ -534,12 +537,14 @@ export default function ReaderScreen() {
             <Bar value={pos} color={theme.accent} track={theme.line} height={4} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <GoalChip theme={theme} />
-              {!isPdf && content && (
-                <Txt v="mono" color={theme.muted}>
-                  {tx('cap.', 'ch.')} {chapter + 1}/{content.chapters.length} · {formatMinutes(minsLeft)}
-                </Txt>
-              )}
-              {isPdf && !book.finishedAt && pdfTotal > 0 && (book.pdfPage ?? 1) >= pdfTotal && <Cta compact label={tx('Terminar', 'Finish')} onPress={finish} />}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                {!isPdf && content && (
+                  <Txt v="mono" color={theme.muted}>
+                    {tx('cap.', 'ch.')} {chapter + 1}/{content.chapters.length} · {formatMinutes(minsLeft)}
+                  </Txt>
+                )}
+                {canFinish && <Cta compact label={tx('Terminar', 'Finish')} onPress={finish} />}
+              </View>
             </View>
           </Animated.View>
         </>
