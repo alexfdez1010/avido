@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { ChevronRight, Compass, FolderOpen, Play, Snowflake } from 'lucide-react-native';
+import { Check, ChevronRight, Compass, FolderOpen, Play, Snowflake } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -12,7 +12,7 @@ import { levelProgress, levelTitle, streakMultiplier } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
 import { dayKey, formatLongDate, greeting } from '@/lib/dates';
 import { pickFolder } from '@/lib/library';
-import type { Book } from '@/lib/types';
+import { FINISH_THRESHOLD, type Book } from '@/lib/types';
 import { useGame, useStreak } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
@@ -152,12 +152,17 @@ function NowReading({ book }: { book: Book }) {
           </View>
         </View>
       </Tap>
-      <View style={{ marginTop: 18 }}>
-        <Cta
-          label={book.progress > 0 ? tx('Seguir leyendo', 'Keep reading') : tx('Empezar a leer', 'Start reading')}
-          icon={<Play size={16} color={p.onEmber} fill={p.onEmber} />}
-          onPress={open}
-        />
+      <View style={{ marginTop: 18, flexDirection: 'row', gap: 10 }}>
+        <View style={{ flex: 1 }}>
+          <Cta
+            label={book.progress > 0 ? tx('Seguir leyendo', 'Keep reading') : tx('Empezar a leer', 'Start reading')}
+            icon={<Play size={16} color={p.onEmber} fill={p.onEmber} />}
+            onPress={open}
+          />
+        </View>
+        {book.progress >= FINISH_THRESHOLD && (
+          <Cta kind="quiet" label={tx('Terminar', 'Finish')} icon={<Check size={16} color={p.text} />} onPress={() => useGame.getState().finishBook(book.id)} />
+        )}
       </View>
     </View>
   );

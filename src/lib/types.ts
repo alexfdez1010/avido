@@ -51,5 +51,6 @@ export type BookContent = {
 };
 
 export const CONTENT_VERSION = 5;
+export const FINISH_THRESHOLD = 0.8;
 
 export const CHARS_PER_PAGE = 1500;

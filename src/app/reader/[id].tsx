@@ -22,7 +22,7 @@ import { loadContent } from '@/lib/content';
 import { dayKey, formatClock } from '@/lib/dates';
 import { personalCharsPerMin } from '@/lib/stats';
 import type { Block, BookContent } from '@/lib/types';
-import { CHARS_PER_PAGE } from '@/lib/types';
+import { CHARS_PER_PAGE, FINISH_THRESHOLD } from '@/lib/types';
 import { useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
@@ -30,8 +30,6 @@ import { readingFonts } from '@/theme/fonts';
 import { readerThemes, type ReaderTheme } from '@/theme/palette';
 import { tx } from '@/i18n';
 import { captureVolumeKeys } from '../../../modules/volume-keys';
-
-const FINISH_THRESHOLD = 0.8;
 
 type Item = { key: string; chars: number; type: 'head'; ch: number } | { key: string; chars: number; type: 'block'; ch: number; block: Block; i: number } | { key: string; chars: number; type: 'foot' };
 
