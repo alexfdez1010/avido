@@ -26,6 +26,8 @@ export function titleFromFileName(name: string): { title: string; author?: strin
   return { title: base };
 }
 
+const MAX_SCAN_DEPTH = 8;
+
 function collect(dir: Directory, depth: number, out: File[]) {
   let entries: (Directory | File)[] = [];
   try {
@@ -35,7 +37,7 @@ function collect(dir: Directory, depth: number, out: File[]) {
   }
   for (const e of entries) {
     if (e instanceof Directory) {
-      if (depth < 4 && !e.name.startsWith('.')) collect(e, depth + 1, out);
+      if (depth < MAX_SCAN_DEPTH && !e.name.startsWith('.')) collect(e, depth + 1, out);
     } else if (formatOf(e.name ?? '')) {
       out.push(e);
     }
@@ -90,12 +92,25 @@ async function doScan() {
     for (const b of Object.values(prev)) {
       if (b.firstOpenedAt || b.finishedAt) next[b.id] = { ...b, missing: true };
     }
+    const prevByUri = new Map(Object.values(prev).map((b) => [b.uri, b]));
+    const foundUris = new Set(files.map((f) => f.uri));
+    const claimed = new Set<string>();
     files.forEach((f) => {
       const name = f.name ?? f.uri;
       const format = formatOf(name)!;
       const size = f.size ?? 0;
-      const id = hashString(`${name}:${size}`);
-      const old = prev[id];
+      const fileId = () => hashString(`${name}:${size}`);
+      const moved = prev[fileId()];
+      const old =
+        prevByUri.get(f.uri) ??
+        (moved && !foundUris.has(moved.uri) && !claimed.has(moved.id) ? moved : undefined);
+      if (old) claimed.add(old.id);
+      const taken = (k: string) => next[k] && next[k].uri !== (old?.uri ?? f.uri);
+      let id = old?.id ?? fileId();
+      if (taken(id)) {
+        id = hashString(`${f.uri}:${size}`);
+        while (taken(id)) id += '~';
+      }
       const guess = titleFromFileName(name);
       next[id] = old
         ? { ...old, uri: f.uri, fileName: name, missing: false }
