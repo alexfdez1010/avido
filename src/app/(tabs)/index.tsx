@@ -121,6 +121,7 @@ function DayCard() {
 function NowReading({ book }: { book: Book }) {
   const p = usePalette();
   const [target, setTarget] = useState<SessionTarget>(DEFAULT_SESSION_TARGET);
+  useFocusEffect(useCallback(() => { setTarget(DEFAULT_SESSION_TARGET); }, []));
   const pages = book.totalChars ? Math.round((book.totalChars * (1 - book.progress)) / 1500) : book.pdfPages ? Math.round(book.pdfPages * (1 - book.progress)) : 0;
   const open = () => router.push(`/reader/${book.id}`);
   return (
@@ -154,33 +155,33 @@ function NowReading({ book }: { book: Book }) {
       </Tap>
       <View testID="reading-plan" style={{ marginTop: 22, gap: 12 }}>
         <View style={{ gap: 4 }}>
-          <Txt v="headline">{tx('Un rato para tu libro', 'A little time for your book')}</Txt>
-          <Txt v="caption" tone="soft">{tx('Elige un comienzo. Tú decides cuándo parar.', 'Choose a start. Stop whenever you like.')}</Txt>
+          <Txt v="headline">{tx('A tu ritmo', 'At your own pace')}</Txt>
+          <Txt v="caption" tone="soft">{tx('Lee sin tiempo o elige cuándo recibir un aviso.', 'Read freely or choose when to get a gentle reminder.')}</Txt>
         </View>
-        <View accessibilityRole="radiogroup" accessibilityLabel={tx('Duración de la sesión', 'Session length')} style={{ flexDirection: 'row', gap: 10 }}>
-          {SESSION_TARGETS.map((minutes) => (
+        <View accessibilityRole="radiogroup" accessibilityLabel={tx('Aviso de lectura', 'Reading reminder')} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {[null, ...SESSION_TARGETS].map((minutes) => (
             <Tap
-              key={minutes}
-              testID={`reading-step-${minutes}`}
+              key={minutes ?? 'none'}
+              testID={`reading-step-${minutes ?? 'none'}`}
               accessibilityRole="radio"
               accessibilityState={{ checked: target === minutes }}
-              accessibilityLabel={tx(`${minutes} minutos`, `${minutes} minutes`)}
+              accessibilityLabel={minutes === null ? tx('Sin tiempo', 'No timer') : tx(`${minutes} minutos`, `${minutes} minutes`)}
               onPress={() => setTarget(minutes)}
-              style={{ flex: 1, minHeight: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: target === minutes ? p.ember : p.line, backgroundColor: target === minutes ? p.emberSoft : 'transparent' }}
+              style={{ flexGrow: 1, minWidth: 64, paddingHorizontal: 10, minHeight: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: target === minutes ? p.ember : p.line, backgroundColor: target === minutes ? p.emberSoft : 'transparent' }}
             >
-              <Txt v="label" tone={target === minutes ? 'ember' : 'soft'}>{minutes} min</Txt>
+              <Txt v="label" tone={target === minutes ? 'ember' : 'soft'}>{minutes === null ? tx('Sin tiempo', 'No timer') : `${minutes} min`}</Txt>
             </Tap>
           ))}
         </View>
         <Tap
           testID="reading-start"
           accessibilityRole="button"
-          accessibilityLabel={tx(`Leer ${target} minutos`, `Read for ${target} minutes`)}
-          onPress={() => router.push({ pathname: '/reader/[id]', params: { id: book.id, targetMin: String(target) } })}
+          accessibilityLabel={target === null ? tx('Seguir leyendo', 'Continue reading') : tx(`Leer ${target} minutos`, `Read for ${target} minutes`)}
+          onPress={() => router.push({ pathname: '/reader/[id]', params: { id: book.id, ...(target === null ? {} : { targetMin: String(target) }) } })}
           style={{ backgroundColor: p.ember, borderRadius: 16, minHeight: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
         >
           <Play size={16} color={p.onEmber} fill={p.onEmber} />
-          <Txt v="headline" color={p.onEmber}>{tx(`Leer ${target} min`, `Read for ${target} min`)}</Txt>
+          <Txt v="headline" color={p.onEmber}>{target === null ? tx('Seguir leyendo', 'Continue reading') : tx(`Leer ${target} min`, `Read for ${target} min`)}</Txt>
         </Tap>
         {book.progress >= FINISH_THRESHOLD && (
           <Cta kind="quiet" label={tx('Terminar', 'Finish')} icon={<Check size={16} color={p.text} />} onPress={() => useGame.getState().finishBook(book.id)} />

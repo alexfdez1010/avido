@@ -69,17 +69,25 @@ selectors and existing test IDs, with screenshots for visual checks.
 
 Committed `.maestro/` flows preserve app data (`clearState: false`). Read each
 flow's setup comments, start from its required screen, and use a QA book rather
-than changing personal reading progress. `reading-plan.yaml` selects 30 minutes
-and opens the book. `text-only-reader.yaml` clears the footer and verifies that
-reader controls can still be recovered; it leaves QA reader settings in text-only
-mode. Session durations are a small starting commitment: reading continues after
-the selected time, without a modal, writing request or countdown stopping it.
+than changing personal reading progress. `reading-plan.yaml` verifies the untimed
+default, selects 30 minutes and opens the book. `reading-timer.yaml` selects
+5 minutes, waits for the actual reminder without gestures, verifies it disappears
+without stopping the reader, and checks that returning home resets the selection
+to untimed. `text-only-reader.yaml` clears the footer and verifies that reader
+controls can still be recovered; it leaves QA reader settings in text-only mode.
+Untimed reading is the default. Optional 5/15/30-minute reminders use foreground
+reader time, including reading without touching the screen, and pause during
+loading, settings or backgrounding. An explicitly chosen reminder appears once
+even with all reader chrome hidden. Reading continues without a modal, writing
+request or countdown stopping it. Reward toasts remain suppressed in text-only mode.
 Restore settings changed by a manual check. Flows default to the QA app ID and
 accept `APP_ID` to target another explicitly chosen installation:
 
 ```sh
 maestro --device emulator-5554 test --test-output-dir artifacts/android/maestro .maestro/reading-plan.yaml
 maestro --device emulator-5554 test --test-output-dir artifacts/android/maestro .maestro/text-only-reader.yaml
+# Slow regression: allow five real minutes without interacting with the emulator.
+maestro --device emulator-5554 test --test-output-dir artifacts/android/maestro .maestro/reading-timer.yaml
 ```
 
 Save screenshots, reports, build logs, APK hashes and scoped crash logs under

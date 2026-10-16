@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const ts = require('typescript');
 
 // Exercise screen callbacks and rendered props without starting a native runtime.
-async function setup({ pure = true, layout = 'scroll', format = 'txt', seconds = 0, loadError = false } = {}) {
+async function setup({ pure = true, layout = 'scroll', format = 'txt', seconds = 0, loadError = false, targetMin = '5' } = {}) {
   let cursor = 0;
   let backs = 0;
   let flushes = 0;
@@ -28,7 +28,7 @@ async function setup({ pure = true, layout = 'scroll', format = 'txt', seconds =
     useEffect(effect, deps) { const i = cursor++; if (!same(hooks[i]?.deps, deps)) effects.push(() => { hooks[i]?.cleanup?.(); hooks[i] = { deps, cleanup: effect() }; }); },
     useLayoutEffect(effect, deps) { react.useEffect(effect, deps); },
   };
-  const tracker = { sessionSec: seconds, idle: false, poke() {}, addPages() {}, flush() { flushes++; } };
+  const tracker = { isForeground: true, elapsedSec: seconds, sessionSec: 0, idle: false, poke() {}, addPages() {}, flush() { flushes++; } };
   const library = { updateBook: (_id, patch) => { book = { ...book, ...patch }; } };
   const game = { days: {}, setHold() {}, startSession() {}, evaluate() {}, chapterDone() {}, finishBook() {} };
   const gesture = () => {
@@ -45,7 +45,7 @@ async function setup({ pure = true, layout = 'scroll', format = 'txt', seconds =
     'expo-keep-awake': { useKeepAwake() {} },
     'expo-navigation-bar': { NavigationBar: 'NavigationBar' },
     'expo-status-bar': { StatusBar: 'StatusBar' },
-    'expo-router': { router: { back: () => backs++ }, useLocalSearchParams: () => ({ id: 'novel', targetMin: '5' }) },
+    'expo-router': { router: { back: () => backs++ }, useLocalSearchParams: () => ({ id: 'novel', targetMin }) },
     'lucide-react-native': { ArrowLeft: 'ArrowLeft', ListTree: 'ListTree', Type: 'Type' },
     'react-native': { View: 'View', ActivityIndicator: 'ActivityIndicator', AppState: { addEventListener: () => ({ remove() {} }) }, BackHandler: { addEventListener: (_event, callback) => { backHandler = callback; return { remove() {} }; } } },
     'react-native-gesture-handler': { Gesture: { Tap: gesture }, GestureDetector: 'GestureDetector' },
@@ -63,7 +63,7 @@ async function setup({ pure = true, layout = 'scroll', format = 'txt', seconds =
     '@/lib/content': { loadContent: () => loadError ? Promise.reject(new Error('Unreadable file')) : Promise.resolve(content) },
     '@/lib/dates': { dayKey: () => '2026-10-16', formatClock: String },
     '@/lib/stats': { personalCharsPerMin: () => 1000 },
-    '@/lib/reading-plan': { parseSessionTarget: () => 5 },
+    '@/lib/reading-plan': { parseSessionTarget: () => targetMin == null ? null : Number(targetMin) },
     '@/lib/types': { CHARS_PER_PAGE: 1500, FINISH_THRESHOLD: 0.8 },
     '@/store/game': { useGame: Object.assign((select) => select(game), { getState: () => game }) },
     '@/store/library': { useLibrary: (select) => select({ books: { novel: book }, ...library }) },
@@ -152,7 +152,7 @@ test('passing a chosen start does not stop or pause the reader', async () => {
   const app = await setup({ pure: false, seconds: 299 });
   assert.equal(app.one('LiveToast').targetMin, 5);
   assert.equal(app.one('LiveToast').sessionSec, 299);
-  app.tracker.sessionSec = 301;
+  app.tracker.elapsedSec = 301;
   app.render();
   assert.equal(app.enabledStates.at(-1), true);
   assert.equal(app.one('LiveToast').sessionSec, 301);
@@ -285,10 +285,11 @@ test('a chosen reading time produces one passive acknowledgement without stoppin
   assert.equal(app.update({ sessionSec: 1801 }), null);
 });
 
-test('a target reached in pure reading never appears later when toasts become available', () => {
-  const app = setupToast({ enabled: false });
+test('a target crossed as an overlay or background opens appears once on returning to reading', () => {
+  const app = setupToast({ enabled: false, targetEnabled: false });
   assert.equal(app.update({ sessionSec: 300 }), null);
-  assert.equal(app.update({ enabled: true, sessionSec: 301 }), null);
+  assert.equal(app.update({ targetEnabled: true, sessionSec: 300 }).props.testID, 'reader-target-toast');
+  assert.equal(app.advance(3200), null);
   assert.equal(app.update({ sessionSec: 900 }), null);
   assert.equal(app.haptics(), 0);
 });
@@ -306,7 +307,7 @@ test('a simultaneous quest reward preserves the passive target acknowledgement w
   assert.equal(app.haptics(), 1);
 });
 
-test('entering pure reading immediately clears a visible target without replaying it', () => {
+test('disabling reminders immediately clears a visible target without replaying it', () => {
   const app = setupToast();
   assert.equal(app.update({ sessionSec: 300 }).props.testID, 'reader-target-toast');
   assert.equal(app.update({ enabled: false }), null);
@@ -327,4 +328,38 @@ test('ordinary untimed reading has no target prompt and retains existing reward 
   assert.equal(app.celebrate({ id: 'reward', kind: 'achievement', title: 'Read a chapter', subtitle: 'A first chapter', big: '1' }).props.testID, 'reader-live-toast');
   assert.equal(app.haptics(), 1);
   assert.equal(app.advance(3200), null);
+});
+
+// A chosen reminder remains visible independently of the optional reward UI.
+test('a chosen reminder works in pure text mode using elapsed foreground reading time', async () => {
+  const app = await setup({ pure: true, seconds: 300 });
+  const toast = app.one('LiveToast');
+  assert.equal(toast.enabled, false);
+  assert.equal(toast.targetEnabled, true);
+  assert.equal(toast.sessionSec, 300);
+  assert.equal(app.tracker.sessionSec, 0);
+});
+
+test('explicit reminders appear once while pure text still suppresses rewards', () => {
+  const app = setupToast({ enabled: false, targetEnabled: true });
+  assert.equal(app.update({ sessionSec: 300 }).props.testID, 'reader-target-toast');
+  app.celebrate({ id: 'reward', kind: 'achievement', title: 'Read a chapter', subtitle: 'A first chapter', big: '1' });
+  assert.equal(app.advance(3200), null);
+  assert.equal(app.update({ enabled: true, sessionSec: 900 }), null);
+  assert.equal(app.haptics(), 0);
+});
+
+test('an untimed reader never receives a session target', async () => {
+  const app = await setup({ targetMin: null });
+  assert.equal(app.one('LiveToast').targetMin, null);
+});
+
+test('an explicit reminder is hidden while the app is in the background', async () => {
+  const app = await setup({ seconds: 300 });
+  app.tracker.isForeground = false;
+  app.render();
+  assert.equal(app.one('LiveToast').targetEnabled, false);
+  app.tracker.isForeground = true;
+  app.render();
+  assert.equal(app.one('LiveToast').targetEnabled, true);
 });

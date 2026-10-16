@@ -19,7 +19,7 @@ tags:
       id: reading-plan
     direction: DOWN
 - assertVisible:
-    id: reading-step-5
+    id: reading-step-none
     checked: true
 - tapOn:
     id: reading-step-30

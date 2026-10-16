@@ -10,18 +10,18 @@ import type { ReaderTheme } from '@/theme/palette';
 
 type Toast = { type: 'celebration'; item: Celebration } | { type: 'target'; minutes: number };
 
-export function LiveToast({ theme, top, enabled = true, targetMin = null, sessionSec = 0 }: { theme: ReaderTheme; top: number; enabled?: boolean; targetMin?: number | null; sessionSec?: number }) {
+export function LiveToast({ theme, top, enabled = true, targetEnabled = enabled, targetMin = null, sessionSec = 0 }: { theme: ReaderTheme; top: number; enabled?: boolean; targetEnabled?: boolean; targetMin?: number | null; sessionSec?: number }) {
   const queue = useGame((s) => s.queue);
   const seen = useRef(queue.length);
   const [targetHandled, setTargetHandled] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
 
-  // Consume this moment even in pure reading mode; never replay it later.
-  if (!targetHandled && targetMin !== null && sessionSec >= targetMin * 60) {
+  // An explicitly chosen reminder also works with reader chrome hidden.
+  if (!targetHandled && targetEnabled && targetMin !== null && sessionSec >= targetMin * 60) {
     setTargetHandled(true);
-    if (enabled) setToast({ type: 'target', minutes: targetMin });
+    setToast({ type: 'target', minutes: targetMin });
   }
-  if (!enabled && toast) setToast(null);
+  if (toast && !(toast.type === 'target' ? targetEnabled : enabled)) setToast(null);
 
   useEffect(() => {
     if (enabled && toast?.type !== 'target' && queue.length > seen.current) {
@@ -37,7 +37,7 @@ export function LiveToast({ theme, top, enabled = true, targetMin = null, sessio
     return () => clearTimeout(timer);
   }, [toast]);
 
-  if (!enabled || !toast) return null;
+  if (!toast || !(toast.type === 'target' ? targetEnabled : enabled)) return null;
   const item = toast.type === 'celebration' ? toast.item : null;
   return (
     <Animated.View

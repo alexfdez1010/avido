@@ -596,7 +596,7 @@ export default function ReaderScreen() {
         </>
       )}
 
-      <LiveToast theme={theme} top={insets.top + (chrome ? 70 : 12)} enabled={!textOnly && sheet === 'none' && !error && !loading} targetMin={targetMin} sessionSec={tracker.sessionSec} />
+      <LiveToast theme={theme} top={insets.top + (chrome ? 70 : 12)} enabled={!textOnly && sheet === 'none' && !error && !loading} targetEnabled={tracker.isForeground && sheet === 'none' && !error && !loading} targetMin={targetMin} sessionSec={tracker.elapsedSec} />
       <ReaderSettingsSheet open={sheet === 'settings'} onClose={dismissSheet} fixedLayout={isPdf} />
       {content && <TocSheet open={sheet === 'toc'} onClose={dismissSheet} chapters={content.chapters} current={chapter} theme={theme} onPick={(i) => goChapter(i)} />}
     </View>

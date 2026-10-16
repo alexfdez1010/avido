@@ -1,0 +1,55 @@
+# Requires the QA home screen and an unfinished synthetic book.
+# Waits five real minutes without gestures, including in text-only mode.
+appId: ${APP_ID}
+name: A chosen timer acknowledges five minutes without interrupting reading
+env:
+  APP_ID: com.alexfdez.avido.local
+tags:
+  - local
+  - reading
+  - slow
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: reading-plan
+    timeout: 15000
+- assertVisible:
+    id: reading-step-none
+    checked: true
+- tapOn:
+    id: reading-step-5
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reading-step-5
+    checked: true
+- takeScreenshot: selected-five-minutes
+- tapOn:
+    id: reading-start
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reader-screen|reader-text-only
+- extendedWaitUntil:
+    visible:
+      id: reader-target-toast
+    timeout: 315000
+- takeScreenshot: five-minute-reminder
+# Poll while keeping the reader visible; notVisible returns immediately in
+# some Maestro versions instead of waiting for the transient toast to expire.
+- repeat:
+    times: 50
+    while:
+      visible:
+        id: reader-target-toast
+    commands:
+      - assertVisible:
+          id: reader-screen|reader-text-only
+- assertNotVisible:
+    id: reader-target-toast
+- assertVisible:
+    id: reader-screen|reader-text-only
+- back
+- assertVisible:
+    id: reading-step-none
+    checked: true

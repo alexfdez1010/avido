@@ -19,7 +19,7 @@ test('session links accept only an explicit supported duration', () => {
   }
 });
 
-test('a small five-minute start is the default alongside optional longer starts', () => {
+test('untimed reading is the default alongside optional timed starts', () => {
   assert.deepEqual(Array.from(SESSION_TARGETS), [5, 15, 30]);
-  assert.equal(DEFAULT_SESSION_TARGET, 5);
+  assert.equal(DEFAULT_SESSION_TARGET, null);
 });

@@ -4,7 +4,9 @@
 
 1. Installs dependencies and runs `expo prebuild` for Android.
 2. Builds the release APK with Gradle.
-3. Uploads it as a workflow artifact and publishes a GitHub Release tagged `v1.0.<run_number>` with the APK attached.
+3. Saves an optional workflow artifact and publishes a GitHub Release tagged
+   `v1.0.<run_number>` with the APK attached. Artifact upload failures (including
+   exhausted Actions storage) do not block the release attachment.
 
 ## Versioning
 
