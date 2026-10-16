@@ -27,19 +27,20 @@ const fontFiles = [
 
 const buildNumber = Number(process.env.BUILD_NUMBER ?? '1');
 const version = process.env.APP_VERSION ?? '1.0.0';
+const localQA = process.env.AVIDO_LOCAL_QA === '1';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Ávido',
+  name: localQA ? 'Ávido Local' : 'Ávido',
   slug: 'avido',
   version,
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'avido',
+  scheme: localQA ? 'avido-local' : 'avido',
   userInterfaceStyle: 'automatic',
   backgroundColor: '#100E0B',
   android: {
-    package: 'com.alexfdez.avido',
+    package: localQA ? 'com.alexfdez.avido.local' : 'com.alexfdez.avido',
     versionCode: buildNumber,
     adaptiveIcon: {
       backgroundColor: '#100E0B',

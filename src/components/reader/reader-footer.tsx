@@ -78,7 +78,7 @@ export function ReaderFooter({ prefs, input, theme, margin, bottomInset }: { pre
   const right = slotText(prefs.right, input, clock);
   if (!left && !right && !prefs.bar) return null;
   return (
-    <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 8, paddingBottom: Math.max(bottomInset, 8), backgroundColor: theme.bg }}>
+    <View testID="reader-footer" pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 8, paddingBottom: Math.max(bottomInset, 8), backgroundColor: theme.bg }}>
       {(left || right) && (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 16, paddingHorizontal: margin, paddingBottom: prefs.bar ? 6 : 0 }}>
           <Txt v="mono" color={theme.muted} numberOfLines={1} style={{ fontSize: 10.5, flexShrink: 1 }}>

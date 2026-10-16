@@ -1,0 +1,73 @@
+# Requires a configured local QA profile with an unfinished synthetic book.
+# Leaves QA settings in text-only mode; app data and book position are preserved.
+appId: ${APP_ID}
+name: Read only the words
+env:
+  APP_ID: com.alexfdez.avido.local
+tags:
+  - local
+  - reading
+  - immersion
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: reading-start
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: reading-start
+    direction: DOWN
+- tapOn:
+    id: reading-start
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reader-screen|reader-text-only
+# The intentional center-tap reading gesture reveals the controls.
+- tapOn:
+    point: 50%,50%
+    waitToSettleTimeoutMs: 500
+- tapOn:
+    id: reader-settings
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: reader-footer-clear
+    direction: DOWN
+- runFlow:
+    when:
+      visible: Clear all|Vaciar
+    commands:
+      - tapOn:
+          id: reader-footer-clear
+          waitToSettleTimeoutMs: 500
+- back
+- tapOn:
+    point: 50%,50%
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reader-text-only
+- runFlow:
+    when:
+      visible: Got it
+    commands:
+      - tapOn:
+          text: Got it
+          waitToSettleTimeoutMs: 500
+- assertNotVisible:
+    id: reader-footer
+- assertNotVisible:
+    id: reader-settings
+- takeScreenshot: reader-words-only
+# Verify the controls remain recoverable from the text-only state.
+- tapOn:
+    point: 50%,50%
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reader-settings
+- tapOn:
+    point: 50%,50%
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reader-text-only

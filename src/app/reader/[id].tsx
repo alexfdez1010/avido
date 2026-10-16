@@ -1,10 +1,11 @@
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useKeepAwake } from 'expo-keep-awake';
+import { NavigationBar } from 'expo-navigation-bar';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowLeft, ListTree, Type } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ViewToken } from 'react-native';
+import { ActivityIndicator, AppState, BackHandler, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ViewToken } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,11 +22,12 @@ import { useReadingTracker } from '@/hooks/use-reading-tracker';
 import { loadContent } from '@/lib/content';
 import { dayKey, formatClock } from '@/lib/dates';
 import { personalCharsPerMin } from '@/lib/stats';
-import type { Block, BookContent } from '@/lib/types';
+import { parseSessionTarget } from '@/lib/reading-plan';
+import type { Block, Book, BookContent } from '@/lib/types';
 import { CHARS_PER_PAGE, FINISH_THRESHOLD } from '@/lib/types';
 import { useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
-import { useSettings } from '@/store/settings';
+import { footerEmpty, useSettings } from '@/store/settings';
 import { readingFonts } from '@/theme/fonts';
 import { readerThemes, type ReaderTheme } from '@/theme/palette';
 import { tx } from '@/i18n';
@@ -52,7 +54,8 @@ function GoalChip({ theme }: { theme: ReaderTheme }) {
 
 export default function ReaderScreen() {
   useKeepAwake();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, targetMin: targetParam } = useLocalSearchParams<{ id: string; targetMin?: string }>();
+  const targetMin = parseSessionTarget(targetParam);
   const book = useLibrary((s) => s.books[id]);
   const updateBook = useLibrary((s) => s.updateBook);
   const prefs = useSettings((s) => s.reader);
@@ -66,6 +69,8 @@ export default function ReaderScreen() {
   const [chapter, setChapter] = useState(book?.location?.chapter ?? 0);
   const [chrome, setChrome] = useState(false);
   const [sheet, setSheet] = useState<'none' | 'settings' | 'toc'>('none');
+  const [pdfReady, setPdfReady] = useState(false);
+  const textOnly = footerEmpty(prefs.footer);
   const [pos, setPos] = useState(book?.progress ?? 0);
   const [pdfTotal, setPdfTotal] = useState(book?.pdfPages ?? 0);
   const listRef = useRef<FlashListRef<Item>>(null);
@@ -75,13 +80,52 @@ export default function ReaderScreen() {
   const paged = prefs.layout === 'paged';
   const charsPerMin = useMemo(() => personalCharsPerMin(useGame.getState().days), []);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPosition = useRef<Partial<Book> | null>(null);
   const scrollY = useRef(0);
   const viewH = useRef(0);
   const viewW = useRef(0);
   const contentH = useRef(0);
 
-  const tracker = useReadingTracker(id);
+  const tracker = useReadingTracker(id, sheet === 'none' && !error && (book?.format === 'pdf' ? pdfReady : !!content));
   const { poke, addPages } = tracker;
+  const dismissSheet = useCallback(() => {
+    setSheet('none');
+    poke();
+  }, [poke]);
+
+  const savePosition = useCallback(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = null;
+    if (pendingPosition.current) {
+      updateBook(id, pendingPosition.current);
+      pendingPosition.current = null;
+    }
+  }, [id, updateBook]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') savePosition();
+    });
+    return () => {
+      sub.remove();
+      savePosition();
+    };
+  }, [savePosition]);
+
+  const leave = useCallback(() => {
+    savePosition();
+    tracker.flush();
+    router.back();
+  }, [savePosition, tracker]);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (sheet !== 'none') { dismissSheet(); return true; }
+      leave();
+      return true;
+    });
+    return () => sub.remove();
+  }, [dismissSheet, leave, sheet]);
 
   useEffect(() => {
     if (!book) return;
@@ -176,11 +220,10 @@ export default function ReaderScreen() {
         maxRef.current = progress;
       }
       if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => {
-        updateBook(id, { progress, maxProgress: maxRef.current, ...(location ? { location } : {}), ...(pdfPage ? { pdfPage } : {}) });
-      }, 400);
+      pendingPosition.current = { progress, maxProgress: maxRef.current, ...(location ? { location } : {}), ...(pdfPage ? { pdfPage } : {}) };
+      saveTimer.current = setTimeout(savePosition, 400);
     },
-    [addPages, content, id, pdfTotal, updateBook]
+    [addPages, content, pdfTotal, savePosition]
   );
 
   const viewHandler = useRef<(info: { viewableItems: ViewToken<Item>[] }) => void>(() => {});
@@ -219,6 +262,7 @@ export default function ReaderScreen() {
     (next: number, completeCurrent = false, atEnd = false) => {
       if (!content) return;
       const n = Math.max(0, Math.min(content.chapters.length - 1, next));
+      poke();
       if (completeCurrent) {
         const endProgress = (offsets[chapter] + content.chapters[chapter].chars) / content.totalChars;
         if (endProgress >= maxRef.current - 0.0005 && book?.location?.chapter !== n) useGame.getState().chapterDone();
@@ -232,15 +276,16 @@ export default function ReaderScreen() {
       setSheet('none');
       if (!paged) requestAnimationFrame(() => listRef.current?.scrollToIndex({ index: chapterStart[n] ?? 0, animated: false }));
     },
-    [book?.location?.chapter, chapter, chapterStart, content, offsets, paged, record]
+    [book?.location?.chapter, chapter, chapterStart, content, offsets, paged, poke, record]
   );
 
   const finish = useCallback(() => {
+    savePosition();
     tracker.flush();
     useGame.getState().chapterDone();
     useGame.getState().finishBook(id);
     router.back();
-  }, [id, tracker]);
+  }, [id, savePosition, tracker]);
 
   const toggle = useCallback(() => {
     poke();
@@ -367,6 +412,7 @@ export default function ReaderScreen() {
   };
 
   const renderItem = ({ item }: { item: Item }, onLines?: OnLines) => {
+    if (textOnly && item.type !== 'block') return null;
     if (item.type === 'head')
       return (
         <View style={{ paddingHorizontal: prefs.margin, paddingTop: paged ? 12 : item.ch === 0 ? insets.top + 64 : 72, paddingBottom: 18 }}>
@@ -384,7 +430,7 @@ export default function ReaderScreen() {
         <View style={{ paddingTop: 28, alignItems: 'center' }}>
           <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 44, color: theme.accent }}>{tx('Fin', 'The end')}</Txt>
           <View style={{ height: 20 }} />
-          <Cta label={book.finishedAt ? tx('Volver a la biblioteca', 'Back to library') : tx('Terminar libro  ·  +XP', 'Finish book  ·  +XP')} onPress={book.finishedAt ? () => router.back() : finish} />
+          <Cta label={book.finishedAt ? tx('Volver a la biblioteca', 'Back to library') : tx('Terminar libro', 'Finish book')} onPress={book.finishedAt ? leave : finish} />
         </View>
       </View>
     );
@@ -394,8 +440,9 @@ export default function ReaderScreen() {
   const canFinish = !book.finishedAt && (pos >= FINISH_THRESHOLD || (isPdf && pdfTotal > 0 && (book.pdfPage ?? 1) >= pdfTotal));
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg }}>
+    <View testID={textOnly && !chrome && sheet === 'none' ? 'reader-text-only' : 'reader-screen'} style={{ flex: 1, backgroundColor: theme.bg }}>
       <StatusBar style={theme.statusBar} hidden={!chrome} animated />
+      <NavigationBar hidden={textOnly && !chrome && sheet === 'none' && !error && !loading} />
       {error ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Txt v="title" color={theme.text} center>
@@ -422,6 +469,7 @@ export default function ReaderScreen() {
           onTap={toggle}
           onError={setError}
           onLoad={(n) => {
+            setPdfReady(true);
             setPdfTotal(n);
             if (book.pdfPages !== n) updateBook(id, { pdfPages: n, totalChars: n * CHARS_PER_PAGE });
           }}
@@ -441,7 +489,7 @@ export default function ReaderScreen() {
           topPad={insets.top + 8}
           bottomPad={footerHeight(prefs.footer) ? Math.max(insets.bottom, 8) + footerHeight(prefs.footer) + 8 : Math.max(insets.bottom, 12) + 8}
           chrome={chrome}
-          layoutKey={`${prefs.font}-${prefs.size}-${prefs.lineHeight}-${prefs.margin}-${prefs.justify}-${footerHeight(prefs.footer)}`}
+          layoutKey={`${prefs.font}-${prefs.size}-${prefs.lineHeight}-${prefs.margin}-${prefs.justify}-${footerHeight(prefs.footer)}-${textOnly}`}
           onPage={onPagedPage}
           onEdge={onPagedEdge}
           onToggle={toggle}
@@ -453,10 +501,11 @@ export default function ReaderScreen() {
         />
       ) : (
         <GestureDetector gesture={tap}>
-          <View style={{ flex: 1 }} onLayout={onLayout}>
+          <View testID="reader-scroll" style={{ flex: 1 }} onLayout={onLayout}>
             <FlashList
               ref={listRef}
               data={scrollItems}
+              contentContainerStyle={textOnly ? { paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom, 12) + 8 } : undefined}
               renderItem={renderItem}
               keyExtractor={(it) => it.key}
               getItemType={(it) => (it.type === 'block' ? it.block.k : it.type)}
@@ -470,13 +519,13 @@ export default function ReaderScreen() {
                 contentH.current = h;
               }}
               showsVerticalScrollIndicator={false}
-              extraData={st}
+              extraData={prefs}
             />
           </View>
         </GestureDetector>
       )}
 
-      {!chrome && !error && !loading && <ReaderFooter prefs={prefs.footer} input={footerInput} theme={theme} margin={prefs.margin} bottomInset={insets.bottom} />}
+      {!textOnly && !chrome && !error && !loading && <ReaderFooter prefs={prefs.footer} input={footerInput} theme={theme} margin={prefs.margin} bottomInset={insets.bottom} />}
 
       {chrome && (
         <>
@@ -486,7 +535,7 @@ export default function ReaderScreen() {
             style={{ position: 'absolute', top: 0, left: 0, right: 0, paddingTop: insets.top + 6, paddingHorizontal: 12, paddingBottom: 10, backgroundColor: theme.bg, }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Tap onPress={() => router.back()} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+              <Tap testID="reader-close" onPress={leave} accessibilityLabel={tx('Cerrar lectura', 'Close reading')} accessibilityRole="button" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowLeft size={22} color={theme.text} />
               </Tap>
               <View style={{ flex: 1 }}>
@@ -498,15 +547,13 @@ export default function ReaderScreen() {
                 </Txt>
               </View>
               {!isPdf && (
-                <Tap onPress={() => setSheet('toc')} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                <Tap onPress={() => setSheet('toc')} accessibilityLabel={tx('Índice', 'Table of contents')} accessibilityRole="button" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                   <ListTree size={21} color={theme.text} />
                 </Tap>
               )}
-              {!isPdf && (
-                <Tap onPress={() => setSheet('settings')} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-                  <Type size={21} color={theme.text} />
-                </Tap>
-              )}
+              <Tap testID="reader-settings" onPress={() => setSheet('settings')} accessibilityLabel={tx('Ajustes de lectura', 'Reading settings')} accessibilityRole="button" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                <Type size={21} color={theme.text} />
+              </Tap>
             </View>
           </Animated.View>
           <Animated.View
@@ -525,6 +572,7 @@ export default function ReaderScreen() {
                 <Txt v="mono" color={theme.accent}>
                   {formatClock(tracker.sessionSec)}
                 </Txt>
+                {targetMin !== null && <Txt v="caption" color={theme.text}>{tx('Sesión de', 'Session of')} {targetMin} min</Txt>}
                 {tracker.idle && (
                   <Txt v="caption" color={theme.muted}>
                     {tx('en pausa', 'paused')}
@@ -548,9 +596,9 @@ export default function ReaderScreen() {
         </>
       )}
 
-      <LiveToast theme={theme} top={insets.top + (chrome ? 70 : 12)} />
-      <ReaderSettingsSheet open={sheet === 'settings'} onClose={() => setSheet('none')} />
-      {content && <TocSheet open={sheet === 'toc'} onClose={() => setSheet('none')} chapters={content.chapters} current={chapter} theme={theme} onPick={(i) => goChapter(i)} />}
+      <LiveToast theme={theme} top={insets.top + (chrome ? 70 : 12)} enabled={!textOnly && sheet === 'none' && !error && !loading} targetMin={targetMin} sessionSec={tracker.sessionSec} />
+      <ReaderSettingsSheet open={sheet === 'settings'} onClose={dismissSheet} fixedLayout={isPdf} />
+      {content && <TocSheet open={sheet === 'toc'} onClose={dismissSheet} chapters={content.chapters} current={chapter} theme={theme} onPick={(i) => goChapter(i)} />}
     </View>
   );
 }

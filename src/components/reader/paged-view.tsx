@@ -427,7 +427,7 @@ export function PagedView<T extends PagedItem>({ items, renderItem, initialIndex
 
   return (
     <GestureDetector gesture={gesture}>
-      <View style={{ flex: 1, overflow: 'hidden', backgroundColor: bg }} onLayout={onFrame}>
+      <View testID="reader-pages" style={{ flex: 1, overflow: 'hidden', backgroundColor: bg }} onLayout={onFrame}>
         {peekLayer}
         <Animated.View style={[layer, { zIndex: 1 }, currentStyle]}>
           <View style={{ flex: 1, overflow: 'hidden' }} onLayout={onWindow}>

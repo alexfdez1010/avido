@@ -1,0 +1,37 @@
+# Requires a configured local QA profile with an unfinished synthetic book.
+# Opens the home screen, selects a small reading step, and enters the book.
+appId: ${APP_ID}
+name: Start a local reading step
+env:
+  APP_ID: com.alexfdez.avido.local
+tags:
+  - local
+  - reading
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: reading-plan
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: reading-plan
+    direction: DOWN
+- assertVisible:
+    id: reading-step-5
+    checked: true
+- tapOn:
+    id: reading-step-30
+    retryTapIfNoChange: true
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reading-step-30
+    checked: true
+- takeScreenshot: home-reading-plan
+- tapOn:
+    id: reading-start
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: reader-screen|reader-text-only
+- takeScreenshot: reading-start

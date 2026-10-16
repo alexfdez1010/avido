@@ -1,5 +1,6 @@
 import { FolderBrowserHost } from '@/components/folder-browser';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { NavigationBar } from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
@@ -79,6 +80,7 @@ export default function RootLayout() {
         <GluestackUIProvider mode={mode}>
           <ThemeProvider value={{ ...navTheme, colors: { ...navTheme.colors, background: p.bg, card: p.bg, text: p.text, border: p.line, primary: p.ember } }}>
             <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+            <NavigationBar hidden={false} />
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: p.bg }, animation: p.ink ? 'none' : 'fade' }}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="onboarding" options={{ animation: p.ink ? 'none' : 'fade', gestureEnabled: false }} />

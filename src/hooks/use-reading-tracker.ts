@@ -6,13 +6,19 @@ import { useLibrary } from '@/store/library';
 
 const IDLE_MS = 3 * 60 * 1000;
 
-export function useReadingTracker(bookId: string) {
+export function useReadingTracker(bookId: string, enabled = true) {
   const lastActivity = useRef(0);
   const pendingSec = useRef(0);
   const pendingPages = useRef(0);
   const session = useRef(0);
   const [sessionSec, setSessionSec] = useState(0);
   const [idle, setIdle] = useState(false);
+  const active = useRef(enabled);
+
+  useEffect(() => {
+    active.current = enabled;
+    lastActivity.current = Date.now();
+  }, [enabled]);
 
   const flush = useCallback(() => {
     const sec = pendingSec.current;
@@ -38,7 +44,7 @@ export function useReadingTracker(bookId: string) {
     let ticks = 0;
     lastActivity.current = Date.now();
     const timer = setInterval(() => {
-      if (AppState.currentState !== 'active') return;
+      if (!active.current || AppState.currentState !== 'active') return;
       if (Date.now() - lastActivity.current > IDLE_MS) {
         setIdle(true);
         return;

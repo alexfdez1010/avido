@@ -4,29 +4,45 @@ import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { Miga } from '@/components/mascot/miga';
 import { haptic, Txt } from '@/components/kit';
 import type { Celebration } from '@/game/types';
+import { tx } from '@/i18n';
 import { useGame } from '@/store/game';
 import type { ReaderTheme } from '@/theme/palette';
 
-export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
+type Toast = { type: 'celebration'; item: Celebration } | { type: 'target'; minutes: number };
+
+export function LiveToast({ theme, top, enabled = true, targetMin = null, sessionSec = 0 }: { theme: ReaderTheme; top: number; enabled?: boolean; targetMin?: number | null; sessionSec?: number }) {
   const queue = useGame((s) => s.queue);
   const seen = useRef(queue.length);
-  const [item, setItem] = useState<Celebration | null>(null);
+  const [targetHandled, setTargetHandled] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
+
+  // Consume this moment even in pure reading mode; never replay it later.
+  if (!targetHandled && targetMin !== null && sessionSec >= targetMin * 60) {
+    setTargetHandled(true);
+    if (enabled) setToast({ type: 'target', minutes: targetMin });
+  }
+  if (!enabled && toast) setToast(null);
 
   useEffect(() => {
-    if (queue.length > seen.current) {
-      setItem(queue[queue.length - 1]);
+    if (enabled && toast?.type !== 'target' && queue.length > seen.current) {
+      setToast({ type: 'celebration', item: queue[queue.length - 1] });
       haptic('success');
-      const t = setTimeout(() => setItem(null), 3200);
-      seen.current = queue.length;
-      return () => clearTimeout(t);
     }
     seen.current = queue.length;
-  }, [queue]);
+  }, [enabled, queue, toast?.type]);
 
-  if (!item) return null;
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 3200);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  if (!enabled || !toast) return null;
+  const item = toast.type === 'celebration' ? toast.item : null;
   return (
     <Animated.View
-      key={item.id}
+      testID={toast.type === 'target' ? 'reader-target-toast' : 'reader-live-toast'}
+      key={item?.id ?? 'reading-target'}
       entering={FadeInUp.duration(180)}
       exiting={FadeOutUp.duration(200)}
       pointerEvents="none"
@@ -47,13 +63,19 @@ export function LiveToast({ theme, top }: { theme: ReaderTheme; top: number }) {
         elevation: 10,
       }}
     >
-      <Miga size={38} mood="happy" still={theme.id === 'eink'} />
-      <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 16, color: theme.id === 'eink' ? '#FFFFFF' : '#F2B544' }}>{item.big && item.big.length <= 3 ? item.big : '✦'}</Txt>
-      <Txt v="label" style={{ flexShrink: 1, color: '#F3EDE2' }} numberOfLines={1}>
-        {item.title}
-        {item.kind === 'quest' || item.kind === 'achievement' ? ` · ${item.subtitle}` : ''}
-      </Txt>
-      {!!item.xp && (
+      <Miga size={38} mood="happy" still={toast.type === 'target' || theme.id === 'eink'} />
+      {item && <Txt style={{ fontFamily: 'Fraunces_900Black_Italic', fontSize: 16, color: theme.id === 'eink' ? '#FFFFFF' : '#F2B544' }}>{item.big && item.big.length <= 3 ? item.big : '✦'}</Txt>}
+      {toast.type === 'target' ? (
+        <Txt v="label" style={{ flexShrink: 1, color: '#F3EDE2' }}>
+          {tx(`Ya llevas ${toast.minutes} minutos leyendo`, `You’ve been reading for ${toast.minutes} minutes`)}
+        </Txt>
+      ) : (
+        <Txt v="label" style={{ flexShrink: 1, color: '#F3EDE2' }} numberOfLines={1}>
+          {toast.item.title}
+          {toast.item.kind === 'quest' || toast.item.kind === 'achievement' ? ` · ${toast.item.subtitle}` : ''}
+        </Txt>
+      )}
+      {!!item?.xp && (
         <Txt v="mono" style={{ color: theme.id === 'eink' ? '#FFFFFF' : '#F2B544' }}>
           +{Math.round(item.xp)}
         </Txt>

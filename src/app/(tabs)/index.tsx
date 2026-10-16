@@ -12,6 +12,7 @@ import { levelProgress, levelTitle, streakMultiplier } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
 import { dayKey, formatLongDate, greeting } from '@/lib/dates';
 import { pickFolder } from '@/lib/library';
+import { DEFAULT_SESSION_TARGET, SESSION_TARGETS, type SessionTarget } from '@/lib/reading-plan';
 import { FINISH_THRESHOLD, type Book } from '@/lib/types';
 import { useGame, useStreak } from '@/store/game';
 import { useLibrary } from '@/store/library';
@@ -70,9 +71,7 @@ function DayCard() {
   const [active, setActive] = useState(false);
   useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
   const mult = streakMultiplier(streak);
-  const hour = new Date().getHours();
-  const danger = !met && streak > 0 && hour >= 18;
-  const left = Math.max(0, goal - Math.floor(sec / 60));
+  const left = Math.max(0, Math.ceil(goal - sec / 60));
   return (
     <Card style={{ padding: 0 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18, padding: 18 }}>
@@ -80,8 +79,8 @@ function DayCard() {
           <Miga size={86} mood={met ? 'happy' : 'reading'} active={active} interactive />
         </Ring>
         <View style={{ flex: 1, gap: 4 }}>
-          <Txt v="eyebrow" color={met ? p.mint : danger ? p.ember : p.muted}>
-            {met ? tx('Meta cumplida', 'Goal reached') : danger ? tx('Racha en peligro', 'Streak at risk') : tx('Meta de hoy', "Today's goal")}
+          <Txt v="eyebrow" color={met ? p.mint : p.muted}>
+            {met ? tx('Meta cumplida', 'Goal reached') : tx('Meta de hoy', "Today's goal")}
           </Txt>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
             <Txt v="numeral" style={{ fontSize: 40, lineHeight: 44 }}>
@@ -121,11 +120,12 @@ function DayCard() {
 
 function NowReading({ book }: { book: Book }) {
   const p = usePalette();
+  const [target, setTarget] = useState<SessionTarget>(DEFAULT_SESSION_TARGET);
   const pages = book.totalChars ? Math.round((book.totalChars * (1 - book.progress)) / 1500) : book.pdfPages ? Math.round(book.pdfPages * (1 - book.progress)) : 0;
   const open = () => router.push(`/reader/${book.id}`);
   return (
     <View>
-      <Tap onPress={open} scale={0.99} style={{ flexDirection: 'row', gap: 18 }}>
+      <Tap onPress={open} accessibilityRole="button" accessibilityLabel={tx(`Abrir ${book.title}`, `Open ${book.title}`)} scale={0.99} style={{ flexDirection: 'row', gap: 18 }}>
         <Cover book={book} width={116} />
         <View style={{ flex: 1, paddingTop: 2 }}>
           <Txt v="title" numberOfLines={3} style={{ fontSize: 25, lineHeight: 29 }}>
@@ -152,14 +152,36 @@ function NowReading({ book }: { book: Book }) {
           </View>
         </View>
       </Tap>
-      <View style={{ marginTop: 18, flexDirection: 'row', gap: 10 }}>
-        <View style={{ flex: 1 }}>
-          <Cta
-            label={book.progress > 0 ? tx('Seguir leyendo', 'Keep reading') : tx('Empezar a leer', 'Start reading')}
-            icon={<Play size={16} color={p.onEmber} fill={p.onEmber} />}
-            onPress={open}
-          />
+      <View testID="reading-plan" style={{ marginTop: 22, gap: 12 }}>
+        <View style={{ gap: 4 }}>
+          <Txt v="headline">{tx('Un rato para tu libro', 'A little time for your book')}</Txt>
+          <Txt v="caption" tone="soft">{tx('Elige un comienzo. Tú decides cuándo parar.', 'Choose a start. Stop whenever you like.')}</Txt>
         </View>
+        <View accessibilityRole="radiogroup" accessibilityLabel={tx('Duración de la sesión', 'Session length')} style={{ flexDirection: 'row', gap: 10 }}>
+          {SESSION_TARGETS.map((minutes) => (
+            <Tap
+              key={minutes}
+              testID={`reading-step-${minutes}`}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: target === minutes }}
+              accessibilityLabel={tx(`${minutes} minutos`, `${minutes} minutes`)}
+              onPress={() => setTarget(minutes)}
+              style={{ flex: 1, minHeight: 48, justifyContent: 'center', alignItems: 'center', borderRadius: 12, borderWidth: 1, borderColor: target === minutes ? p.ember : p.line, backgroundColor: target === minutes ? p.emberSoft : 'transparent' }}
+            >
+              <Txt v="label" tone={target === minutes ? 'ember' : 'soft'}>{minutes} min</Txt>
+            </Tap>
+          ))}
+        </View>
+        <Tap
+          testID="reading-start"
+          accessibilityRole="button"
+          accessibilityLabel={tx(`Leer ${target} minutos`, `Read for ${target} minutes`)}
+          onPress={() => router.push({ pathname: '/reader/[id]', params: { id: book.id, targetMin: String(target) } })}
+          style={{ backgroundColor: p.ember, borderRadius: 16, minHeight: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+        >
+          <Play size={16} color={p.onEmber} fill={p.onEmber} />
+          <Txt v="headline" color={p.onEmber}>{tx(`Leer ${target} min`, `Read for ${target} min`)}</Txt>
+        </Tap>
         {book.progress >= FINISH_THRESHOLD && (
           <Cta kind="quiet" label={tx('Terminar', 'Finish')} icon={<Check size={16} color={p.text} />} onPress={() => useGame.getState().finishBook(book.id)} />
         )}
@@ -233,7 +255,7 @@ export default function Today() {
       </Animated.View>
       <Animated.View entering={FadeIn.duration(180)}>
         <SectionTitle first>{hero ? (current ? tx('Ahora leyendo', 'Now reading') : tx('Para empezar', 'Up next')) : tx('Tu biblioteca', 'Your library')}</SectionTitle>
-        {hero ? <NowReading book={hero} /> : !folder ? <EmptyLibrary /> : (
+        {hero ? <NowReading key={hero.id} book={hero} /> : !folder ? <EmptyLibrary /> : (
           <Card>
             <Txt v="title">{tx('Tu carpeta está vacía', 'Your folder is empty')}</Txt>
             <View style={{ height: 16 }} />

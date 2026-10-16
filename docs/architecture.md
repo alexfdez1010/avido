@@ -34,7 +34,7 @@ tools/                Asset generation scripts (app icons)
 
 ## Persistence
 
-All stores use Zustand `persist` with a JSON storage backed by `expo-file-system` (`store/storage.ts`):
+All stores use Zustand `persist` with JSON storage backed by AsyncStorage (`store/storage.ts`):
 
 | Store | Key | Contents |
 | --- | --- | --- |

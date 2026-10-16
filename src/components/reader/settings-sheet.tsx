@@ -58,14 +58,14 @@ function Segmented<T extends string>({ options, value, onChange, fg, muted, line
   );
 }
 
-function SlotPicker({ label, value, onChange, fg, muted, line, accent }: { label: string; value: FooterSlot; onChange: (v: FooterSlot) => void; fg: string; muted: string; line: string; accent: string }) {
+function SlotPicker({ label, value, onChange, fg, muted, line, accent, fixedLayout }: { label: string; value: FooterSlot; onChange: (v: FooterSlot) => void; fg: string; muted: string; line: string; accent: string; fixedLayout?: boolean }) {
   return (
     <View style={{ marginTop: 14 }}>
       <Txt v="caption" color={muted}>
         {label}
       </Txt>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-        {FOOTER_SLOTS.map((o) => {
+        {FOOTER_SLOTS.filter((o) => !fixedLayout || (o.id !== 'chapter' && o.id !== 'chapterLeft')).map((o) => {
           const on = o.id === value;
           return (
             <Tap
@@ -89,10 +89,11 @@ function SlotPicker({ label, value, onChange, fg, muted, line, accent }: { label
 
 const PREVIEW = { progress: 0.42, chapterLeftMin: 12, bookLeftMin: 254, page: 128, pages: 304, chapterTitle: tx('La casa del árbol', 'The tree house'), sessionSec: 1104 };
 
-export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function ReaderSettingsSheet({ open, onClose, fixedLayout = false }: { open: boolean; onClose: () => void; fixedLayout?: boolean }) {
   const r = useSettings((s) => s.reader);
   const setReader = useSettings((s) => s.setReader);
   const t = readerThemes[r.theme];
+  const defaultFooter = fixedLayout ? { ...DEFAULT_FOOTER, left: 'pages' as const } : DEFAULT_FOOTER;
   const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
   return (
     <Sheet open={open} onClose={onClose} bg={t.bg} fg={t.muted} scroll>
@@ -100,7 +101,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
         <Txt v="eyebrow" color={t.muted}>
           {tx('Lectura', 'Reading')}
         </Txt>
-        <Segmented<ReaderLayout>
+        {!fixedLayout && <Segmented<ReaderLayout>
           value={r.layout}
           onChange={(layout) => setReader({ layout })}
           fg={t.text}
@@ -111,14 +112,15 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             { id: 'paged', label: tx('Páginas', 'Pages'), hint: tx('Toca o desliza para pasar', 'Tap or swipe to turn') },
             { id: 'scroll', label: tx('Desplazamiento', 'Scroll'), hint: tx('Texto continuo', 'Continuous text') },
           ]}
-        />
+        />}
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
           <Txt v="eyebrow" color={t.muted}>
             {tx('Pie de página', 'Footer')}
           </Txt>
           <Tap
-            onPress={() => setReader({ footer: footerEmpty(r.footer) ? DEFAULT_FOOTER : { left: 'none', right: 'none', bar: false } })}
+            testID="reader-footer-clear"
+            onPress={() => setReader({ footer: footerEmpty(r.footer) ? defaultFooter : { left: 'none', right: 'none', bar: false } })}
             feedback="select"
             accessibilityRole="button"
             style={{ minHeight: 44, justifyContent: 'center', paddingLeft: 12 }}
@@ -135,12 +137,12 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             </Txt>
           ) : (
             <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 }}>
-              <ReaderFooter prefs={r.footer} input={PREVIEW} theme={{ ...t, bg: 'transparent' }} margin={16} bottomInset={10} />
+              <ReaderFooter prefs={r.footer} input={fixedLayout ? { ...PREVIEW, chapterLeftMin: null, chapterTitle: undefined } : PREVIEW} theme={{ ...t, bg: 'transparent' }} margin={16} bottomInset={10} />
             </View>
           )}
         </View>
-        <SlotPicker label={tx('Izquierda', 'Left')} value={r.footer.left} onChange={(left) => setReader({ footer: { ...r.footer, left } })} fg={t.text} muted={t.muted} line={t.line} accent={t.accent} />
-        <SlotPicker label={tx('Derecha', 'Right')} value={r.footer.right} onChange={(right) => setReader({ footer: { ...r.footer, right } })} fg={t.text} muted={t.muted} line={t.line} accent={t.accent} />
+        <SlotPicker fixedLayout={fixedLayout} label={tx('Izquierda', 'Left')} value={r.footer.left} onChange={(left) => setReader({ footer: { ...r.footer, left } })} fg={t.text} muted={t.muted} line={t.line} accent={t.accent} />
+        <SlotPicker fixedLayout={fixedLayout} label={tx('Derecha', 'Right')} value={r.footer.right} onChange={(right) => setReader({ footer: { ...r.footer, right } })} fg={t.text} muted={t.muted} line={t.line} accent={t.accent} />
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, marginTop: 6 }}>
           <Txt v="label" color={t.text}>
             {tx('Barra de progreso', 'Progress bar')}
@@ -148,6 +150,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
           <Switch value={r.footer.bar} onValueChange={(bar) => setReader({ footer: { ...r.footer, bar } })} trackColor={{ false: t.line, true: t.accent }} thumbColor="#fff" />
         </View>
 
+        {!fixedLayout && <>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
           <Txt v="eyebrow" color={t.muted}>
             {tx('Tamaño de letra', 'Text size')}
@@ -180,6 +183,8 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
           </Tap>
         </View>
 
+        </>}
+
         <Txt v="eyebrow" color={t.muted} style={{ marginTop: 22 }}>
           {tx('Tema', 'Theme')}
         </Txt>
@@ -188,7 +193,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             const th = readerThemes[id];
             const on = id === r.theme;
             return (
-              <Tap key={id} onPress={() => setReader({ theme: id })} feedback="select" style={{ flex: 1, alignItems: 'center', gap: 6 }}>
+              <Tap testID={`reader-theme-${id}`} key={id} onPress={() => setReader({ theme: id })} feedback="select" style={{ flex: 1, alignItems: 'center', gap: 6 }}>
                 <View style={{ width: '100%', aspectRatio: 1, borderRadius: 16, backgroundColor: th.bg, borderWidth: 2, borderColor: on ? th.accent : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
                   <Txt style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 20, color: th.text }}>Aa</Txt>
                 </View>
@@ -200,6 +205,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
           })}
         </View>
 
+        {!fixedLayout && <>
         <Txt v="eyebrow" color={t.muted} style={{ marginTop: 22 }}>
           {tx('Tipografía', 'Typeface')}
         </Txt>
@@ -248,6 +254,7 @@ export function ReaderSettingsSheet({ open, onClose }: { open: boolean; onClose:
             </View>
           )}
         </View>
+        </>}
       </View>
     </Sheet>
   );

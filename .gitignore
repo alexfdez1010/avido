@@ -17,6 +17,9 @@ npm-debug.*
 *.tsbuildinfo
 /coverage
 
+# Local Android verification evidence (APKs, screenshots, reports and logs)
+/artifacts/android/
+
 # Local Expo module build output
 modules/*/android/build/
 modules/*/android/.gradle/

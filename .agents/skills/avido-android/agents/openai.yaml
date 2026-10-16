@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Ávido Android'
+  short_description: 'Verify the native reader locally with Maestro and ADB'
+  default_prompt: 'Use $avido-android to verify these changes on the local Android emulator, preserving installed data and recording evidence.'
