@@ -8,9 +8,10 @@ Rules live in `src/game/` (pure functions) and are applied by `src/store/game.ts
 | --- | --- |
 | Reading | `(minutes × 6 + pages × 4) × streak multiplier` |
 | Daily goal met | `50 × streak multiplier` |
+| Chapter finished | 15 |
 | Quest completed | 40–90 depending on the quest |
 | All three daily quests | +100 |
-| Book finished | `300 + min(700, pages × 1.5)` |
+| Book finished | `300 + min(700, round(pages × 1.5))` |
 | Achievement unlocked | Defined per achievement |
 
 ## Levels
@@ -26,7 +27,7 @@ Rules live in `src/game/` (pure functions) and are applied by `src/store/game.ts
 
 ## Quests
 
-Three quests per day, picked deterministically from a pool seeded by the date (`src/game/quests.ts`). Targets scale with the daily goal.
+Three quests per day, picked deterministically from a pool seeded by the date (`src/game/quests.ts`). One is always a reading-time quest whose target scales with the daily goal; the other two come from the remaining pool. These are local rules, not server-assigned challenges or randomized purchases.
 
 ## Achievements
 
@@ -35,3 +36,9 @@ Three quests per day, picked deterministically from a pool seeded by the date (`
 ## Yearly challenge
 
 A yearly book target (`yearlyGoal`, 24 by default); the Trophies screen shows progress and whether they are ahead of or behind pace.
+
+## Measurement and limits
+
+The default daily goal is 20 minutes and can be changed in Profile. Time and progress are estimates recorded by the app, not measures of comprehension. Reward time pauses in the background, during loading or reader sheets, and after three minutes without reading interaction. A separately chosen session reminder continues to count foreground reading without requiring gestures. Reflowed page counts are estimates; PDF pages use the document's page count. Finishing a reflowed book estimates its length at 1,500 characters per page (with a fallback when length is unavailable).
+
+The mechanics are designed to make returning to a chosen book rewarding. The repository does not establish a clinical or experimentally proven effect on addiction, attention or habit formation. See [habit-loop.md](habit-loop.md) for the product hypothesis and reader controls.

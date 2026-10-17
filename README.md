@@ -1,58 +1,110 @@
-# Ávido
+# 📚 Ávido
 
-An Android book reader that turns reading into a game — XP, levels, streaks, daily quests, achievements and a yearly challenge — built to make you finish more books.
+### Get hooked on books
 
-Pick a folder on your device and Ávido picks up every book inside it.
+**A private Android reader that makes coming back to a book feel good**
 
-## Features
+Silicon Valley made a fortune getting us hooked on feeds. Ávido borrows the streaks, rewards and little wins — and puts them to work for your next chapter.
 
-- **Folder library** — choose a folder through Android's Storage Access Framework; Ávido scans it recursively and keeps it in sync. If the system picker doesn't work on a device, an in-app storage browser (all-files access) is available as a fallback.
-- **Discover classics** — browse, search and download public-domain EPUBs from [Project Gutenberg](https://www.gutenberg.org) straight into the books folder, filtered by Spanish, English or any language.
-- **Formats** — EPUB, PDF, TXT and Markdown (`.md`). EPUB/TXT/Markdown are reflowed with your typography settings; PDF is rendered page by page.
-- **Reader** — themes (Paper, Sepia, Dusk, Night, Ink (OLED), E-ink), custom typefaces (Literata, Newsreader, Fraunces, Atkinson Hyperlegible), font size, line height, margins, justification, table of contents and per-book progress.
-- **Gamification** — daily minute goal, streaks with freezes, streak XP multiplier, three daily quests, 32 achievements, yearly book challenge, activity heatmap and reminders. See [docs/gamification.md](docs/gamification.md).
-- **E-ink mode** — pure black-and-white palette, no animations and tap-to-turn pages. Enabled automatically on known e-ink Android devices, or manually from Profile.
-- **Languages** — Spanish (Spain) and English, selected from the device language (English fallback).
+Read a few pages, earn XP and watch your progress grow. Your books and reading history stay on your device, with no account, ads or analytics.
 
-## Install
+[⬇️ Download Android APK](https://github.com/alexfdez1010/avido/releases/latest/download/avido.apk) · [🌍 Explore the website · ES / EN](https://alexfdez1010.github.io/avido/) · [🤝 Contribute](CONTRIBUTING.md)
 
-Every push to `main` builds a signed APK and publishes it on [Releases](../../releases). Download the latest `avido-<version>.apk` and install it on Android.
+Android · Spanish & English · Free & open source · MIT licensed
 
-## Development
+## 👀 A little motivation, a lot of reading
 
-Requirements: Node 22, JDK 17 and the Android SDK.
+<p>
+  <img src="site/assets/app-home.webp" width="250" alt="Ávido Today screen showing reading progress and the current book" />
+  <img src="site/assets/app-reader.webp" width="250" alt="Ávido reader displaying a locally stored book in Spanish" />
+</p>
+
+Real Android app screenshots with local demonstration data.
+
+## 🔥 Make the next chapter easier to start
+
+- **Feel every little win** — Earn XP, level up and unlock 32 achievements as you read.
+- **Find your own rhythm** — Choose a daily goal, build a streak and let streak freezes cover an occasional missed day.
+- **See how far you've come** — Follow your reading activity and work towards your yearly book challenge.
+- **Have a reason to return** — Three daily quests and Miga, your little reading companion, add a playful nudge.
+
+Designed to encourage reading at your own pace. No habit or reading outcome is guaranteed.
+
+## 📖 Make yourself comfortable
+
+- **Bring your bookshelf** — Open EPUB, PDF, TXT and Markdown books from a folder on your device.
+- **Make the page yours** — Choose fonts, themes and spacing for reflowable books, or read PDFs page by page.
+- **Pick up where you left off** — Your place is saved for each book.
+- **Read on e-ink** — A monochrome mode, reduced motion and tap-to-turn pages suit Android e-ink devices.
+- **Find your next classic** — Browse and download from Project Gutenberg without leaving the app.
+
+The app follows your device language: Spanish (Spain) or English, with English as the fallback. Bring books without DRM, and check the copyright status of Gutenberg titles where you live. Releases are currently available for Android.
+
+## 🔒 Keep your reading to yourself
+
+No account to create. No ads between chapters. No analytics recording your reading habits. Your library, progress and preferences are stored on your device, and you can read local books offline.
+
+Discover needs the internet and connects to Project Gutenberg. For details about permissions, local storage and device backups, read the [privacy guide](docs/privacy.md).
+
+Open source under [MIT](LICENSE), so you can see how it works, make it yours and help make it better.
+
+## ⬇️ Three steps to your next book
+
+1. **Download** — On your Android device, tap [Download Android APK](https://github.com/alexfdez1010/avido/releases/latest/download/avido.apk). If your browser asks whether to keep the APK, confirm the download.
+2. **Install** — Open `avido.apk` from your downloads. If Android asks, open **Settings**, enable **Allow from this source** for the browser or file app you are using, then return and tap **Install**. You can turn that permission off again afterwards. Labels vary by Android version.
+3. **Read** — Open Ávido, choose your books folder and set your daily goal. Open a book, or find a classic in Discover.
+
+No computer or developer tools needed. You can also get the APK from the [latest release page](https://github.com/alexfdez1010/avido/releases/latest).
+
+If the folder picker doesn't work on your device, use the in-app storage browser. This fallback requests broader file access, explained in the [privacy guide](docs/privacy.md).
+
+## 🛠️ Build it yourself
+
+Use Node.js 22 and npm. For a local Android build, also install JDK 17 and the Android SDK, and connect a device or start an emulator.
 
 ```bash
+git clone https://github.com/alexfdez1010/avido.git
+cd avido
 npm ci
-npx expo prebuild --platform android --clean
-npx expo run:android            # development build on a device/emulator
+npm run android
 ```
 
-Checks to run before pushing:
+Ávido uses native modules, so Android development requires a development build rather than Expo Go. To restart the development server after installing that build:
 
 ```bash
-npx tsc --noEmit
-npx expo lint
-npx expo-doctor
+npm start -- --dev-client
 ```
 
-Local release APK:
+Run the project checks before submitting changes:
 
 ```bash
-npx expo prebuild --platform android --clean --no-install
-cd android && ./gradlew assembleRelease
-# → android/app/build/outputs/apk/release/app-release.apk
+npm run typecheck
+npm run lint
+npm test
 ```
 
-`android/` is generated (Continuous Native Generation) — never edit it by hand; use `app.config.ts` and config plugins in `plugins/`.
+`android/` and `ios/` are generated native projects. Configure native behavior in `app.config.ts` and `plugins/`; do not edit generated files by hand. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and [Android testing](docs/android-testing.md) for device validation.
 
-## Documentation
+## 🤝 Help more people fall for reading
 
-- [Architecture](docs/architecture.md) — project layout, data flow and key modules.
+Help improve the reader, make e-ink support more reliable, refine translations, fix an accessibility issue or report a book that doesn't render correctly. Small, focused contributions are welcome.
+
+Before starting a large change, [open an issue](https://github.com/alexfdez1010/avido/issues) to discuss it. Please don't attach copyrighted books or private reading data to public reports.
+
+## 🧭 Documentation
+
+- [Contributing](CONTRIBUTING.md) — setup, checks and pull requests.
+- [Privacy](docs/privacy.md) — local data, permissions and network connections.
+- [Architecture](docs/architecture.md) — project layout, data flow and persistence.
 - [Gamification](docs/gamification.md) — XP, levels, streaks, quests and achievements.
-- [Internationalization](docs/i18n.md) — how UI strings are translated.
-- [Releasing](docs/releasing.md) — CI workflow, versioning and signing.
+- [Habit design](docs/habit-loop.md) — product intent and the limits of outcome claims.
+- [Internationalization](docs/i18n.md) — Spanish and English UI strings.
+- [Android testing](docs/android-testing.md) — emulator and device verification.
+- [Releasing](docs/releasing.md) — CI builds, versioning and signing.
+- [GitHub Pages](docs/github-pages.md) — the bilingual website and deployment.
 
-## Tech stack
+Built with Expo SDK 57, React Native, Expo Router, TypeScript, Zustand, Reanimated, FlashList and gluestack-ui.
 
-Expo SDK 57 · React Native · Expo Router · TypeScript · gluestack-ui v5 (UniWind / Tailwind CSS 4) · Zustand · Reanimated · FlashList · JSZip · react-native-pdf.
+## ⚖️ License
+
+Ávido's source code is available under the [MIT license](LICENSE). Dependencies, bundled fonts and books retain their respective licenses and copyright terms.

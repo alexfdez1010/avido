@@ -69,6 +69,7 @@ jobs:
         run: |
           mkdir -p dist
           cp android/app/build/outputs/apk/release/app-release.apk "dist/avido-${APP_VERSION}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk dist/avido.apk
           ls -la dist
 
       - name: Save workflow artifact
@@ -90,4 +91,5 @@ jobs:
           body: |
             Ávido APK built automatically from `${{ github.sha }}`.
 
-            Download `avido-${{ env.APP_VERSION }}.apk` and install it on Android (allow "install unknown apps").
+            Download `avido.apk` and install it on Android (allow "install unknown apps").
+            The versioned `avido-${{ env.APP_VERSION }}.apk` is the same build.

@@ -7,7 +7,10 @@ isolated QA installation. The project uses npm and Expo SDK 57.
 
 ## Tooling and emulator
 
-On Alejandro's Mac:
+The commands below show Alejandro's existing macOS setup. For another machine,
+use its Android SDK, Java and Maestro installation paths and select an existing
+AVD or create a dedicated QA device. The app ID and data-preservation rules apply
+regardless of those paths.
 
 ```sh
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
