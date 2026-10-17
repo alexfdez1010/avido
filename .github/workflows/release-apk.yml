@@ -25,6 +25,7 @@ on:
       - '*-env.d.ts'
       - 'uniwind-types.d.ts'
       - '.github/workflows/release-apk.yml'
+      - '.github/android-signer.sha256'
   workflow_dispatch:
 
 permissions:
@@ -87,6 +88,7 @@ jobs:
         run: |
           npx tsc --noEmit
           npx expo lint
+          npm test
 
       - name: Prepare signing key
         env:
@@ -96,7 +98,7 @@ jobs:
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
             echo "AVIDO_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
           else
-            echo "::warning::ANDROID_KEYSTORE_BASE64 not set; signing with a throwaway debug key"
+            echo "::warning::Using Expo's shared debug key for compatibility with existing releases. The signer fingerprint is checked before publication."
           fi
 
       - name: Generate native project
@@ -130,6 +132,21 @@ jobs:
           cp android/app/build/outputs/apk/release/app-release.apk dist/avido.apk
           ls -la dist
 
+      - name: Verify signing identity and generate SHA-256 checksums
+        env:
+          EXPECTED_SIGNER_FILE: .github/android-signer.sha256
+        run: |
+          set -euo pipefail
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$apksigner" verify --print-certs "dist/avido-${APP_VERSION}.apk" > "$RUNNER_TEMP/apk-signer.txt"
+          actual=$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signer.txt")
+          expected=$(tr -d '[:space:]' < "$EXPECTED_SIGNER_FILE")
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::APK signing identity changed. Publication stopped to preserve in-place updates."
+            exit 1
+          fi
+          (cd dist && sha256sum "avido-${APP_VERSION}.apk" avido.apk > SHA256SUMS.txt)
+
       - name: Save workflow artifact
         uses: actions/upload-artifact@v4
         # The APK is also attached to the release; artifact quota must not block it.
@@ -147,9 +164,14 @@ jobs:
           name: Ávido ${{ env.APP_VERSION }}
           target_commitish: ${{ github.sha }}
           make_latest: true
-          files: dist/*.apk
+          files: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
           body: |
             Ávido APK built automatically from `${{ github.sha }}`.
 
             Download `avido.apk` and install it on Android (allow "install unknown apps").
             The versioned `avido-${{ env.APP_VERSION }}.apk` is the same build.
+
+            Obtainium: add https://github.com/alexfdez1010/avido and select the versioned APK.
+            Verify downloads against the attached `SHA256SUMS.txt`.

@@ -107,3 +107,23 @@ References: [Expo CLI](https://docs.expo.dev/more/expo-cli/),
 [SDK 57](https://docs.expo.dev/versions/v57.0.0/),
 [Maestro MCP](https://docs.maestro.dev/get-started/maestro-mcp),
 [ADB](https://developer.android.com/tools/adb).
+
+## Progress backup verification
+
+From Profile → Progress backup, export to a dedicated folder using the system
+picker. Confirm the JSON exists outside app storage, its payload SHA-256 matches,
+and it contains no book URIs or folder permissions. Import that file, check the
+replacement confirmation, restore, restart the app, and resume a synthetic book
+at its saved position. Canceling either picker must leave existing data intact.
+Book files are separate from progress backups; do not clear app data to test this.
+
+`npm test` covers portable matching, legacy IDs, checksum/schema rejection,
+ambiguous duplicates, storage errors and progress saved during asynchronous scans.
+Inspect APK permissions to confirm `MANAGE_EXTERNAL_STORAGE`,
+`READ_EXTERNAL_STORAGE` and `WRITE_EXTERNAL_STORAGE` are absent from the merged
+binary manifest, rather than merely absent from an explicit permission list.
+
+If Maestro cannot retrieve the hierarchy, record that failure and use ADB with
+native screenshots for a clearly identified manual check. Do not report the
+failed automated flows as passed. Keep screenshots, the exported test copy and
+scoped logs under `artifacts/android/` and restore temporary emulator settings.

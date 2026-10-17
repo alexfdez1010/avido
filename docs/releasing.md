@@ -18,7 +18,7 @@ apply to this manual action.
 
 Each release attaches `avido.apk` for an easy, stable download URL and
 `avido-<version>.apk` for a filename that identifies the version. Both files contain
-the same APK. The website and README link to
+the same APK. `SHA256SUMS.txt` lists the SHA-256 digest of both names. The website and README link to
 [`releases/latest/download/avido.apk`](https://github.com/alexfdez1010/avido/releases/latest/download/avido.apk),
 which follows the latest published release. Earlier releases need an `avido.apk`
 asset added before that URL works for them.
@@ -77,7 +77,7 @@ replacement for native-reader verification; see [android-testing.md](android-tes
 
 ## Signing
 
-The `plugins/with-release-signing.js` config plugin adds a release signing config that reads `AVIDO_KEYSTORE_PATH`, `AVIDO_KEYSTORE_PASSWORD`, `AVIDO_KEY_ALIAS` and `AVIDO_KEY_PASSWORD`. Without a signing-key path it falls back to the debug keystore. CI warns when the keystore secret is missing; a successful workflow alone does not establish a stable production signing identity.
+The `plugins/with-release-signing.js` config plugin adds a release signing config that reads `AVIDO_KEYSTORE_PATH`, `AVIDO_KEYSTORE_PASSWORD`, `AVIDO_KEY_ALIAS` and `AVIDO_KEY_PASSWORD`. Without a signing-key path it falls back to the debug keystore. CI verifies every APK against `.github/android-signer.sha256` before publication and stops on a mismatch. This pins the certificate used by the existing v1.0.25 release and prevents an accidental key change. The current certificate belongs to Expo’s shared template debug key, not a private production key. This preserves update compatibility but does not provide an exclusive publisher identity. Do not silently replace it: moving to a private production key needs an explicit migration plan, including progress export/import for installations that Android cannot update in place. The fallback key is deterministic in the current template; the fingerprint gate catches any future template change.
 
 To sign with your own key, add these repository secrets:
 
@@ -90,8 +90,7 @@ To sign with your own key, add these repository secrets:
 
 Changing the signing key later prevents in-place updates of already installed APKs.
 Keep the same key for releases that should update one another and retain a secure
-backup outside the repository. A CI-generated debug key can differ between runs,
-so that fallback is unsuitable for a dependable public update path.
+backup outside the repository. Never regenerate or swap a signing key as part of a routine release. The certificate gate rejects keys that differ from the pinned release identity.
 
 ## Books and third-party assets
 
@@ -100,3 +99,7 @@ Project Gutenberg titles are offered under its [terms and permissions](https://w
 status can vary by jurisdiction. Keep book fixtures synthetic or use material you
 have permission to redistribute. Font packages and other dependencies retain
 their own licenses.
+
+## Obtainium
+
+The website and README provide an Obtainium import link using the official redirect service. It tracks this repository’s tagged GitHub releases and filters assets to `^avido-[0-9]+\.[0-9]+\.[0-9]+\.apk$`, so the identical generic APK is not a second choice. No listing submission is required. Keep one release per version, a versioned APK attachment, monotonically increasing version codes, and the pinned signing identity. See the [official deep-link documentation](https://wiki.obtainium.imranr.dev/deep_links/).

@@ -1,7 +1,7 @@
-import { Bell, BookMarked, Clock, Contrast, FolderOpen, Minus, Moon, Plus, Sun, Timer, Vibrate } from 'lucide-react-native';
+import { Bell, BookMarked, Clock, Contrast, Download, FolderOpen, Minus, Moon, Plus, Sun, Timer, Upload, Vibrate } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import { Card, PageHeader, Screen, SectionTitle, StatRow, Tap, Txt } from '@/components/kit';
 import { Miga } from '@/components/mascot/miga';
@@ -10,12 +10,13 @@ import { levelProgress, levelTitle } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
 import { pickFolder } from '@/lib/library';
 import { scheduleReminders } from '@/lib/notifications';
+import { exportProgress, importProgress, pickProgressBackup } from '@/lib/progress-transfer';
 import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
-import { tx } from '@/i18n';
+import { LOCALE, plural, tx } from '@/i18n';
 
-function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean }) {
+function Row({ icon, title, hint, right, onPress, last, disabled, testID }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean; disabled?: boolean; testID?: string }) {
   const p = usePalette();
   const body = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 60, paddingVertical: 10, borderBottomWidth: last ? 0 : 1, borderBottomColor: p.ink ? p.faint : p.line }}>
@@ -31,7 +32,7 @@ function Row({ icon, title, hint, right, onPress, last }: { icon: React.ReactNod
       {right}
     </View>
   );
-  return onPress ? <Tap onPress={onPress} scale={0.99}>{body}</Tap> : body;
+  return onPress ? <Tap testID={testID} disabled={disabled} accessibilityState={{ disabled }} onPress={onPress} scale={0.99} style={{ opacity: disabled ? 0.5 : 1 }}>{body}</Tap> : body;
 }
 
 function Stepper({ value, unit, onChange, step, min, max }: { value: number; unit: string; onChange: (v: number) => void; step: number; min: number; max: number }) {
@@ -56,6 +57,42 @@ function Stepper({ value, unit, onChange, step, min, max }: { value: number; uni
 export default function Profile() {
   const p = usePalette();
   const [active, setActive] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+  const transferError = () => Alert.alert(
+    tx('No se pudo completar la copia', 'Could not complete the backup'),
+    tx('Comprueba que el archivo sea una copia de Ávido válida y que haya espacio disponible. Tus datos actuales se conservan si el archivo no es válido.', 'Check that the file is a valid Ávido backup and that storage is available. Invalid files leave your current data unchanged.')
+  );
+  const exportBackup = async () => {
+    setTransferring(true);
+    try {
+      if (await exportProgress()) Alert.alert(tx('Copia guardada', 'Backup saved'), tx('El archivo de progreso se ha guardado en la carpeta que has elegido.', 'The progress file was saved in your chosen folder.'));
+    } catch { transferError(); } finally { setTransferring(false); }
+  };
+  const importBackup = async () => {
+    setTransferring(true);
+    try {
+      const backup = await pickProgressBackup();
+      if (!backup) { setTransferring(false); return; }
+      const bookCount = `${backup.books.length} ${plural(backup.books.length, ['libro', 'libros'], ['book', 'books'])}`;
+      Alert.alert(
+        tx('¿Restaurar el progreso?', 'Restore progress?'),
+        tx(
+          `Copia del ${new Date(backup.exportedAt).toLocaleDateString(LOCALE)} con ${bookCount}. Reemplazará el progreso, el historial, los logros y los objetivos actuales. Los archivos de tus libros se conservan.`,
+          `Backup from ${new Date(backup.exportedAt).toLocaleDateString(LOCALE)} with ${bookCount}. This replaces current progress, history, achievements and goals. Your book files are kept.`
+        ),
+        [
+          { text: tx('Cancelar', 'Cancel'), style: 'cancel', onPress: () => setTransferring(false) },
+          { text: tx('Restaurar', 'Restore'), style: 'destructive', onPress: async () => {
+            try {
+              await importProgress(backup);
+              Alert.alert(tx('Progreso restaurado', 'Progress restored'), tx('Si faltan libros, selecciona su carpeta. Se reconocerán por su nombre y tamaño.', 'If books are missing, select their folder. Books are matched by filename and size.'));
+            } catch { transferError(); } finally { setTransferring(false); }
+          } },
+        ],
+        { cancelable: false }
+      );
+    } catch { transferError(); setTransferring(false); }
+  };
   useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
   const s = useSettings();
   const xp = useGame((g) => g.xp);
@@ -63,6 +100,7 @@ export default function Profile() {
   const finished = useGame((g) => g.finished.length);
   const totalSec = useGame((g) => g.totalSec);
   const folderName = useLibrary((l) => l.folderName);
+  const folderUri = useLibrary((l) => l.folderUri);
   const lp = levelProgress(xp);
   const streak = computeStreak(days);
   const activeDays = Object.values(days).filter((d) => d.sec > 0).length;
@@ -101,9 +139,18 @@ export default function Profile() {
         <Row icon={<BookMarked size={17} color={p.gold} />} title={tx('Libros este año', 'Books this year')} last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
       </Card>
 
+      <SectionTitle>{tx('Copia de progreso', 'Progress backup')}</SectionTitle>
+      <Card style={{ paddingVertical: 0 }}>
+        <Row testID="progress-export" disabled={transferring} icon={<Upload size={17} color={p.soft} />} title={tx('Exportar progreso', 'Export progress')} onPress={exportBackup} />
+        <Row testID="progress-import" disabled={transferring} icon={<Download size={17} color={p.soft} />} title={tx('Importar progreso', 'Import progress')} onPress={importBackup} last />
+      </Card>
+      <Txt v="caption" tone="muted" style={{ marginTop: 10 }} accessibilityLiveRegion="polite">
+        {transferring ? tx('Preparando copia…', 'Preparing backup…') : tx('Incluye posiciones, estadísticas, logros y objetivos. Guarda la copia fuera de la app; los libros no se incluyen.', 'Includes positions, statistics, achievements and goals. Save the backup outside the app; book files are not included.')}
+      </Txt>
+
       <SectionTitle>{tx('Ajustes', 'Settings')}</SectionTitle>
       <Card style={{ paddingVertical: 0 }}>
-        <Row icon={<FolderOpen size={17} color={p.soft} />} title={tx('Carpeta de libros', 'Books folder')} hint={folderName ?? tx('Sin seleccionar', 'Not selected')} onPress={pickFolder} right={<Txt v="label" tone="ember">{tx('Cambiar', 'Change')}</Txt>} />
+        <Row icon={<FolderOpen size={17} color={p.soft} />} title={tx('Carpeta de libros', 'Books folder')} hint={folderUri?.startsWith('file:///storage/') ? tx('Selecciona de nuevo para limitar el acceso', 'Select again to limit file access') : folderName ?? tx('Sin seleccionar', 'Not selected')} onPress={pickFolder} right={<Txt v="label" tone="ember">{tx('Cambiar', 'Change')}</Txt>} />
         <Row
           icon={<Bell size={17} color={p.soft} />}
           title={tx('Recordatorios', 'Reminders')}

@@ -243,3 +243,20 @@ test('the film and accessible screenshot carousel share the product showcase', (
     }
   }
 });
+
+test('Obtainium links import the production app and select only versioned APK assets', () => {
+  for (const file of ['index.html', 'es/index.html', 'en/index.html']) {
+    const link = tags(read(file), 'a').find((tag) => tag.href?.startsWith('https://apps.obtainium.imranr.dev/redirect?'));
+    assert.ok(link, `${file} needs an Obtainium link`);
+    const deepLink = new URL(link.href).searchParams.get('r');
+    assert.ok(deepLink.startsWith('obtainium://app/'));
+    const config = JSON.parse(decodeURIComponent(deepLink.slice('obtainium://app/'.length)));
+    assert.equal(config.id, 'com.alexfdez.avido');
+    assert.equal(config.url, 'https://github.com/alexfdez1010/avido');
+    const filter = new RegExp(JSON.parse(config.additionalSettings).apkFilterRegEx);
+    assert.ok(filter.test('avido-1.0.25.apk'));
+    assert.ok(!filter.test('avido.apk'));
+    assert.ok(!filter.test('avido-1x0x25.apk'));
+    assert.ok(tags(read(file), 'a').some((tag) => tag.href?.endsWith('/SHA256SUMS.txt')));
+  }
+});

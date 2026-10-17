@@ -1,4 +1,6 @@
 import { Directory, File } from 'expo-file-system';
+import { Alert } from 'react-native';
+import { CryptoDigestAlgorithm, digestStringAsync } from 'expo-crypto';
 
 import { useLibrary, useScan } from '@/store/library';
 
@@ -7,7 +9,6 @@ import { clearBookCache } from './paths';
 import { hashString, hueFor } from './hash';
 import type { Book, BookFormat } from './types';
 import { tx } from '@/i18n';
-import { openFolderBrowser } from '@/store/folder-browser';
 
 const EXT: Record<string, BookFormat> = { epub: 'epub', pdf: 'pdf', txt: 'txt', md: 'md', markdown: 'md' };
 
@@ -33,6 +34,7 @@ function collect(dir: Directory, depth: number, out: File[]) {
   try {
     entries = dir.list();
   } catch {
+    if (depth === 0) throw new Error('Books folder is no longer accessible');
     return;
   }
   for (const e of entries) {
@@ -64,7 +66,10 @@ export async function pickFolder(): Promise<PickResult> {
     const cancelled = e instanceof Error && /cancel/i.test(e.message);
     if (!cancelled) {
       console.warn('Folder picker failed', e);
-      openFolderBrowser();
+      Alert.alert(
+        tx('No se pudo abrir la carpeta', 'Could not open the folder'),
+        tx('Vuelve a intentarlo y elige una carpeta con el selector del sistema. Solo se necesita acceso a esa carpeta.', 'Try again and choose a folder with the system picker. Only that folder needs access.')
+      );
     }
     return cancelled ? 'cancelled' : 'failed';
   }
@@ -75,8 +80,18 @@ export async function pickFolder(): Promise<PickResult> {
 
 let scanPromise: Promise<void> | null = null;
 
+export function waitForLibraryScan(): Promise<void> {
+  return scanPromise ?? Promise.resolve();
+}
+
 export function scanLibrary(): Promise<void> {
-  if (!scanPromise) scanPromise = doScan().finally(() => (scanPromise = null));
+  if (!scanPromise) scanPromise = (async () => {
+    let folder: string | undefined;
+    do {
+      folder = useLibrary.getState().folderUri;
+      await doScan();
+    } while (folder !== useLibrary.getState().folderUri);
+  })().finally(() => (scanPromise = null));
   return scanPromise;
 }
 
@@ -90,25 +105,35 @@ async function doScan() {
     collect(new Directory(folderUri), 0, files);
     const next: Record<string, Book> = {};
     for (const b of Object.values(prev)) {
-      if (b.firstOpenedAt || b.finishedAt) next[b.id] = { ...b, missing: true };
+      if (b.firstOpenedAt || b.finishedAt || b.progress || b.readSeconds || b.missing) next[b.id] = { ...b, missing: true };
     }
     const prevByUri = new Map(Object.values(prev).map((b) => [b.uri, b]));
+    const restoredByFile = new Map<string, Book[]>();
+    for (const b of Object.values(prev)) {
+      if (!b.uri) {
+        const key = `${b.fileName}:${b.size}`;
+        restoredByFile.set(key, [...(restoredByFile.get(key) ?? []), b]);
+      }
+    }
     const foundUris = new Set(files.map((f) => f.uri));
     const claimed = new Set<string>();
-    files.forEach((f) => {
+    for (const f of files) {
       const name = f.name ?? f.uri;
       const format = formatOf(name)!;
       const size = f.size ?? 0;
-      const fileId = () => hashString(`${name}:${size}`);
-      const moved = prev[fileId()];
+      const fileId = await digestStringAsync(CryptoDigestAlgorithm.SHA256, `${name}:${size}`);
+      // Keep legacy IDs so reader caches and finished-book references remain valid.
+      const moved = prev[fileId] ?? prev[hashString(`${name}:${size}`)];
+      const restored = restoredByFile.get(`${name}:${size}`) ?? [];
       const old =
         prevByUri.get(f.uri) ??
-        (moved && !foundUris.has(moved.uri) && !claimed.has(moved.id) ? moved : undefined);
+        (moved && moved.fileName === name && moved.size === size && !foundUris.has(moved.uri) && !claimed.has(moved.id) ? moved : undefined) ??
+        (restored.length === 1 && !claimed.has(restored[0].id) ? restored[0] : undefined);
       if (old) claimed.add(old.id);
       const taken = (k: string) => next[k] && next[k].uri !== (old?.uri ?? f.uri);
-      let id = old?.id ?? fileId();
+      let id = old?.id ?? fileId;
       if (taken(id)) {
-        id = hashString(`${f.uri}:${size}`);
+        id = await digestStringAsync(CryptoDigestAlgorithm.SHA256, `${f.uri}:${size}`);
         while (taken(id)) id += '~';
       }
       const guess = titleFromFileName(name);
@@ -129,7 +154,14 @@ async function doScan() {
             readSeconds: 0,
             metaLoaded: format !== 'epub',
           };
-    });
+    }
+    if (useLibrary.getState().folderUri !== folderUri) return;
+    // Hashing yields to the reader; retain progress saved while the scan ran.
+    const latest = useLibrary.getState().books;
+    for (const [id, book] of Object.entries(next)) {
+      if (prev[id] && !latest[id]) { delete next[id]; continue; }
+      if (latest[id]) next[id] = { ...latest[id], uri: book.uri, fileName: book.fileName, missing: book.missing };
+    }
     replaceBooks(next);
     const pending = Object.values(next).filter((b) => !b.metaLoaded && !b.missing);
     for (let i = 0; i < pending.length; i++) {

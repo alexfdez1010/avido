@@ -59,7 +59,19 @@ Open source under [MIT](LICENSE), so you can see how it works, make it yours and
 
 No computer or developer tools needed. You can also get the APK from the [latest release page](https://github.com/alexfdez1010/avido/releases/latest).
 
-If the folder picker doesn't work on your device, use the in-app storage browser. This fallback requests broader file access, explained in the [privacy guide](docs/privacy.md).
+Ávido only accesses the folder you select with Android’s system picker; it does not request all-files access. If a folder selected by an older version stops working, select it again in Profile → Books folder.
+
+### Updates with Obtainium
+
+[Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%257B%2522id%2522%253A%2522com.alexfdez.avido%2522%252C%2522url%2522%253A%2522https%253A%252F%252Fgithub.com%252Falexfdez1010%252Favido%2522%252C%2522author%2522%253A%2522alexfdez1010%2522%252C%2522name%2522%253A%2522%25C3%2581vido%2522%252C%2522additionalSettings%2522%253A%2522%257B%255C%2522apkFilterRegEx%255C%2522%253A%255C%2522%255Eavido-%255B0-9%255D%252B%255C%255C%255C%255C.%255B0-9%255D%252B%255C%255C%255C%255C.%255B0-9%255D%252B%255C%255C%255C%255C.apk%2524%255C%2522%257D%2522%257D) to track tagged GitHub releases and receive update notifications. Install [Obtainium](https://github.com/ImranR98/Obtainium/releases/latest) first, or use the link’s installation prompt. You can also paste `https://github.com/alexfdez1010/avido` into Obtainium and filter APK names with `^avido-[0-9]+\.[0-9]+\.[0-9]+\.apk$` to select the versioned APK. The generic `avido.apk` is the same build and remains available for direct downloads.
+
+Install updates over the existing app. Every release includes `SHA256SUMS.txt`; run `sha256sum avido.apk` (or `shasum -a 256 avido.apk` on macOS) and compare the result with the matching filename in that file. Publication checks the signing certificate against the pinned fingerprint to prevent accidental incompatible updates. See [release signing](docs/releasing.md#signing) for the current signing limitations.
+
+### Back up reading progress
+
+In **Profile → Progress backup**, choose **Export progress** and save the JSON outside the app, then use **Import progress** on the destination installation. The copy includes book positions, reading times, daily history, XP, achievements, finished books, name and goals. Import validates its SHA-256 checksum and contents, then asks before replacing current progress.
+
+Book files and folder permissions are not included. Select the books folder again on a new device; books are matched by filename and size. Keep those unchanged. Ambiguous duplicates stay missing until they can be identified. Backups are plain JSON, not encrypted; protect them like your reading history.
 
 ## 🛠️ Build it yourself
 

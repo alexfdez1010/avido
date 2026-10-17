@@ -11,7 +11,6 @@ import { Input, InputField } from '@/components/ui/input';
 import { usePalette } from '@/hooks/use-palette';
 import { pickFolder } from '@/lib/library';
 import { ensurePermission, scheduleReminders } from '@/lib/notifications';
-import { openFolderBrowser } from '@/store/folder-browser';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { fonts } from '@/theme/fonts';
@@ -168,11 +167,6 @@ export default function Onboarding() {
           {tx('El selector del sistema ha fallado.', 'The system picker failed.')}
         </Txt>
       )}
-      <Tap onPress={openFolderBrowser} style={{ alignSelf: 'flex-start', paddingVertical: 12, marginTop: 4 }}>
-        <Txt v="label" tone="muted">
-          {tx('¿No funciona? Buscar en el almacenamiento', 'Not working? Browse storage')}
-        </Txt>
-      </Tap>
     </View>,
   ];
 

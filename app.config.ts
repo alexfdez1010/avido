@@ -51,8 +51,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     permissions: [
       'android.permission.POST_NOTIFICATIONS',
       'android.permission.VIBRATE',
-      'android.permission.READ_EXTERNAL_STORAGE',
+    ],
+    blockedPermissions: [
       'android.permission.MANAGE_EXTERNAL_STORAGE',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
     ],
   },
   plugins: [

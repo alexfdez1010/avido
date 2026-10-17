@@ -5,6 +5,11 @@ const root = path.resolve(__dirname, '../site');
 const origin = 'https://avido.alejandrofernandezcamello.me/';
 const repo = 'https://github.com/alexfdez1010/avido';
 const download = `${repo}/releases/latest/download/avido.apk`;
+const obtainiumConfig = {
+  id: 'com.alexfdez.avido', url: repo, author: 'alexfdez1010', name: 'Ávido',
+  additionalSettings: JSON.stringify({ apkFilterRegEx: '^avido-[0-9]+\\.[0-9]+\\.[0-9]+\\.apk$' }),
+};
+const obtainium = `https://apps.obtainium.imranr.dev/redirect?${new URLSearchParams({ r: `obtainium://app/${encodeURIComponent(JSON.stringify(obtainiumConfig))}` })}`;
 const assetVersion = file => createHash('sha256').update(fs.readFileSync(path.join(root, 'assets', file))).digest('hex').slice(0, 12);
 const copy = {
   es: {
@@ -38,9 +43,9 @@ const copy = {
     installTitle: 'Tu próximo capítulo<br><em>empieza aquí.</em>',
     installIntro: 'La descarga es un archivo APK que se instala directamente en tu móvil Android.',
     steps: [['Descarga el APK', 'Pulsa Descargar para Android. Si el navegador te pregunta, confirma que quieres guardar avido.apk.'], ['Ábrelo e instala', 'Abre el archivo descargado. Si Android lo pide, entra en Ajustes y permite instalar desde ese navegador o gestor de archivos. Vuelve y pulsa Instalar. Puedes quitar ese permiso después.'], ['Elige tus libros', 'Abre Ávido y selecciona tu carpeta de libros. ¿Todavía no tienes ninguno? Entra en Descubrir para buscar clásicos.']],
-    releaseLink: 'Ver todas las versiones',
+    releaseLink: 'Ver todas las versiones', obtainium: 'Añadir a Obtainium', obtainiumHint: 'Recibe avisos de nuevas versiones y actualiza desde GitHub con Obtainium.', checksum: 'Verificar descarga (SHA-256)',
     faqTitle: 'Antes de pasar página.',
-    faqs: [['¿Es gratis de verdad?', 'Sí. El código se publica con licencia MIT. Puedes usarlo, estudiarlo, modificarlo y contribuir. Los libros tienen sus propios derechos.'], ['¿Funciona sin internet?', 'Puedes leer los libros que ya tienes en el dispositivo sin conexión. Buscar y descargar libros en Descubrir sí necesita internet.'], ['¿Tengo que mantener una racha?', 'Tú decides cómo leer. La lectura empieza sin temporizador; puedes elegir un aviso de 5, 15 o 30 minutos. Los logros acompañan tu progreso, no bloquean el lector.'], ['¿Y para iPhone?', 'De momento, Ávido está disponible para Android.'], ['¿Cómo actualizo?', 'Descarga la nueva versión e instálala sobre la anterior. Evita desinstalar para conservar tu progreso. Si Android no acepta la actualización, consulta las notas de esa versión.']],
+    faqs: [['¿Es gratis de verdad?', 'Sí. El código se publica con licencia MIT. Puedes usarlo, estudiarlo, modificarlo y contribuir. Los libros tienen sus propios derechos.'], ['¿Funciona sin internet?', 'Puedes leer los libros que ya tienes en el dispositivo sin conexión. Buscar y descargar libros en Descubrir sí necesita internet.'], ['¿Tengo que mantener una racha?', 'Tú decides cómo leer. La lectura empieza sin temporizador; puedes elegir un aviso de 5, 15 o 30 minutos. Los logros acompañan tu progreso, no bloquean el lector.'], ['¿Y para iPhone?', 'De momento, Ávido está disponible para Android.'], ['¿Cómo actualizo?', 'Descarga la nueva versión e instálala sobre la anterior. Evita desinstalar para conservar tu progreso. También puedes añadir Ávido a Obtainium para recibir avisos de nuevas versiones. Exporta tu progreso desde tu perfil para guardar una copia. Si Android no acepta la actualización, consulta las notas de esa versión.']],
     closing: 'Que tu próxima<br>obsesión tenga <em>páginas.</em>',
     contribute: 'Contribuir', license: 'Licencia MIT', skip: 'Saltar al contenido', lang: 'Idioma', compare: 'Comparar el objetivo del hábito',
     og: 'Ávido. Que te atrape un buen libro. Lector Android de código abierto.',
@@ -76,9 +81,9 @@ const copy = {
     installTitle: 'Your next chapter<br><em>starts here.</em>',
     installIntro: 'The download is an APK file that installs directly on your Android device.',
     steps: [['Download the APK', 'Tap Download for Android. If your browser asks, confirm that you want to save avido.apk.'], ['Open it and install', 'Open the downloaded file. If Android asks, go to Settings and allow installs from that browser or file manager. Return and tap Install. You can turn that permission off afterwards.'], ['Choose your books', 'Open Ávido and select your books folder. No books yet? Head to Discover to find a classic.']],
-    releaseLink: 'Browse all versions',
+    releaseLink: 'Browse all versions', obtainium: 'Add to Obtainium', obtainiumHint: 'Get new version alerts and update from GitHub with Obtainium.', checksum: 'Verify download (SHA-256)',
     faqTitle: 'Before you turn the page.',
-    faqs: [['Is it really free?', 'Yes. The source is released under the MIT license. Use it, study it, change it, contribute. Books have their own copyright terms.'], ['Does it work offline?', 'You can read books already on your device without an internet connection. Searching and downloading in Discover requires internet.'], ['Do I have to keep a streak?', 'You decide how to read. Reading starts without a timer; you can choose a 5, 15 or 30 minute reminder. Achievements accompany your progress without blocking the reader.'], ['What about iPhone?', 'Ávido is currently available for Android.'], ['How do I update?', 'Download the new version and install it over the existing app. Avoid uninstalling to keep your progress. If Android won’t accept the update, check that version’s release notes.']],
+    faqs: [['Is it really free?', 'Yes. The source is released under the MIT license. Use it, study it, change it, contribute. Books have their own copyright terms.'], ['Does it work offline?', 'You can read books already on your device without an internet connection. Searching and downloading in Discover requires internet.'], ['Do I have to keep a streak?', 'You decide how to read. Reading starts without a timer; you can choose a 5, 15 or 30 minute reminder. Achievements accompany your progress without blocking the reader.'], ['What about iPhone?', 'Ávido is currently available for Android.'], ['How do I update?', 'Download the new version and install it over the existing app. Avoid uninstalling to keep your progress. You can also add Ávido to Obtainium for new version alerts. Export your progress from your profile to keep a backup. If Android won’t accept the update, check that version’s release notes.']],
     closing: 'Let your next<br>obsession have <em>pages.</em>',
     contribute: 'Contribute', license: 'MIT license', skip: 'Skip to content', lang: 'Language', compare: 'Compare the goal of the habit',
     og: 'Ávido. Get hooked on a good book. Open source Android reader.',
@@ -175,7 +180,7 @@ ${isRoot ? '<script src="./assets/language.js"></script>' : ''}
 <p class="sr-only" data-carousel-status data-label="${lang === 'es' ? 'Capturas {start} a {end} de {total}' : 'Screenshots {start} to {end} of {total}'}" aria-live="polite" aria-atomic="true"></p>
 </div></div></section>
 <section id="privacy" class="privacy section"><div class="wrap privacy-layout"><div><h2>${c.privacyTitle}</h2><p class="privacy-intro">${c.privacyIntro}</p></div><div><dl>${c.privacy.map(([h,p])=>`<div><dt>${h}</dt><dd>${p}</dd></div>`).join('')}</dl><p class="privacy-fine">${c.privacyFine}</p><a class="text-link" href="${repo}/blob/main/docs/privacy.md">${c.privacyLink} ${arrow}</a></div></div></section>
-<section id="install" class="install wrap section"><div class="install-heading"><h2>${c.installTitle}</h2><p>${c.installIntro}</p>${button}<a class="text-link release-link" href="${repo}/releases/latest">${c.releaseLink} ${arrow}</a></div><ol class="install-steps">${c.steps.map(([h,p])=>`<li><h3>${h}</h3><p>${p}</p></li>`).join('')}</ol></section>
+<section id="install" class="install wrap section"><div class="install-heading"><h2>${c.installTitle}</h2><p>${c.installIntro}</p>${button}<a class="text-link release-link" href="${repo}/releases/latest">${c.releaseLink} ${arrow}</a><a class="text-link release-link obtainium-link" href="${obtainium}">${c.obtainium} ${arrow}</a><p class="obtainium-hint">${c.obtainiumHint}</p><a class="text-link release-link" href="${repo}/releases/latest/download/SHA256SUMS.txt">${c.checksum}</a></div><ol class="install-steps">${c.steps.map(([h,p])=>`<li><h3>${h}</h3><p>${p}</p></li>`).join('')}</ol></section>
 <section class="faq wrap section"><h2>${c.faqTitle}</h2><div>${c.faqs.map(([q,a])=>`<details><summary>${q}<span aria-hidden="true">+</span></summary><p>${a}</p></details>`).join('')}</div></section>
 <section class="closing section-dark"><div class="wrap"><h2>${c.closing}</h2>${button}</div></section>
 </main>

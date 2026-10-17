@@ -1,4 +1,3 @@
-import { FolderBrowserHost } from '@/components/folder-browser';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { NavigationBar } from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -55,12 +54,12 @@ export default function RootLayout() {
     SplashScreen.hideAsync().catch(() => {});
     useGame.getState().reconcile();
     useGame.getState().evaluate();
-    if (useLibrary.getState().folderUri) scanLibrary();
+    if (useLibrary.getState().folderUri) scanLibrary().catch(console.warn);
     scheduleReminders();
     const sub = AppState.addEventListener('change', (st) => {
       if (st === 'active') {
         useGame.getState().reconcile();
-        if (useLibrary.getState().folderUri) scanLibrary();
+        if (useLibrary.getState().folderUri) scanLibrary().catch(console.warn);
       } else if (st === 'background') {
         scheduleReminders();
       }
@@ -87,7 +86,6 @@ export default function RootLayout() {
               <Stack.Screen name="discover" options={{ animation: p.ink ? 'none' : 'fade' }} />
               <Stack.Screen name="reader/[id]" options={{ animation: p.ink ? 'none' : 'fade' }} />
             </Stack>
-            <FolderBrowserHost />
             <CelebrationHost />
           </ThemeProvider>
         </GluestackUIProvider>
