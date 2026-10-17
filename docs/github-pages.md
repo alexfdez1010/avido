@@ -41,11 +41,12 @@ the production website during a local preview.
 Run the focused, dependency-free website checks:
 
 ```sh
-node --test scripts/test-site.cjs
+node --test scripts/test-site.cjs scripts/test-carousel.cjs
 ```
 
 They check the localized SEO metadata, social image dimensions, structured data,
-language links, sitemap, and local link and asset targets. `npm test` includes these
+language links, sitemap, local link and asset targets, and carousel navigation
+with keyboard, touch interruption, reduced motion and resizing. `npm test` includes these
 checks alongside the application tests. When editing the site, also inspect desktop
 and mobile layouts in a browser.
 

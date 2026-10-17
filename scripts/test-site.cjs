@@ -224,3 +224,22 @@ test('each website language uses its own native app screenshots', () => {
     }
   }
 });
+
+test('the film and accessible screenshot carousel share the product showcase', () => {
+  for (const language of languages) {
+    const html = read(`${language}/index.html`);
+    const showcase = html.match(/<section id="inside"[^>]*>[\s\S]*?<\/section>/)?.[0];
+    assert.ok(showcase, 'Keep product evidence in one section');
+    assert.equal(tags(showcase, 'video').length, 1);
+    assert.equal(tags(showcase, 'figure').length, 6);
+    assert.ok(tags(showcase, 'div').some((tag) => 'data-carousel-track' in tag || tag.id === 'screenshots'));
+    const controls = tags(showcase, 'button');
+    assert.equal(controls.length, 2);
+    assert.ok(controls.every((tag) => tag['aria-controls'] === 'screenshots' && tag['aria-label']));
+    assert.equal(tags(showcase, 'p').find((tag) => tag['aria-live'] === 'polite')?.['aria-atomic'], 'true');
+    assert.ok(showcase.includes('id="film-heading"'), 'Keep existing shared film links working');
+    for (const heading of html.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi)) {
+      assert.doesNotMatch(heading[1], /33/, 'Do not show a separate film-duration heading');
+    }
+  }
+});

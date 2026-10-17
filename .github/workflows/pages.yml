@@ -7,12 +7,14 @@ on:
       - 'site/**'
       - 'scripts/build-site.cjs'
       - 'scripts/test-site.cjs'
+      - 'scripts/test-carousel.cjs'
       - '.github/workflows/pages.yml'
   pull_request:
     paths:
       - 'site/**'
       - 'scripts/build-site.cjs'
       - 'scripts/test-site.cjs'
+      - 'scripts/test-carousel.cjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -36,7 +38,7 @@ jobs:
       - name: Generate localized website
         run: node scripts/build-site.cjs
       - name: Check routes, metadata, and assets
-        run: node --test scripts/test-site.cjs
+        run: node --test scripts/test-site.cjs scripts/test-carousel.cjs
       - name: Upload website
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4

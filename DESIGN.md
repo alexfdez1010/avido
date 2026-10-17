@@ -117,7 +117,7 @@ The sidecar's eight-step OKLCH tonal ramps are generated panel-preview metadata,
 ### Hierarchy
 
 - **Display:** the frontmatter `display` role drives the hero. At the mobile breakpoint its size becomes `clamp(3.5rem, 12vw, 5.5rem)`; at widths up to 360px it becomes 3rem.
-- **Headline:** the frontmatter `headline` role drives section headings. The manifesto, film, FAQ and closing have observed contextual sizes in `site/assets/styles.css`; mobile section headings use `clamp(2.7rem, 10vw, 4rem)`.
+- **Headline:** the frontmatter `headline` role drives section headings. The manifesto, FAQ and closing have observed contextual sizes in `site/assets/styles.css`; mobile section headings use `clamp(2.7rem, 10vw, 4rem)`.
 - **Title:** bold sans serif definition terms use the `title` role; installation titles are slightly smaller (21px).
 - **Body:** the `body` role is the page default. Introductions rise to 20–21px on desktop; supporting descriptions use 15–18px, generally constrained to 32–48 characters per line. FAQ answers allow up to 65ch.
 - **Label:** navigation and text links use the `label` role. Supplementary labels and captions are smaller (11–14px depending on context and viewport). The format list has a modest 0.08em letter spacing.
@@ -130,12 +130,12 @@ All four font files are local under `site/assets/fonts/`: Fraunces black (900 no
 
 ## Layout
 
-The shared container `.wrap` is capped at 1280px with 56px side gutters. The default section rhythm uses the frontmatter `section` spacing. Two-column editorial layouts separate an expressive heading from readable content; the hero uses a 1.45:1 grid. The screenshot gallery places six images in three columns and two rows beneath its section heading, with benefit titles and short descriptions below each capture. Desktop gallery gaps are 48px vertically and 32px horizontally.
+The shared container `.wrap` is capped at 1280px with 56px side gutters. The default section rhythm uses the frontmatter `section` spacing. Two-column editorial layouts separate an expressive heading from readable content; the hero uses a 1.45:1 grid. The product showcase integrates the film directly beneath its existing section heading, followed by carousel controls and six screenshots with benefit titles and short descriptions. The carousel scrolls horizontally with snapping at every breakpoint. Desktop figures use `min(340px, calc((100% - 64px)/3))` with 32px gaps, showing three captures and a preview of the next when space permits.
 
 - **Above 1450px:** the hero gap increases to 110px and its app screenshot grows to 300px wide.
 - **At or below 1100px:** side gutters become 32px, regular section padding becomes 85px, most two-column gaps become 55px, and the hero screenshot becomes 240px wide.
-- **From 761px to 1000px:** the gallery changes from three columns to two, with each image figure capped at 300px wide and centered in its column.
-- **At or below 760px:** side gutters become 20px, editorial sections stack, regular section padding becomes 65px, and the hero screenshot becomes 220px wide. The header retains install and language controls while other section links hide. The comparison steps become individual label-and-copy rows. The gallery becomes a horizontal strip with scroll snapping; each figure is the smaller of 76vw and 280px wide, with a 24px gap.
+- **From 761px to 1000px:** carousel figures use `min(340px, calc((100% - 32px)/2))`, showing two captures and a preview of the next when space permits.
+- **At or below 760px:** side gutters become 20px, editorial sections stack, regular section padding becomes 65px, and the hero screenshot becomes 220px wide. The header retains install and language controls while other section links hide. The comparison steps become individual label-and-copy rows. Carousel figures become the smaller of 76vw and 280px wide with a 24px gap, leaving the following capture partially visible.
 - **At or below 360px:** the hero's smaller display size protects the grouped ending from overflow.
 
 The browser-language entry point redirects to Spanish for an `es` browser language and English otherwise, preserving the query and fragment. Explicit `/es/` and `/en/` URLs remain stable. The shared layout supports both translations and exposes an ES/EN switch with the current language identified.
@@ -175,9 +175,15 @@ The hero and gallery show real Android captures, with explicit width and height 
 
 The owner authorized a coherent demonstration library and reading history in the local capture environment, rendered by the actual native app. The library includes Gutenberg editions of Don Quijote and Crimen y castigo. Displayed statistics and achievements are illustrative samples, not evidence of real user outcomes. Keep provenance with shipping raster assets according to the asset workflow.
 
+### Screenshot Carousel
+
+The track uses horizontal scrolling and mandatory start snapping, with a thin forest scrollbar and an 8px leading inset to keep focus outlines visible. Circular 48px previous/next buttons have localized accessible labels, ink backgrounds and paper arrows; hover uses forest. Unavailable directions are disabled with muted colors. Buttons remain hidden until the carousel script initializes, while ordinary scrolling remains available without it.
+
+The labeled track is keyboard focusable. Left and right arrows move between screenshot positions; Home and End reach the ends. Touch and wheel scrolling remain available, and there is no automatic advance. A screen-reader-only polite live region announces the visible range after scrolling settles, excluding small previews. Reduced-motion navigation moves instantly. Slide groups have localized position labels; the screen keeps its interface free of visible counters.
+
 ### Launch Video
 
-The bilingual 33-second film pairs campaign copy with tall full-phone app captures, including holds on detailed statistics and achievements. Its composition omits slide folios, decorative rules and top labels. The player uses the browser's native controls, `playsinline`, `preload="none"`, a local poster and no autoplay. Each version offers a download fallback and a small music/credits link using `.film-credit`. The implemented player has no caption track or visible transcript disclosure, following the owner's explicit refinement. Media and posters are self-hosted with the site.
+The bilingual 33-second film pairs campaign copy with tall full-phone app captures, including holds on detailed statistics and achievements. Its composition omits slide folios, decorative rules and top labels. It sits within the showcase section without a separate visible title; its accessible name is “Descubre Ávido” / “Discover Ávido”. The wrapper retains `#film-heading` as an existing link destination. The player uses the browser's native controls, `playsinline`, `preload="none"`, a local poster and no autoplay. Each version offers a download fallback and a small music/credits link using `.film-credit`. The implemented player has no caption track or visible transcript disclosure, following the owner's explicit refinement. Media and posters are self-hosted with the site.
 
 ### FAQ
 
@@ -185,7 +191,7 @@ Native `details` and `summary` provide keyboard-operable disclosure. A decorativ
 
 ### Accessibility and Motion
 
-A visible-on-focus skip link leads to the main content. Semantic section headings, labeled navigation, explicit page languages and decorative SVGs hidden from assistive technology support orientation. Smooth anchor scrolling and short hover transitions are the only custom motion. `prefers-reduced-motion: reduce` disables smooth scrolling, transitions and animations. Reduced motion does not remove controls or information. The site implements no text input, form field or general-purpose card component.
+A visible-on-focus skip link leads to the main content. Semantic section headings, labeled navigation, explicit page languages and decorative SVGs hidden from assistive technology support orientation. Smooth anchor and carousel scrolling and short hover transitions supply custom motion. `prefers-reduced-motion: reduce` disables smooth anchor scrolling, transitions and animations; the carousel script also chooses instant scrolling. Reduced motion does not remove controls or information. The site implements no text input, form field or general-purpose card component.
 
 ## Do's and Don'ts
 

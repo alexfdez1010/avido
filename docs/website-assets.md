@@ -62,6 +62,10 @@ without autoplay or preloading. The README links its poster to the matching
 website player because GitHub does not reliably render repository-hosted HTML
 video elements in Markdown.
 
+The website groups the film and screenshot carousel in the same product showcase.
+The carousel supports touch scrolling, previous/next controls and keyboard
+navigation; it does not advance automatically.
+
 The videos' music is CC BY 4.0 and the sound effects are CC0. Keep
 `site/assets/video-credits.txt` linked beside the player and preserve its credits
 when sharing the video. Video source and reproduction notes are in

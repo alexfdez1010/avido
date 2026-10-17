@@ -25,3 +25,9 @@ reading history computed by the app. The six-image gallery includes detailed
 statistics and unlocked trophies. The 33-second film uses a taller portrait
 phone, with no subtitles, scene counters or secondary labels. Its simple native
 player retains only the necessary music credit link beneath it.
+
+The owner subsequently requested a carousel and closer video integration. The
+film now leads the existing product showcase under “Cada página cuenta”, without
+a separate duration heading. Six captures follow in one snapping horizontal
+carousel with previous/next controls, native touch scrolling, keyboard navigation
+and a screen-reader-only visible-range announcement. No automatic advancement.
