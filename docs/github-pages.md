@@ -1,15 +1,15 @@
 # Marketing website
 
 The independent static website in `site/` is published at
-[alexfdez1010.github.io/avido](https://alexfdez1010.github.io/avido/).
+[avido.alejandrofernandezcamello.me](https://avido.alejandrofernandezcamello.me/).
 It requires no app build, package installation, or client-side framework. The
 dependency-free `scripts/build-site.cjs` generator produces its localized HTML.
 
 ## Routes and language
 
-- `/avido/` chooses the first supported Spanish or English entry in the browser's preferred languages,
+- `/` chooses the first supported Spanish or English entry in the browser's preferred languages,
   with English as the fallback. Visible language links also work without JavaScript.
-- `/avido/es/` and `/avido/en/` are stable, fully rendered Spanish and English pages.
+- `/es/` and `/en/` are stable, fully rendered Spanish and English pages.
 - The language switch links directly to the other language, so a shared localized
   URL keeps its language instead of redirecting the visitor again.
 

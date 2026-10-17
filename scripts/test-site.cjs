@@ -4,7 +4,7 @@ const path = require('node:path');
 const { test } = require('node:test');
 
 const siteRoot = path.resolve(__dirname, '../site');
-const production = new URL('https://alexfdez1010.github.io/avido/');
+const production = new URL('https://avido.alejandrofernandezcamello.me/');
 const languages = ['es', 'en'];
 const read = (file) => readFileSync(path.join(siteRoot, file), 'utf8');
 

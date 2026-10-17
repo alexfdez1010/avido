@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://alexfdez1010.github.io/avido/sitemap.xml
+Sitemap: https://avido.alejandrofernandezcamello.me/sitemap.xml

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const root = path.resolve(__dirname, '../site');
-const origin = 'https://alexfdez1010.github.io/avido/';
+const origin = 'https://avido.alejandrofernandezcamello.me/';
 const repo = 'https://github.com/alexfdez1010/avido';
 const download = `${repo}/releases/latest/download/avido.apk`;
 const assetVersion = file => createHash('sha256').update(fs.readFileSync(path.join(root, 'assets', file))).digest('hex').slice(0, 12);

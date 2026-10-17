@@ -8,15 +8,15 @@ Silicon Valley made a fortune getting us hooked on feeds. Ávido borrows the str
 
 Read a few pages, earn XP and watch your progress grow. Your books and reading history stay on your device, with no account, ads or analytics.
 
-[⬇️ Download Android APK](https://github.com/alexfdez1010/avido/releases/latest/download/avido.apk) · [🌍 Explore the website · ES / EN](https://alexfdez1010.github.io/avido/) · [🤝 Contribute](CONTRIBUTING.md)
+[⬇️ Download Android APK](https://github.com/alexfdez1010/avido/releases/latest/download/avido.apk) · [🌍 Explore the website · ES / EN](https://avido.alejandrofernandezcamello.me/) · [🤝 Contribute](CONTRIBUTING.md)
 
 Android · Spanish & English · Free & open source · MIT licensed
 
 ## 🎬 Meet Ávido in 33 seconds
 
-[![Watch the Ávido launch video in English](site/assets/video-poster-en.jpg)](https://alexfdez1010.github.io/avido/en/#film-heading)
+[![Watch the Ávido launch video in English](site/assets/video-poster-en.jpg)](https://avido.alejandrofernandezcamello.me/en/#film-heading)
 
-[▶️ Watch in English](https://alexfdez1010.github.io/avido/en/#film-heading) · [▶️ Ver en español](https://alexfdez1010.github.io/avido/es/#film-heading) · [Download the video](https://alexfdez1010.github.io/avido/assets/avido-launch-en.mp4)
+[▶️ Watch in English](https://avido.alejandrofernandezcamello.me/en/#film-heading) · [▶️ Ver en español](https://avido.alejandrofernandezcamello.me/es/#film-heading) · [Download the video](https://avido.alejandrofernandezcamello.me/assets/avido-launch-en.mp4)
 
 [Music and credits](site/assets/video-credits.txt).
 
