@@ -157,6 +157,7 @@ test('neutral entry selects Spanish or English and preserves shared location', (
   const script = read('assets/language.js');
   for (const [preferred, expected] of [
     ['es-ES', 'es'], ['es-MX', 'es'], ['en-US', 'en'], ['fr-FR', 'en'], ['', 'en'],
+    [['ca-ES', 'es-ES', 'en-GB'], 'es'], [['fr-FR', 'en-GB', 'es-ES'], 'en'],
   ]) {
     let redirected;
     const location = {
@@ -167,7 +168,7 @@ test('neutral entry selects Spanish or English and preserves shared location', (
     };
     vm.runInNewContext(script, {
       URL,
-      navigator: { languages: preferred ? [preferred] : [], language: preferred },
+      navigator: { languages: Array.isArray(preferred) ? preferred : preferred ? [preferred] : [], language: Array.isArray(preferred) ? preferred[0] : preferred },
       window: { location },
     });
     assert.equal(redirected, `${production.href}${expected}/?from=readme#install`);
@@ -187,7 +188,7 @@ test('marketing headings have no full stops', () => {
   }
 });
 
-test('localized films have lightweight accessible players and real companion files', () => {
+test('localized films give visitors control without extra subtitle overlays', () => {
   for (const language of languages) {
     const html = read(`${language}/index.html`);
     const player = tags(html, 'video')[0];
@@ -196,14 +197,30 @@ test('localized films have lightweight accessible players and real companion fil
     assert.ok(!('autoplay' in player), 'Visitors control film playback');
     assert.ok(player['aria-label']);
     assert.ok(html.match(/<video\b[^>]*\bcontrols\b/));
-    assert.ok(player.poster.endsWith(`video-poster-${language}.jpg`));
-    const track = tags(html, 'track').find((entry) => entry.srclang === language);
-    assert.equal(track?.kind, 'captions');
-    const vtt = read(`assets/avido-launch-${language}.vtt`);
-    assert.ok(vtt.startsWith('WEBVTT'));
+    assert.ok(new URL(player.poster, production).pathname.endsWith(`video-poster-${language}.jpg`));
+    assert.equal(tags(html, 'track').length, 0, 'The owner requested no subtitle overlays');
+    assert.ok(html.includes('PT33S'), 'Keep the video metadata aligned with the final edit');
+    assert.doesNotMatch(html, /Ver el contenido del vídeo|Read the video transcript/);
     const video = readFileSync(path.join(siteRoot, 'assets', `avido-launch-${language}.mp4`));
     assert.equal(video.subarray(4, 8).toString(), 'ftyp');
     assert.ok(video.length < 10 * 1024 * 1024, 'Keep the short film below 10 MiB');
     assert.ok(html.includes('video-credits.txt'), 'Preserve the linked music attribution');
+  }
+});
+
+
+test('each website language uses its own native app screenshots', () => {
+  for (const language of languages) {
+    const html = read(`${language}/index.html`);
+    for (const screen of ['home', 'library', 'stats', 'trophies', 'reader', 'stats-details', 'trophies-details']) {
+      const relative = `assets/screenshots/${language}/${screen}.webp`;
+      const image = readFileSync(path.join(siteRoot, relative));
+      assert.equal(image.subarray(0, 4).toString(), 'RIFF');
+      assert.equal(image.subarray(8, 12).toString(), 'WEBP');
+      assert.ok(html.includes(`screenshots/${language}/${screen}.webp`));
+      const other = language === 'es' ? 'en' : 'es';
+      assert.notDeepEqual(image, readFileSync(path.join(siteRoot, 'assets', 'screenshots', other, `${screen}.webp`)),
+        `${screen} must be a separate capture for each app language`);
+    }
   }
 });

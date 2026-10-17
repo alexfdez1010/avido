@@ -6,14 +6,31 @@ there is no remote font service or website analytics script.
 
 ## Screenshots
 
-- `site/assets/app-home.webp`: real Android screenshot captured on 2026-10-16
-  during local verification, with a demonstration book and example progress.
-- `site/assets/app-reader.webp`: real Android reader screenshot from the baseline
-  verification, displaying Spanish sample reading content in the paper theme.
+`site/assets/screenshots/es/` and `site/assets/screenshots/en/` each contain seven
+native Android captures: `home`, `library`, `stats`, `stats-details`, `trophies`,
+`trophies-details` and `reader`. Each locale was selected inside the app before
+capture. The published WebP files are resized from 1080 × 2424 to 540 × 1212;
+their interface and figures were not painted or reconstructed.
 
-The files are resized versions of verification captures, not reconstructed UI.
-They illustrate different reading states and are not evidence of effectiveness
-or actual user metrics. Their provenance is preserved in adjacent JSON files.
+The books contain the actual Project Gutenberg EPUB text, metadata and covers:
+
+- [Don Quijote](https://www.gutenberg.org/ebooks/2000)
+- [El crimen y el castigo](https://www.gutenberg.org/ebooks/61851)
+- [Crime and Punishment](https://www.gutenberg.org/ebooks/2554)
+
+The reader shows Crime and Punishment in Spanish or English. Other
+screens show a representative demonstration history, calculated by the app's
+own stores and statistics: 120 days of history, a 42-day streak, 25 unlocked
+achievements and an annual goal with eight of twelve books completed. These
+figures illustrate the interface; they are not actual user results or evidence
+of habit effectiveness.
+
+The capture used the isolated local QA application, based on commit
+`e8ed41f358287ead93c804227bab872691835de7` (version 1.0.23), with a temporary
+JavaScript entrypoint that seeded the demonstration data. Production sources
+and native code were unchanged; that entrypoint is not distributed. Adjacent
+JSON files record the base APK, temporary bundle, locale and source provenance.
+The original QA APK was restored after capture.
 
 ## Identity and fonts
 
@@ -37,10 +54,11 @@ localized Open Graph alternative text and rerun the website checks.
 
 ## Launch videos
 
-The 22-second English and Spanish MP4 files use actual app screenshots, animated
-typography and music, with no narration. Their opening frame matches the poster.
-The website supplies caption tracks and a visible text transcript and does not
-autoplay or preload the videos. The README links its poster to the matching
+The 33-second English and Spanish MP4 files use these localized app screenshots,
+animated typography and music, with no narration. A tall portrait phone gives
+the interface most of the canvas height. There are no subtitle tracks, scene
+counters or secondary scene labels. The website uses native playback controls
+without autoplay or preloading. The README links its poster to the matching
 website player because GitHub does not reliably render repository-hosted HTML
 video elements in Markdown.
 

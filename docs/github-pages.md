@@ -7,7 +7,7 @@ dependency-free `scripts/build-site.cjs` generator produces its localized HTML.
 
 ## Routes and language
 
-- `/avido/` chooses Spanish or English from the browser's preferred languages,
+- `/avido/` chooses the first supported Spanish or English entry in the browser's preferred languages,
   with English as the fallback. Visible language links also work without JavaScript.
 - `/avido/es/` and `/avido/en/` are stable, fully rendered Spanish and English pages.
 - The language switch links directly to the other language, so a shared localized
@@ -73,3 +73,5 @@ See [GitHub's custom Pages workflow documentation](https://docs.github.com/en/pa
 for the deployment and permission requirements.
 
 See [website assets](website-assets.md) for screenshot provenance and font licenses.
+
+Website translations live in the `copy` map in `scripts/build-site.cjs`. Unlike the native app's `tx` helpers, this build-time map emits complete HTML without loading Expo in the browser.

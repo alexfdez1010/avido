@@ -50,12 +50,22 @@ a cold build. See the run's **Native compiler cache** summary for hits and misse
 and Gradle's final task summary for `from cache` counts. Compare these alongside
 the **Build release APK** step duration before reporting a speedup.
 
-For reference, [the 16 October 2026 run](https://github.com/alexfdez1010/avido/actions/runs/38879901660)
-took about 26 minutes overall, including almost 23 minutes in Gradle, with all
-807 tasks executed despite restored dependency caches. That is the baseline for
-these cache changes, not a guarantee of future build time. The workflow artifact
-stores only one copy without ZIP compression; both APK filenames remain available
-on the permanent GitHub Release.
+Measured successful builds:
+
+| Run | Build job duration | Build release APK step | Gradle task results |
+| --- | --- | --- | --- |
+| [16 October 2026 baseline](https://github.com/alexfdez1010/avido/actions/runs/38879901660) | 25m 53s | 22m 56s | 807 executed |
+| [17 October 2026, first optimized run](https://github.com/alexfdez1010/avido/actions/runs/39015556307) | 17m 12s | 14m 41s | 711 executed, 96 from cache |
+
+The first optimized run had no existing compiler cache: it recorded 303 cacheable
+compilations, all misses, plus 15 uncacheable calls, and populated about 0.1 GB of
+compiler outputs. Its shorter observed duration therefore does not establish a
+warm compiler-cache speedup, nor can the whole difference be attributed to these
+changes; runner performance and existing Gradle cache contents also vary. A later
+run must demonstrate compiler-cache hits before claiming that benefit.
+
+The workflow artifact stores only one copy without ZIP compression; both APK
+filenames remain available on the permanent GitHub Release.
 
 The APK workflow builds Android only. The repository does not currently publish
 an iOS build, App Store release or Play Store listing. Browser previews are not a

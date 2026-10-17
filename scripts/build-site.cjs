@@ -1,12 +1,14 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const root = path.resolve(__dirname, '../site');
 const origin = 'https://alexfdez1010.github.io/avido/';
 const repo = 'https://github.com/alexfdez1010/avido';
 const download = `${repo}/releases/latest/download/avido.apk`;
+const assetVersion = file => createHash('sha256').update(fs.readFileSync(path.join(root, 'assets', file))).digest('hex').slice(0, 12);
 const copy = {
   es: {
-    title: 'Ávido — Engánchate a los libros. Recupera tu atención.',
+    title: 'Ávido — Tu próximo vicio se lee | Lector para Android',
     description: 'Cambia el scroll por un capítulo más. Ávido es un lector Android de código abierto con rachas, misiones y progreso local. Sin anuncios ni cuenta. Descarga el APK.',
     nav: ['La idea', 'El lector', 'Privacidad', 'Instalar'],
     headline: 'Tu próximo <span class="headline-ending">vicio se <em>lee</em></span>',
@@ -26,8 +28,8 @@ const copy = {
       ['Cómodo, a tu manera.', 'Cuatro tipografías de lectura, seis temas, ajustes de tamaño y márgenes. Modo e-ink y lectura sin controles visibles.'],
       ['Siempre hay otro libro.', 'Descubre clásicos con Project Gutenberg. Descárgalos y sigue leyendo sin conexión. Comprueba sus derechos en tu país.']
     ],
-    galleryTitle: 'Elige cómo leer',
-    gallery: ['Retoma tu libro y consulta tu objetivo diario', 'Ajusta la letra, los márgenes y el tema'],
+    galleryTitle: 'Cada página cuenta',
+    gallery: [['library', 'Todos tus libros, a mano', 'Busca por título o autor y retoma tus lecturas pendientes.'], ['stats', 'Mira cómo crece tu hábito', 'Páginas por día, tiempo de lectura y tus horas favoritas.'], ['trophies', 'Celebra cada paso', 'Rachas, niveles, logros y un reto anual a tu medida.'], ['reader', 'Lee como más te guste', 'Elige la letra, el tema y los márgenes.'], ['stats-details', 'Tus sesiones, al detalle', 'Consulta la duración de tus sesiones y tus horas de lectura.'], ['trophies-details', 'Tus logros, uno a uno', 'Descubre qué has conseguido y qué te queda por desbloquear.']],
     privacyTitle: 'Tu biblioteca<br><em>Tu vida privada</em>',
     privacyIntro: 'Una biblioteca necesita libros. No necesita un perfil publicitario sobre ti.',
     privacy: [['Sin cuenta.', 'Abre la app y lee. Sin registro ni inicio de sesión.'], ['Sin anuncios ni rastreadores', 'Sin interrupciones para venderte algo. Sin medir tus lecturas para hacer negocio con ellas.'], ['Progreso en tu dispositivo.', 'Tus libros, tu posición y tus logros se quedan en el dispositivo. No necesitas entregarlos a una nube para disfrutar de ellos.']],
@@ -44,7 +46,7 @@ const copy = {
     og: 'Ávido. Que te atrape un buen libro. Lector Android de código abierto.',
   },
   en: {
-    title: 'Ávido — Get hooked on books. Reclaim your attention.',
+    title: 'Ávido — Your next obsession has pages | Android book reader',
     description: 'Trade the endless scroll for one more chapter. Ávido is an open source Android reader with streaks, quests and local progress. No ads or account. Download the APK.',
     nav: ['The idea', 'The reader', 'Privacy', 'Install'],
     headline: 'Your next obsession <em class="headline-ending">has pages</em>',
@@ -64,8 +66,8 @@ const copy = {
       ['Comfort, on your terms.', 'Four reading typefaces, six themes, adjustable type and margins. E-ink mode and reading with the controls out of sight.'],
       ['Always another book.', 'Discover classics through Project Gutenberg. Download them, then keep reading offline. Check their copyright status in your country.']
     ],
-    galleryTitle: 'Make yourself comfortable',
-    gallery: ['Pick up your book and check your daily goal', 'Set your type, margins and reading theme'],
+    galleryTitle: 'Every page counts',
+    gallery: [['library', 'All your books, within reach', 'Search by title or author and pick up your unfinished reads.'], ['stats', 'Watch your habit take shape', 'Pages per day, reading time and your favourite reading hours.'], ['trophies', 'Celebrate every step', 'Streaks, levels, achievements and your own yearly challenge.'], ['reader', 'Read your way', 'Choose your typeface, theme and margins.'], ['stats-details', 'A closer look at your sessions', 'See how long you read and which hours work for you.'], ['trophies-details', 'Your achievements, one by one', 'See what you have earned and what is still waiting to be unlocked.']],
     privacyTitle: 'Your library<br><em>Your private life</em>',
     privacyIntro: 'A library needs books. It doesn’t need an advertising profile of you.',
     privacy: [['No account.', 'Open the app and read. No sign-up or sign-in.'], ['No ads or trackers', 'No interruptions to sell you something. No tracking your reading to turn it into a business.'], ['Progress on your device.', 'Your books, your place and your achievements stay on your device. You don’t have to hand them to a cloud to enjoy them.']],
@@ -90,23 +92,25 @@ function render(lang, isRoot = false) {
   const unstop = text => text.replace(/\.(?=<|$)/g, '');
   for (const key of ['headline', 'manifesto', 'switchTitle', 'featuresTitle', 'galleryTitle', 'privacyTitle', 'installTitle', 'faqTitle', 'closing']) c[key] = unstop(c[key]);
   for (const key of ['features', 'privacy', 'steps']) c[key] = c[key].map(([heading, text]) => [unstop(heading), text]);
-  c.gallery = c.gallery.map(unstop);
   const prefix = isRoot ? './' : '../';
   const canonical = isRoot ? origin : `${origin}${lang}/`;
   const assets = `${prefix}assets/`;
-  const image = `${origin}assets/og-${lang}.png`;
+  const asset = file => `${assets}${file}?v=${assetVersion(file)}`;
+  const screenshotAlt = lang === 'es'
+    ? {library:'Biblioteca de Ávido con las portadas de Don Quijote y Crimen y castigo, búsqueda y filtros de lectura',stats:'Estadísticas de lectura con gráfico de páginas por día, minutos leídos y días activos',trophies:'Pantalla de logros con nivel, experiencia, reto anual y racha de lectura',reader:'Un clásico de Gutenberg abierto en el lector de Ávido','stats-details':'Detalle de estadísticas con sesiones y distribución de horas de lectura','trophies-details':'Vitrina de logros de lectura desbloqueados'}
+    : {library:'Ávido library with Don Quijote and Crime and Punishment book covers, search and reading filters',stats:'Reading statistics with a pages-per-day chart, reading time and active days',trophies:'Achievements screen with level, experience, yearly challenge and reading streak',reader:'A Gutenberg classic open in the Ávido reader','stats-details':'Detailed reading statistics with sessions and reading-hour distribution','trophies-details':'Showcase of unlocked reading achievements'};
+  const image = `${origin}assets/og-${lang}.png?v=${assetVersion(`og-${lang}.png`)}`;
   const button = `<a class="button" href="${download}">${down}${c.primary}</a>`;
   const video = {
-    title: lang === 'es' ? 'Un capítulo más empieza en 22 segundos' : 'Your next chapter starts in 22 seconds',
-    transcript: lang === 'es' ? 'Ver el contenido del vídeo' : 'Read the video transcript',
-    text: lang === 'es' ? 'Ellos ganan con tu scroll. Tu próximo vicio se lee. Ávido muestra tu libro actual y tu objetivo diario en una captura real de Android. Una página más: rachas, misiones y XP. Tú, el libro y nada más: lectura sin anuncios y sin cuenta. Recupera tu atención con Ávido para Android, gratis y de código abierto.' : 'They profit from your scroll. Your next obsession has pages. Ávido shows your current book and daily goal in a real Android screenshot. One more page: streaks, quests and XP. You, the book and nothing else: reading without ads or an account. Reclaim your attention with Ávido for Android, free and open source.',
+    title: lang === 'es' ? 'Ávido en 33 segundos' : 'Meet Ávido in 33 seconds',
+    text: lang === 'es' ? 'Ellos ganan con tu scroll. Tu próximo vicio se lee. Explora tu biblioteca, consulta tus estadísticas y celebra tus logros. Cada página cuenta: rachas, misiones y XP. Tú, el libro y nada más, sin anuncios y sin cuenta. Descubre Ávido para Android, gratis y de código abierto.' : 'They profit from your scroll. Your next obsession has pages. Explore your library, check your statistics and celebrate your achievements. Every page counts: streaks, quests and XP. You, the book and nothing else, without ads or an account. Discover Ávido for Android, free and open source.',
     credits: lang === 'es' ? 'Música y créditos' : 'Music and credits',
     fallback: lang === 'es' ? 'Descargar el vídeo' : 'Download the video',
   };
   const schema = {'@context':'https://schema.org','@graph':[
     {'@type':'WebSite','@id':`${origin}#website`,name:'Ávido',url:origin,inLanguage:['es','en']},
-    {'@type':'VideoObject',name:video.title,description:video.text,thumbnailUrl:`${origin}assets/video-poster-${lang}.jpg`,contentUrl:`${origin}assets/avido-launch-${lang}.mp4`,uploadDate:'2026-10-17T07:48:42Z',duration:'PT22S',inLanguage:lang,caption:video.text},
-    {'@type':'SoftwareApplication',name:'Ávido',operatingSystem:'Android',applicationCategory:'BooksApplication',url:canonical,downloadUrl:download,license:`${repo}/blob/main/LICENSE`,description:c.description,inLanguage:['es','en'],isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'},image,screenshot:`${origin}assets/app-home.webp`}
+    {'@type':'VideoObject',name:video.title,description:video.text,thumbnailUrl:`${origin}assets/video-poster-${lang}.jpg`,contentUrl:`${origin}assets/avido-launch-${lang}.mp4`,uploadDate:'2026-10-17T07:48:42Z',duration:'PT33S',inLanguage:lang},
+    {'@type':'SoftwareApplication',name:'Ávido',operatingSystem:'Android',applicationCategory:'BooksApplication',url:canonical,downloadUrl:download,license:`${repo}/blob/main/LICENSE`,description:c.description,inLanguage:['es','en'],isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'},image,screenshot:`${origin}assets/screenshots/${lang}/home.webp`}
   ]};
   return `<!doctype html>
 <html lang="${lang}">
@@ -140,29 +144,29 @@ function render(lang, isRoot = false) {
 <meta name="twitter:image:alt" content="${escape(c.og)}">
 <link rel="icon" href="${assets}icon.png" type="image/png">
 <link rel="preload" href="${assets}fonts/fraunces-black.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="${assets}styles.css">
+<link rel="stylesheet" href="${asset('styles.css')}">
 <script type="application/ld+json">${JSON.stringify(schema)}</script>
 ${isRoot ? '<script src="./assets/language.js"></script>' : ''}
-<script src="${assets}site.js" defer></script>
+<script src="${asset('site.js')}" defer></script>
 </head>
 <body data-language="${lang}">
 <a class="skip-link" href="#main">${c.skip}</a>
 <header class="masthead wrap">
-<a class="brand" href="${isRoot ? './' : '../'}" aria-label="Ávido"><img src="${assets}icon.png" width="40" height="40" alt="">ávido</a>
+<a class="brand" href="${prefix}${lang}/" aria-label="Ávido"><img src="${assets}icon.png" width="40" height="40" alt="">ávido</a>
 <nav aria-label="${lang === 'es' ? 'Navegación principal' : 'Main navigation'}"><a href="#idea">${c.nav[0]}</a><a href="#reader">${c.nav[1]}</a><a href="#privacy">${c.nav[2]}</a><a class="nav-install" href="#install">${c.nav[3]} ${arrow}</a></nav>
 <div class="languages" role="group" aria-label="${c.lang}"><a href="${prefix}es/" lang="es" hreflang="es"${lang === 'es' ? ' aria-current="page"' : ''}>ES</a><span aria-hidden="true">/</span><a href="${prefix}en/" lang="en" hreflang="en"${lang === 'en' ? ' aria-current="page"' : ''}>EN</a></div>
 </header>
 <main id="main">
 <section class="hero wrap" aria-labelledby="hero-heading">
 <div class="hero-copy"><h1 id="hero-heading">${c.headline}</h1><p class="intro">${c.intro}</p><div class="hero-actions">${button}<a class="text-link" href="${repo}">${c.source} ${arrow}</a></div><p class="micro">${c.micro}</p></div>
-<figure class="hero-figure"><img class="app-shot" src="${assets}app-home.webp" alt="${lang === 'es' ? 'Inicio de Ávido: libro actual, progreso y opciones para leer sin temporizador o con un aviso.' : 'Ávido home: current book, reading progress and options for untimed reading or a reminder.'}" width="540" height="1212" fetchpriority="high"></figure>
+<figure class="hero-figure"><img class="app-shot" src="${assets}screenshots/${lang}/home.webp" alt="${lang === 'es' ? 'Inicio de Ávido: libro actual, progreso y opciones para leer sin temporizador o con un aviso.' : 'Ávido home: current book, reading progress and options for untimed reading or a reminder.'}" width="540" height="1212" fetchpriority="high"></figure>
 </section>
 
-<section class="film wrap section" aria-labelledby="film-heading"><h2 id="film-heading">${video.title}</h2><video controls playsinline preload="none" poster="${assets}video-poster-${lang}.jpg" width="1280" height="720" aria-label="${video.title}"><source src="${assets}avido-launch-${lang}.mp4" type="video/mp4"><track kind="captions" src="${assets}avido-launch-${lang}.vtt" srclang="${lang}" label="${lang === 'es' ? 'Español' : 'English'}" default><a href="${assets}avido-launch-${lang}.mp4">${video.fallback}</a></video><div class="film-notes"><details><summary>${video.transcript}</summary><p>${video.text}</p></details><a href="${assets}video-credits.txt">${video.credits}</a></div></section>
+<section class="film wrap section" aria-labelledby="film-heading"><h2 id="film-heading">${video.title}</h2><video controls playsinline preload="none" poster="${asset(`video-poster-${lang}.jpg`)}" width="1280" height="720" aria-label="${video.title}"><source src="${asset(`avido-launch-${lang}.mp4`)}" type="video/mp4"><a href="${asset(`avido-launch-${lang}.mp4`)}">${video.fallback}</a></video><p class="film-credit"><a href="${assets}video-credits.txt">${video.credits}</a></p></section>
 <section id="idea" class="manifesto section-dark"><div class="wrap manifesto-grid"><h2>${c.manifesto}</h2><div class="manifesto-body"><p>${c.body}</p><p>${c.body2}</p><a href="${repo}/blob/main/docs/habit-loop.md" class="text-link">${lang === 'es' ? 'El diseño del hábito, explicado' : 'The habit design, explained'} ${arrow}</a></div></div>
 <div class="wrap loop-area"><div><h3>${c.switchTitle}</h3><div class="mode-switch" role="group" aria-label="${c.compare}">${c.modes.map((m,i)=>`<button type="button" data-mode="${i}" aria-pressed="${i === 1}">${m}</button>`).join('')}</div></div><div class="loop" aria-live="polite">${c.loopLabels.map((label,i)=>`<div><span>${label}</span><p data-loop="${i}">${c.loops[1][i]}</p></div>`).join('')}</div><p class="loop-note">${c.loopNote}</p></div></section>
 <section id="reader" class="features wrap section"><div><h2>${c.featuresTitle}</h2><p class="format-line">EPUB / PDF / TXT / MD</p></div><dl>${c.features.map(([h,p])=>`<div><dt>${h}</dt><dd>${p}</dd></div>`).join('')}</dl></section>
-<section class="gallery section"><div class="wrap gallery-layout"><div class="gallery-heading"><h2>${c.galleryTitle}</h2></div><div class="screenshots">${['app-home.webp','app-reader.webp'].map((img,i)=>`<figure><img src="${assets}${img}" alt="${c.gallery[i]}" width="540" height="1212" loading="lazy"><figcaption>${c.gallery[i]}</figcaption></figure>`).join('')}</div></div></section>
+<section id="inside" class="gallery section"><div class="wrap"><h2>${c.galleryTitle}</h2><div class="screenshots">${c.gallery.map(([screen,title,description])=>`<figure><a href="${assets}screenshots/${lang}/${screen}.webp" target="_blank" rel="noopener" aria-label="${lang === 'es' ? 'Ampliar captura' : 'Enlarge screenshot'}: ${title}"><img src="${assets}screenshots/${lang}/${screen}.webp" alt="${screenshotAlt[screen]}" width="540" height="1212" decoding="sync"></a><figcaption><h3>${title}</h3><p>${description}</p></figcaption></figure>`).join('')}</div></div></section>
 <section id="privacy" class="privacy section"><div class="wrap privacy-layout"><div><h2>${c.privacyTitle}</h2><p class="privacy-intro">${c.privacyIntro}</p></div><div><dl>${c.privacy.map(([h,p])=>`<div><dt>${h}</dt><dd>${p}</dd></div>`).join('')}</dl><p class="privacy-fine">${c.privacyFine}</p><a class="text-link" href="${repo}/blob/main/docs/privacy.md">${c.privacyLink} ${arrow}</a></div></div></section>
 <section id="install" class="install wrap section"><div class="install-heading"><h2>${c.installTitle}</h2><p>${c.installIntro}</p>${button}<a class="text-link release-link" href="${repo}/releases/latest">${c.releaseLink} ${arrow}</a></div><ol class="install-steps">${c.steps.map(([h,p])=>`<li><h3>${h}</h3><p>${p}</p></li>`).join('')}</ol></section>
 <section class="faq wrap section"><h2>${c.faqTitle}</h2><div>${c.faqs.map(([q,a])=>`<details><summary>${q}<span aria-hidden="true">+</span></summary><p>${a}</p></details>`).join('')}</div></section>

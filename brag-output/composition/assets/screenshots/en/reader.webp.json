@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-10-17",
+  "kind": "native Android screenshot, resized only",
+  "device": "Pixel_9_Android_16",
+  "androidApi": 36,
+  "sourcePixels": [
+    1080,
+    2424
+  ],
+  "publishedPixels": [
+    540,
+    1212
+  ],
+  "package": "com.alexfdez.avido.local",
+  "version": "1.0.23",
+  "versionCode": 23,
+  "sourceCommit": "e8ed41f358287ead93c804227bab872691835de7",
+  "installedApkSha256": "6a72d4b2dd5fa39d81418626100d3ce297a500fe51b0cbaf9697bfd34f17d0bc",
+  "appLanguage": "en",
+  "screen": "reader",
+  "dataContext": "Isolated local QA reading progress and genuine Project Gutenberg classics; illustrative example, not user results",
+  "bookSources": [
+    "https://www.gutenberg.org/ebooks/2000",
+    "https://www.gutenberg.org/ebooks/61851",
+    "https://www.gutenberg.org/ebooks/2554"
+  ],
+  "processing": "cwebp quality 82, resized to width 540, no cropping, UI reconstruction or metric alteration",
+  "prompt": "Origin: real native Android reader capture in en, showing Project Gutenberg Crime and Punishment. Base QA APK provenance in this JSON. Resized only, no reconstructed UI.",
+  "createdAt": "2026-10-17T08:26:03.968Z"
+}

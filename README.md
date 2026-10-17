@@ -12,7 +12,7 @@ Read a few pages, earn XP and watch your progress grow. Your books and reading h
 
 Android · Spanish & English · Free & open source · MIT licensed
 
-## 🎬 Meet Ávido in 22 seconds
+## 🎬 Meet Ávido in 33 seconds
 
 [![Watch the Ávido launch video in English](site/assets/video-poster-en.jpg)](https://alexfdez1010.github.io/avido/en/#film-heading)
 
@@ -20,14 +20,42 @@ Android · Spanish & English · Free & open source · MIT licensed
 
 [Music and credits](site/assets/video-credits.txt).
 
-## 👀 A little motivation, a lot of reading
+## 👀 Your library, your progress
 
 <p>
-  <img src="site/assets/app-home.webp" width="250" alt="Ávido Today screen showing reading progress and the current book" />
-  <img src="site/assets/app-reader.webp" width="250" alt="Ávido reader displaying a locally stored book in Spanish" />
+  <img src="site/assets/screenshots/en/library.webp" width="240" alt="Library with books from Project Gutenberg" />
+  <img src="site/assets/screenshots/en/stats.webp" width="240" alt="Reading statistics and daily progress" />
 </p>
 
-Real Android app screenshots with local demonstration data.
+<p>
+  <img src="site/assets/screenshots/en/trophies.webp" width="240" alt="Levels, yearly challenge and achievements" />
+  <img src="site/assets/screenshots/en/reader.webp" width="240" alt="Book reader with adjustable typography" />
+</p>
+
+<p>
+  <img src="site/assets/screenshots/en/stats-details.webp" width="240" alt="Session length, favourite reading hours and statistics by book" />
+  <img src="site/assets/screenshots/en/trophies-details.webp" width="240" alt="Reading activity calendar and unlocked achievement medals" />
+</p>
+
+<details>
+<summary>Ver las capturas en español</summary>
+
+<p>
+  <img src="site/assets/screenshots/es/library.webp" width="240" alt="Library with books from Project Gutenberg" />
+  <img src="site/assets/screenshots/es/stats.webp" width="240" alt="Reading statistics and daily progress" />
+</p>
+
+<p>
+  <img src="site/assets/screenshots/es/trophies.webp" width="240" alt="Levels, yearly challenge and achievements" />
+  <img src="site/assets/screenshots/es/reader.webp" width="240" alt="Book reader with adjustable typography" />
+</p>
+
+<p>
+  <img src="site/assets/screenshots/es/stats-details.webp" width="240" alt="Session length, favourite reading hours and statistics by book" />
+  <img src="site/assets/screenshots/es/trophies-details.webp" width="240" alt="Reading activity calendar and unlocked achievement medals" />
+</p>
+
+</details>
 
 ## 🔥 Make the next chapter easier to start
 
@@ -35,8 +63,6 @@ Real Android app screenshots with local demonstration data.
 - **Find your own rhythm** — Choose a daily goal, build a streak and let streak freezes cover an occasional missed day.
 - **See how far you've come** — Follow your reading activity and work towards your yearly book challenge.
 - **Have a reason to return** — Three daily quests and Miga, your little reading companion, add a playful nudge.
-
-Designed to encourage reading at your own pace. No habit or reading outcome is guaranteed.
 
 ## 📖 Make yourself comfortable
 

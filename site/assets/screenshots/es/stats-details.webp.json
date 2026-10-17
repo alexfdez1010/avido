@@ -1,0 +1,49 @@
+{
+  "capturedAt": "2026-10-17",
+  "kind": "native Android screenshot with representative demonstration data, resized only",
+  "device": "Pixel_9_Android_16",
+  "androidApi": 36,
+  "sourcePixels": [
+    1080,
+    2424
+  ],
+  "publishedPixels": [
+    540,
+    1212
+  ],
+  "package": "com.alexfdez.avido.local",
+  "version": "1.0.23",
+  "versionCode": 23,
+  "sourceCommit": "e8ed41f358287ead93c804227bab872691835de7",
+  "baseApkSha256": "6a72d4b2dd5fa39d81418626100d3ce297a500fe51b0cbaf9697bfd34f17d0bc",
+  "installedApkSha256": "a96e6a2ee3e1cf72a06a104d85c39c1d643f123f4b3670eb303088f2bb211ef4",
+  "showcaseBundleSha256": "fa084ccefacc15ce1efe01e42daadf9644589183db2bd0953066bb25d0a14fe5",
+  "showcaseOverlay": "Temporary isolated QA JavaScript entrypoint seeds a coherent reading history using the actual stores, quest definitions, achievements, XP and statistics calculations. All production app source and native code remain unchanged. Seed entrypoint is not part of the distributed app.",
+  "appLanguage": "es",
+  "screen": "stats-details",
+  "dataContext": "Representative demonstration history, not actual user results or evidence of habit effectiveness. Real Project Gutenberg EPUB content, metadata and covers.",
+  "fixture": {
+    "historySpanDays": 120,
+    "activeDays": 109,
+    "streakDays": 42,
+    "totalSeconds": 305520,
+    "totalPages": 4327,
+    "yearlyFinished": 8,
+    "yearlyGoal": 12,
+    "unlockedAchievements": 25,
+    "availableAchievements": 32,
+    "level": 67,
+    "questsCompleted": 276,
+    "weekPages": 274,
+    "weekReadingSeconds": 19800,
+    "weekSessions": 16
+  },
+  "bookSources": [
+    "https://www.gutenberg.org/ebooks/2000",
+    "https://www.gutenberg.org/ebooks/61851",
+    "https://www.gutenberg.org/ebooks/2554"
+  ],
+  "processing": "Native screencap; cwebp quality 82, resized to width 540. No cropping, painted metrics or UI reconstruction.",
+  "prompt": "Origin: native Android screenshot of Ávido stats-details in es; genuine Project Gutenberg EPUBs; representative demonstration history computed by app stores; source and overlay hashes in adjacent JSON; resized only, no reconstructed UI.",
+  "createdAt": "2026-10-17T08:26:04.192Z"
+}

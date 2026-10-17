@@ -5,13 +5,13 @@ Track: https://ende.app/en/song/12881-happy-beats-business-moves-vol-12
 License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 https://creativecommons.org/licenses/by/4.0/
 Source license: https://ende.app/standard-license
-Changes: excerpted to 22 seconds, opening and closing fades, reduced volume, mixed with sound effects.
+Changes: excerpted to 33 seconds, opening and closing fades, reduced volume, mixed with sound effects.
 License verified against the artist's track page on 2026-10-17.
 
 Sound effects: Kenney (CC0 / public domain)
 https://kenney.nl/assets
-impactSoft_medium_001.ogg and click2.ogg from the brag skill's bundled Kenney library.
+impactSoft_medium_001.ogg from the brag skill's bundled Kenney library.
 
 Typography: Fraunces and Bricolage Grotesque, SIL Open Font License 1.1.
 Full font license notices are in site/assets/fonts/.
-Screenshots: real Ávido Android screenshots, with local demonstration data.
+Screenshots: native Ávido Android captures in Spanish and English. Local demonstration reading progress accompanies public-domain classics; book copyright status depends on jurisdiction.

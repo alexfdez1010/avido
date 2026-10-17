@@ -7,3 +7,5 @@ composition/.hf-tmp/
 *.log
 qa/
 check-*.json
+.raw-*.hf-transaction-*/
+work-*/

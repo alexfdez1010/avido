@@ -18,18 +18,25 @@ for language, lines, subtitle in [
     icon = Image.open(ASSETS / 'icon.png').convert('RGBA').resize((48, 48))
     image.paste(icon, (58, 38), icon)
     draw.text((119, 33), 'ávido', font=font('fraunces-black.ttf', 45), fill=INK)
-    draw.text((58, 126), lines[0], font=font('fraunces-black.ttf', 84), fill=INK)
-    draw.text((58, 222), lines[1], font=font('fraunces-black.ttf', 84), fill=INK)
-    draw.text((58, 320), lines[2], font=font('fraunces-italic.ttf', 88), fill='#145b38')
+    if language == 'es':
+        heading_font = font('fraunces-black.ttf', 84)
+        draw.text((58, 240), 'Tu próximo', font=heading_font, fill=INK, anchor='ls')
+        draw.text((58, 350), 'vicio se ', font=heading_font, fill=INK, anchor='ls')
+        ending_x = 58 + draw.textlength('vicio se ', font=heading_font)
+        draw.text((ending_x, 350), 'lee', font=font('fraunces-italic.ttf', 88), fill='#145b38', anchor='ls')
+    else:
+        draw.text((58, 126), lines[0], font=font('fraunces-black.ttf', 84), fill=INK)
+        draw.text((58, 222), lines[1], font=font('fraunces-black.ttf', 84), fill=INK)
+        draw.text((58, 320), lines[2], font=font('fraunces-italic.ttf', 88), fill='#145b38')
     draw.text((61, 462), subtitle, font=font('bricolage-regular.ttf', 24), fill=INK)
     draw.rounded_rectangle((58, 523, 650, 581), radius=8, fill=INK)
     label = 'Gratis para Android · Código abierto' if language == 'es' else 'Free for Android · Open source'
     draw.text((80, 537), label, font=font('bricolage-bold.ttf', 24), fill=PAPER)
     draw.rectangle((804, 0, 1200, 630), fill=GREEN)
-    shot = Image.open(ASSETS / 'app-home.webp').convert('RGB')
+    shot = Image.open(ASSETS / 'screenshots' / language / 'home.webp').convert('RGB')
     shot.thumbnail((245, 550))
     image.paste(shot, (878, 40))
-    provenance = 'Code-rendered Ávido launch artwork; real Android demonstration screenshot app-home.webp; self-hosted Fraunces/Bricolage fonts; scripts/generate-social-images.py'
+    provenance = 'Code-rendered Ávido launch artwork; real localized Android home screenshot; self-hosted Fraunces/Bricolage fonts; scripts/generate-social-images.py'
     metadata = PngImagePlugin.PngInfo()
     metadata.add_text('Description', provenance)
     image.save(ASSETS / f'og-{language}.png', pnginfo=metadata, optimize=True)
