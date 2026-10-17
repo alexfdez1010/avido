@@ -22,40 +22,24 @@ Android · Spanish & English · Free & open source · MIT licensed
 
 ## 👀 Your library, your progress
 
-<p>
-  <img src="site/assets/screenshots/en/library.webp" width="240" alt="Library with books from Project Gutenberg" />
-  <img src="site/assets/screenshots/en/stats.webp" width="240" alt="Reading statistics and daily progress" />
-</p>
-
-<p>
-  <img src="site/assets/screenshots/en/trophies.webp" width="240" alt="Levels, yearly challenge and achievements" />
-  <img src="site/assets/screenshots/en/reader.webp" width="240" alt="Book reader with adjustable typography" />
-</p>
-
-<p>
-  <img src="site/assets/screenshots/en/stats-details.webp" width="240" alt="Session length, favourite reading hours and statistics by book" />
-  <img src="site/assets/screenshots/en/trophies-details.webp" width="240" alt="Reading activity calendar and unlocked achievement medals" />
+<p align="center">
+  <a href="site/assets/screenshots/en/library.webp"><img src="site/assets/screenshots/en/library.webp" width="30%" alt="Your books, ready to read" /></a>
+  <a href="site/assets/screenshots/en/stats.webp"><img src="site/assets/screenshots/en/stats.webp" width="30%" alt="Your reading progress at a glance" /></a>
+  <a href="site/assets/screenshots/en/trophies.webp"><img src="site/assets/screenshots/en/trophies.webp" width="30%" alt="Your streak, levels and reading achievements" /></a>
 </p>
 
 <details>
 <summary>Ver las capturas en español</summary>
 
-<p>
-  <img src="site/assets/screenshots/es/library.webp" width="240" alt="Library with books from Project Gutenberg" />
-  <img src="site/assets/screenshots/es/stats.webp" width="240" alt="Reading statistics and daily progress" />
-</p>
-
-<p>
-  <img src="site/assets/screenshots/es/trophies.webp" width="240" alt="Levels, yearly challenge and achievements" />
-  <img src="site/assets/screenshots/es/reader.webp" width="240" alt="Book reader with adjustable typography" />
-</p>
-
-<p>
-  <img src="site/assets/screenshots/es/stats-details.webp" width="240" alt="Session length, favourite reading hours and statistics by book" />
-  <img src="site/assets/screenshots/es/trophies-details.webp" width="240" alt="Reading activity calendar and unlocked achievement medals" />
+<p align="center">
+  <a href="site/assets/screenshots/es/library.webp"><img src="site/assets/screenshots/es/library.webp" width="30%" alt="Tu biblioteca, lista para leer" /></a>
+  <a href="site/assets/screenshots/es/stats.webp"><img src="site/assets/screenshots/es/stats.webp" width="30%" alt="Tu progreso de lectura de un vistazo" /></a>
+  <a href="site/assets/screenshots/es/trophies.webp"><img src="site/assets/screenshots/es/trophies.webp" width="30%" alt="Tu racha, niveles y logros de lectura" /></a>
 </p>
 
 </details>
+
+More screens: [English](https://avido.alejandrofernandezcamello.me/en/#screenshots) · [Español](https://avido.alejandrofernandezcamello.me/es/#screenshots)
 
 ## 🔥 Make the next chapter easier to start
 
