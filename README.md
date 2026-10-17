@@ -16,8 +16,6 @@ Android · Spanish & English · Free & open source · MIT licensed
 
 [![Watch the Ávido launch video in English](site/assets/video-poster-en.jpg)](https://avido.alejandrofernandezcamello.me/en/#film-heading)
 
-[▶️ Watch in English](https://avido.alejandrofernandezcamello.me/en/#film-heading) · [▶️ Ver en español](https://avido.alejandrofernandezcamello.me/es/#film-heading) · [Download the video](https://avido.alejandrofernandezcamello.me/assets/avido-launch-en.mp4)
-
 [Music and credits](site/assets/video-credits.txt).
 
 ## 👀 Your library, your progress
@@ -27,8 +25,6 @@ Android · Spanish & English · Free & open source · MIT licensed
   <a href="site/assets/screenshots/en/stats.webp"><img src="site/assets/screenshots/en/stats.webp" width="30%" alt="Your reading progress at a glance" /></a>
   <a href="site/assets/screenshots/en/trophies.webp"><img src="site/assets/screenshots/en/trophies.webp" width="30%" alt="Your streak, levels and reading achievements" /></a>
 </p>
-
-[Explore more screens](https://avido.alejandrofernandezcamello.me/en/#screenshots)
 
 ## 🔥 Make the next chapter easier to start
 
