@@ -1055,10 +1055,18 @@ footer .brand img {
   }
   .screenshots {
     gap:24px;
+    margin-inline:0;
+    padding-inline:0;
+    scroll-padding-inline:0;
   }
   .screenshots figure {
-    flex:0 0 min(76vw,280px);
+    flex:0 0 100%;
     scroll-snap-align:start;
+    scroll-snap-stop:always;
+  }
+  .screenshots figure>a,.screenshots figcaption {
+    max-width:280px;
+    margin-inline:auto;
   }
   .screenshots h3 {
     font-size:19px;

@@ -135,7 +135,7 @@ The shared container `.wrap` is capped at 1280px with 56px side gutters. The def
 - **Above 1450px:** the hero gap increases to 110px and its app screenshot grows to 300px wide.
 - **At or below 1100px:** side gutters become 32px, regular section padding becomes 85px, most two-column gaps become 55px, and the hero screenshot becomes 240px wide.
 - **From 761px to 1000px:** carousel figures use `min(340px, calc((100% - 32px)/2))`, showing two captures and a preview of the next when space permits.
-- **At or below 760px:** side gutters become 20px, editorial sections stack, regular section padding becomes 65px, and the hero screenshot becomes 220px wide. The header retains install and language controls while other section links hide. The comparison steps become individual label-and-copy rows. Carousel figures become the smaller of 76vw and 280px wide with a 24px gap, leaving the following capture partially visible.
+- **At or below 760px:** side gutters become 20px, editorial sections stack, regular section padding becomes 65px, and the hero screenshot becomes 220px wide. The header retains install and language controls while other section links hide. The comparison steps become individual label-and-copy rows. Each carousel slide fills the track width, with its image and caption centered at a maximum of 280px. Only one capture is visible at rest. A 24px gap separates slides; mandatory snapping and `scroll-snap-stop: always` make horizontal swipes settle on the next capture.
 - **At or below 360px:** the hero's smaller display size protects the grouped ending from overflow.
 
 The browser-language entry point redirects to Spanish for an `es` browser language and English otherwise, preserving the query and fragment. Explicit `/es/` and `/en/` URLs remain stable. The shared layout supports both translations and exposes an ES/EN switch with the current language identified.
@@ -177,7 +177,7 @@ The owner authorized a coherent demonstration library and reading history in the
 
 ### Screenshot Carousel
 
-The track uses horizontal scrolling and mandatory start snapping, with a thin forest scrollbar and an 8px leading inset to keep focus outlines visible. Circular 48px previous/next buttons have localized accessible labels, ink backgrounds and paper arrows; hover uses forest. Unavailable directions are disabled with muted colors. Buttons remain hidden until the carousel script initializes, while ordinary scrolling remains available without it.
+The track uses horizontal scrolling and mandatory start snapping, with a thin forest scrollbar and an 8px leading inset to keep focus outlines visible on larger screens. Mobile removes the horizontal inset so each slide occupies one complete viewport. Circular 48px previous/next buttons have localized accessible labels, ink backgrounds and paper arrows; hover uses forest. Unavailable directions are disabled with muted colors. Buttons remain hidden until the carousel script initializes, while ordinary scrolling remains available without it.
 
 The labeled track is keyboard focusable. Left and right arrows move between screenshot positions; Home and End reach the ends. Touch and wheel scrolling remain available, and there is no automatic advance. A screen-reader-only polite live region announces the visible range after scrolling settles, excluding small previews. Reduced-motion navigation moves instantly. Slide groups have localized position labels; the screen keeps its interface free of visible counters.
 

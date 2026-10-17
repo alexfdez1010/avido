@@ -31,3 +31,7 @@ film now leads the existing product showcase under “Cada página cuenta”, wi
 a separate duration heading. Six captures follow in one snapping horizontal
 carousel with previous/next controls, native touch scrolling, keyboard navigation
 and a screen-reader-only visible-range announcement. No automatic advancement.
+
+On mobile, the owner requested exactly one capture at a time. Each slide fills
+the track, with its image centered, no next-slide preview, and native horizontal
+swiping that snaps to the adjacent capture. Desktop and tablet keep their layout.
