@@ -12,6 +12,14 @@ Read a few pages, earn XP and watch your progress grow. Your books and reading h
 
 Android · Spanish & English · Free & open source · MIT licensed
 
+## 🎬 Meet Ávido in 22 seconds
+
+[![Watch the Ávido launch video in English](site/assets/video-poster-en.jpg)](https://alexfdez1010.github.io/avido/en/#film-heading)
+
+[▶️ Watch in English](https://alexfdez1010.github.io/avido/en/#film-heading) · [▶️ Ver en español](https://alexfdez1010.github.io/avido/es/#film-heading) · [Download the video](https://alexfdez1010.github.io/avido/assets/avido-launch-en.mp4)
+
+[Music and credits](site/assets/video-credits.txt).
+
 ## 👀 A little motivation, a lot of reading
 
 <p>

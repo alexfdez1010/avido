@@ -151,3 +151,59 @@ test('sitemap and crawler instructions expose both stable language routes', () =
     'The root must offer both languages without JavaScript');
   }
 });
+
+test('neutral entry selects Spanish or English and preserves shared location', () => {
+  const vm = require('node:vm');
+  const script = read('assets/language.js');
+  for (const [preferred, expected] of [
+    ['es-ES', 'es'], ['es-MX', 'es'], ['en-US', 'en'], ['fr-FR', 'en'], ['', 'en'],
+  ]) {
+    let redirected;
+    const location = {
+      href: `${production.href}?from=readme#install`,
+      hash: '#install',
+      search: '?from=readme',
+      replace: (url) => { redirected = url; },
+    };
+    vm.runInNewContext(script, {
+      URL,
+      navigator: { languages: preferred ? [preferred] : [], language: preferred },
+      window: { location },
+    });
+    assert.equal(redirected, `${production.href}${expected}/?from=readme#install`);
+  }
+  for (const language of languages) {
+    assert.doesNotMatch(read(`${language}/index.html`), /<script[^>]+src=["'][^"']*language\.js/,
+      'Explicit language URLs must stay in the selected language');
+  }
+});
+
+test('marketing headings have no full stops', () => {
+  for (const language of languages) {
+    const html = read(`${language}/index.html`);
+    for (const heading of html.matchAll(/<(h[1-3]|dt)\b[^>]*>([\s\S]*?)<\/\1>/gi)) {
+      assert.doesNotMatch(heading[2].replace(/<[^>]*>/g, ''), /\./, 'Keep full stops out of headings');
+    }
+  }
+});
+
+test('localized films have lightweight accessible players and real companion files', () => {
+  for (const language of languages) {
+    const html = read(`${language}/index.html`);
+    const player = tags(html, 'video')[0];
+    assert.ok(player, 'Include the launch film player');
+    assert.equal(player.preload, 'none', 'Do not download the film before it is requested');
+    assert.ok(!('autoplay' in player), 'Visitors control film playback');
+    assert.ok(player['aria-label']);
+    assert.ok(html.match(/<video\b[^>]*\bcontrols\b/));
+    assert.ok(player.poster.endsWith(`video-poster-${language}.jpg`));
+    const track = tags(html, 'track').find((entry) => entry.srclang === language);
+    assert.equal(track?.kind, 'captions');
+    const vtt = read(`assets/avido-launch-${language}.vtt`);
+    assert.ok(vtt.startsWith('WEBVTT'));
+    const video = readFileSync(path.join(siteRoot, 'assets', `avido-launch-${language}.mp4`));
+    assert.equal(video.subarray(4, 8).toString(), 'ftyp');
+    assert.ok(video.length < 10 * 1024 * 1024, 'Keep the short film below 10 MiB');
+    assert.ok(html.includes('video-credits.txt'), 'Preserve the linked music attribution');
+  }
+});

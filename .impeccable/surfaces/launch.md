@@ -11,3 +11,11 @@ STORY: Recognize the scroll habit, discover the reading loop, inspect privacy bo
 FIRST VIEWPORT: A compact masthead above a dominant three-line manifesto, Android download beneath it, and a tall specimen of an actual public-domain reading passage beside it. The next section begins with an oversized green statement. Signature interaction: a two-state comparison swaps the objective of the same habit loop, from attention extraction to reading progress; it respects reduced motion.
 FORM: Candidate 6, the reader's marginal manifesto, seed 2994aa3d. The seven grounded forms were campaign poster, independent bookshop, paperback cover, library catalogue, reading notebook, marginal manifesto, and publishing colophon. The user-pinned rebellious voice and incumbent warm/green brand constrain the form. Challengers neon, glazier, Kraftwerk, Memphis, zine and oscilloscope lose product clarity; retain their discipline of continuous narrative, compositional clarity, purposeful state, expressive hierarchy, explanatory sequence and legible feedback respectively. Implement with code-native typography; no raster mockup is shipping proof.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Owner refinements
+
+Marketing language takes priority over implementation details; technical limits
+stay in linked documentation. The owner requested no full stops in headings,
+no decorative separator rules, the real app icon, real app screenshots and an
+accessible bilingual launch video. The approved current hero is “Tu próximo
+vicio se lee” / “Your next obsession has pages”.

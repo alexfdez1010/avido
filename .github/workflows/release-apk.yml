@@ -3,6 +3,28 @@ name: Build & release APK
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'modules/**'
+      - 'plugins/**'
+      - 'patches/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.npmrc'
+      - '.node-version'
+      - '.nvmrc'
+      - 'app.config.*'
+      - 'app.json'
+      - 'babel.config.*'
+      - 'metro.config.*'
+      - 'react-native.config.*'
+      - 'tailwind.config.*'
+      - 'tsconfig.json'
+      - 'eslint.config.*'
+      - '*-env.d.ts'
+      - 'uniwind-types.d.ts'
+      - '.github/workflows/release-apk.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,6 +42,8 @@ jobs:
       APP_VERSION: 1.0.${{ github.run_number }}
       BUILD_NUMBER: ${{ github.run_number }}
       NODE_OPTIONS: --max-old-space-size=6144
+      CCACHE_MAXSIZE: 1G
+      CCACHE_COMPILERCHECK: content
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +58,27 @@ jobs:
           java-version: 17
 
       - uses: gradle/actions/setup-gradle@v4
+
+      # React Native's application CMake project detects ccache automatically.
+      # Cache compiler outputs, never generated native projects or signing keys.
+      - name: Install native compiler cache
+        run: |
+          echo "CCACHE_DIR=$RUNNER_TEMP/ccache" >> "$GITHUB_ENV"
+          if ! command -v ccache >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install --no-install-recommends -y ccache
+          fi
+
+      - name: Restore native compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ runner.arch }}-v1-${{ hashFiles('package-lock.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ runner.arch }}-v1-${{ hashFiles('package-lock.json') }}-
+
+      - name: Reset compiler cache statistics
+        run: ccache --zero-stats
 
       - name: Install dependencies
         run: npm ci
@@ -63,7 +108,20 @@ jobs:
           AVIDO_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           AVIDO_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           AVIDO_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64
+        run: ./gradlew assembleRelease --no-daemon --build-cache -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64
+
+      - name: Report compiler cache statistics
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### Native compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Collect APK
         run: |
@@ -78,7 +136,9 @@ jobs:
         continue-on-error: true
         with:
           name: avido-${{ env.APP_VERSION }}
-          path: dist/*.apk
+          path: dist/avido-${{ env.APP_VERSION }}.apk
+          retention-days: 3
+          compression-level: 0
 
       - name: Publish release
         uses: softprops/action-gh-release@v2

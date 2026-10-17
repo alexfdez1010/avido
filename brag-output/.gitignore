@@ -1,0 +1,9 @@
+composition/.hyperframes/
+composition/node_modules/
+composition/.cache/
+composition/.hf-tmp/
+*.mp4
+*.jpg
+*.log
+qa/
+check-*.json

@@ -1,10 +1,18 @@
 # Releasing
 
-`.github/workflows/release-apk.yml` runs on every push to `main` (and manually via *workflow_dispatch*):
+`.github/workflows/release-apk.yml` runs when a push to `main` changes the app,
+its assets, local native modules, config plugins, dependencies, build/check
+configuration, or the APK workflow itself. Website, README, documentation, video,
+and standalone test changes do not rebuild or republish the APK. Keep the workflow's
+`paths` list updated when introducing a new build input outside those locations.
+
+To force a release without app changes, open **Actions → Build & release APK →
+Run workflow**, select `main`, and run it manually. Automatic path filters do not
+apply to this manual action.
 
 1. Installs dependencies and runs `expo prebuild` for Android.
 2. Builds the release APK with Gradle.
-3. Saves an optional workflow artifact and publishes a GitHub Release tagged
+3. Saves one optional, versioned workflow artifact for three days and publishes a GitHub Release tagged
    `v1.0.<run_number>` with the APK attached. Artifact upload failures (including
    exhausted Actions storage) do not block the release attachment.
 
@@ -24,6 +32,30 @@ npm run lint
 npm run typecheck
 npm test
 ```
+
+## Build efficiency
+
+The workflow preserves all three existing Android architectures (`arm64-v8a`,
+`armeabi-v7a`, and `x86_64`) and generates a fresh native project on each build.
+It uses npm's download cache, Gradle's dependency cache, Gradle task-output caching
+(`--build-cache`), and a 1 GB `ccache` for the C++ compilation handled by React
+Native's application CMake project. The compiler cache is restored for the same
+dependency lockfile and validates compiler content; it does not store signing keys,
+generated native projects, or completed APKs. Other native-library CMake projects
+may compile independently of this cache.
+
+The first build fills the task and compiler caches. Later builds can reuse unchanged
+work, but changes to dependencies, compiler inputs, or cache eviction can still cause
+a cold build. See the run's **Native compiler cache** summary for hits and misses,
+and Gradle's final task summary for `from cache` counts. Compare these alongside
+the **Build release APK** step duration before reporting a speedup.
+
+For reference, [the 16 October 2026 run](https://github.com/alexfdez1010/avido/actions/runs/38879901660)
+took about 26 minutes overall, including almost 23 minutes in Gradle, with all
+807 tasks executed despite restored dependency caches. That is the baseline for
+these cache changes, not a guarantee of future build time. The workflow artifact
+stores only one copy without ZIP compression; both APK filenames remain available
+on the permanent GitHub Release.
 
 The APK workflow builds Android only. The repository does not currently publish
 an iOS build, App Store release or Play Store listing. Browser previews are not a

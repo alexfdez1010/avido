@@ -28,13 +28,13 @@ previewing or running the website checks:
 node scripts/build-site.cjs
 ```
 
-Serve the repository root with any static server. For example:
+Serve only the public website directory with a local static server. For example:
 
 ```sh
-python3 -m http.server 8080
+python3 -m http.server 8080 --bind 127.0.0.1 --directory site
 ```
 
-Open `http://localhost:8080/site/`. Use the explicit `/site/es/` and `/site/en/`
+Open `http://localhost:8080/`. Use the explicit `/es/` and `/en/`
 URLs to review both languages. Canonical and sharing URLs deliberately point to
 the production website during a local preview.
 
@@ -71,3 +71,5 @@ and the expected production URL in `scripts/test-site.cjs` together.
 
 See [GitHub's custom Pages workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 for the deployment and permission requirements.
+
+See [website assets](website-assets.md) for screenshot provenance and font licenses.
