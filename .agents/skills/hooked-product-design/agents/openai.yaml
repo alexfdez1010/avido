@@ -1,4 +1,0 @@
-interface:
-  display_name: 'Hooked Product Design'
-  short_description: 'Improve useful product habits, flows, and copy'
-  default_prompt: 'Use $hooked-product-design to audit this product and propose concrete improvements to its habit loop, interface copy, and validation plan.'
