@@ -4,8 +4,12 @@ import { useLibrary } from '@/store/library';
 
 import { findAll, localName, parseXml, textOf } from './html';
 import { scanLibrary } from './library';
+import { DISCOVER_ENABLED } from './distribution';
 
 const SITE = 'https://www.gutenberg.org';
+export const GUTENBERG_HEADERS = {
+  'User-Agent': 'Avido/1.0 (+https://avido.alejandrofernandezcamello.me; apps_alejandro@proton.me)',
+};
 
 export type FreeBook = {
   id: number;
@@ -32,7 +36,8 @@ function cleanTitle(raw: string): string {
 }
 
 export async function fetchCatalog(url: string, signal?: AbortSignal): Promise<FreePage> {
-  const res = await fetch(url, { signal, headers: { Accept: 'application/atom+xml' } });
+  if (!DISCOVER_ENABLED) throw new Error('The external catalogue is unavailable in this edition.');
+  const res = await fetch(url, { signal, headers: { ...GUTENBERG_HEADERS, Accept: 'application/atom+xml' } });
   if (!res.ok) throw new Error(`Catalog request failed with ${res.status}`);
   const doc = parseXml(await res.text());
   const feed = findAll(doc, (n) => localName(n) === 'feed')[0];
@@ -70,13 +75,14 @@ export function fileNameFor(book: FreeBook): string {
 
 /** Downloads the EPUB into the user's books folder and returns the library id of the new book. */
 export async function downloadFreeBook(book: FreeBook): Promise<string | undefined> {
+  if (!DISCOVER_ENABLED) throw new Error('External book downloads are unavailable in this edition.');
   const { folderUri } = useLibrary.getState();
   if (!folderUri) throw new Error('No books folder selected');
   const tmpDir = new Directory(Paths.cache, 'downloads');
   tmpDir.create({ idempotent: true, intermediates: true });
   const tmp = new File(tmpDir, `${book.id}.epub`);
   if (tmp.exists) tmp.delete();
-  await File.downloadFileAsync(book.epub, tmp);
+  await File.downloadFileAsync(book.epub, tmp, { headers: GUTENBERG_HEADERS });
   try {
     const name = fileNameFor(book);
     const dir = new Directory(folderUri);

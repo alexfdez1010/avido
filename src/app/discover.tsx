@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { AlertCircle, ArrowLeft, BookOpen, Download, Search, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, View } from 'react-native';
@@ -9,7 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Cta, GUTTER, Tap, Txt } from '@/components/kit';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { usePalette } from '@/hooks/use-palette';
-import { catalogUrl, downloadFreeBook, fetchCatalog, fileNameFor, type FreeBook } from '@/lib/gutenberg';
+import { DISCOVER_ENABLED } from '@/lib/distribution';
+import { catalogUrl, downloadFreeBook, fetchCatalog, fileNameFor, GUTENBERG_HEADERS, type FreeBook } from '@/lib/gutenberg';
 import { pickFolder } from '@/lib/library';
 import { useLibrary } from '@/store/library';
 import { fonts } from '@/theme/fonts';
@@ -32,7 +33,7 @@ function Row({ book, status, done, onPress }: { book: FreeBook; status?: Status;
     <Tap onPress={onPress} disabled={busy} scale={0.98} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: p.line }}>
       <View style={{ width: 52, height: 78, borderRadius: 5, overflow: 'hidden', backgroundColor: p.surface, alignItems: 'center', justifyContent: 'center' }}>
         {!coverFailed ? (
-          <Image source={book.cover} style={{ width: 52, height: 78 }} contentFit="cover" transition={p.ink ? 0 : 150} onError={() => setCoverFailed(true)} />
+          <Image source={{ uri: book.cover, headers: GUTENBERG_HEADERS }} style={{ width: 52, height: 78 }} contentFit="cover" transition={p.ink ? 0 : 150} onError={() => setCoverFailed(true)} />
         ) : (
           <BookOpen size={18} color={p.faint} />
         )}
@@ -62,7 +63,11 @@ function Row({ book, status, done, onPress }: { book: FreeBook; status?: Status;
   );
 }
 
-export default function Discover() {
+export default function DiscoverRoute() {
+  return DISCOVER_ENABLED ? <Discover /> : <Redirect href="/(tabs)/library" />;
+}
+
+function Discover() {
   const p = usePalette();
   const insets = useSafeAreaInsets();
   const folderUri = useLibrary((s) => s.folderUri);

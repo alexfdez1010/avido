@@ -10,7 +10,7 @@ Image.open(ROOT / "assets/images/icon.png").convert("RGB").resize((512, 512), Im
 for language in ("es", "en"):
     target = OUT / language
     target.mkdir(exist_ok=True)
-    for number, screen in enumerate(("home", "library", "reader", "stats", "trophies"), 1):
+    for number, screen in enumerate(("reader", "stats", "stats-details", "trophies", "trophies-details"), 1):
         screenshot = Image.open(ROOT / f"site/assets/screenshots/{language}/{screen}.webp").convert("RGB")
         # Preserve the entire captured UI; pad to Play's recommended 9:16 canvas.
         height = 1920

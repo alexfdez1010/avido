@@ -25,7 +25,14 @@ This document describes the application in this repository. It is a description 
 
 The app configuration does not explicitly disable operating-system backup or device-transfer behavior. Device or cloud backups may therefore include app data depending on the platform and your settings. Ávido's lack of a sync backend does not prevent those backups. A selected folder can also be managed by another file provider or sync application.
 
-## When the app connects to the network
+## Edition scope
+
+The **Google Play edition** has no Discover screen, catalogue, downloads or
+INTERNET/ACCESS_NETWORK_STATE permissions. It reads user-selected local files only.
+The UI, direct route and catalogue functions all block Discover in that edition.
+The network description below applies only to the **GitHub APK edition**.
+
+## When the GitHub APK connects to the network
 
 The optional **Discover** screen contacts Project Gutenberg directly over HTTPS. Opening it requests its catalogue; searching sends the search text and selected language; visible results load cover images; choosing a book downloads its EPUB. These requests expose the usual connection information, including the source IP address, to the receiving service. Downloads may follow redirects operated by that service. Project Gutenberg states that its access logs, including IP addresses, are retained for at most 60 days; this is not ephemeral-only processing. See its current policy for details. Opening the Project Gutenberg footer link hands the website to your browser.
 

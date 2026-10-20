@@ -11,6 +11,7 @@ import { WeekStrip } from '@/components/home/week-strip';
 import { levelProgress, levelTitle, streakMultiplier } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
 import { dayKey, formatLongDate, greeting } from '@/lib/dates';
+import { DISCOVER_ENABLED } from '@/lib/distribution';
 import { pickFolder } from '@/lib/library';
 import { DEFAULT_SESSION_TARGET, SESSION_TARGETS, type SessionTarget } from '@/lib/reading-plan';
 import { FINISH_THRESHOLD, type Book } from '@/lib/types';
@@ -230,7 +231,7 @@ function EmptyLibrary() {
       </Txt>
       <View style={{ marginTop: 6, gap: 10 }}>
         <Cta label={tx('Elegir carpeta', 'Choose folder')} onPress={pickFolder} />
-        <Cta kind="ghost" compact icon={<Compass size={16} color={p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />
+        {DISCOVER_ENABLED && <Cta kind="ghost" compact icon={<Compass size={16} color={p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />}
       </View>
     </Card>
   );

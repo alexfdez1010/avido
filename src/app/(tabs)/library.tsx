@@ -9,6 +9,7 @@ import { Bar, Cover, Cta, GUTTER, PageHeader, Sheet, TAB_BAR_SPACE, Tap, Txt } f
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { usePalette } from '@/hooks/use-palette';
 import { formatDuration } from '@/lib/dates';
+import { DISCOVER_ENABLED } from '@/lib/distribution';
 import { deleteBook, pickFolder, scanLibrary } from '@/lib/library';
 import { clearBookCache } from '@/lib/paths';
 import type { Book } from '@/lib/types';
@@ -187,9 +188,9 @@ export default function Library() {
             <Tap onPress={() => scanLibrary()} accessibilityLabel={tx('Actualizar', 'Refresh')} style={iconBtn}>
               <RefreshCw size={18} color={p.soft} />
             </Tap>
-            <Tap onPress={() => router.push('/discover')} accessibilityLabel={tx('Descubrir', 'Discover')} style={[iconBtn, { backgroundColor: p.emberSoft, borderColor: 'transparent' }]}>
+            {DISCOVER_ENABLED && <Tap onPress={() => router.push('/discover')} accessibilityLabel={tx('Descubrir', 'Discover')} style={[iconBtn, { backgroundColor: p.emberSoft, borderColor: 'transparent' }]}>
               <Compass size={19} color={p.ember} />
-            </Tap>
+            </Tap>}
           </View>
         }
       >
@@ -251,7 +252,7 @@ export default function Library() {
       </Txt>
       <View style={{ marginTop: 10, gap: 8, alignItems: 'center' }}>
         {!folderUri && <Cta label={tx('Elegir carpeta', 'Choose folder')} onPress={pickFolder} />}
-        {!q && <Cta kind={folderUri ? 'primary' : 'ghost'} icon={<Compass size={18} color={folderUri ? p.onEmber : p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />}
+        {DISCOVER_ENABLED && !q && <Cta kind={folderUri ? 'primary' : 'ghost'} icon={<Compass size={18} color={folderUri ? p.onEmber : p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />}
       </View>
     </View>
   );

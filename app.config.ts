@@ -42,6 +42,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: localQA ? 'avido-local' : 'avido',
   userInterfaceStyle: 'automatic',
   backgroundColor: '#100E0B',
+  extra: { ...config.extra, distribution: playStore ? 'play' : 'direct' },
   android: {
     package: localQA ? 'com.alexfdez.avido.local' : playStore ? 'com.alexfdez.avido.play' : 'com.alexfdez.avido',
     versionCode: buildNumber,
@@ -60,6 +61,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'android.permission.READ_EXTERNAL_STORAGE',
       'android.permission.WRITE_EXTERNAL_STORAGE',
       'com.google.android.gms.permission.AD_ID',
+      ...(playStore ? ['android.permission.INTERNET', 'android.permission.ACCESS_NETWORK_STATE'] : []),
     ],
   },
   plugins: [

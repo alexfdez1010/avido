@@ -149,3 +149,14 @@ is included by the website generator, requires no dependencies and must be updat
 alongside changes to data handling. Public support/privacy email:
 `apps_alejandro@proton.me`. The owner approved a free app without ads for ages 16+.
 See `docs/play-store.md` for declarations, source evidence and remaining release gates.
+
+### Offline Play edition
+
+The owner selected an offline Play edition after reviewing Gutenberg's US-only
+copyright assurances. The GitHub APK retains Discover. `extra.distribution` embeds
+`play` or `direct`; unknown values fail closed. Play hides all catalogue entrypoints,
+redirects direct `/discover` navigation and rejects catalogue calls before I/O.
+Its manifest blocks INTERNET and ACCESS_NETWORK_STATE, and CI verifies their
+absence in the signed APK, alongside advertising ID and broad storage permissions.
+Store policy and listing text distinguish the two editions. Website screenshots
+showing Discover must not be uploaded to the Play listing.

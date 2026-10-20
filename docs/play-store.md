@@ -7,51 +7,44 @@ Play package: `com.alexfdez.avido.play`; legacy APK and QA keep their identities
 
 ## Data safety evidence
 
-Do not select "no data collected" just because the app has no login.
-`src/lib/gutenberg.ts` sends catalogue searches and book/cover requests directly
-to Project Gutenberg. Its [privacy policy](https://www.gutenberg.org/policy/privacy_policy.html)
-states that server access logs include IP addresses and are retained for at most
-60 days. This is not ephemeral-only processing. Profile and reading history remain
-local; exported backups are user-directed local files and may be synchronized by
-the selected file provider. No advertising, analytics or crash-reporting SDK is
-integrated in the audited app source. Confirm the merged release manifest too.
+The owner decided to exclude Discover **only from the Play edition** after the
+copyright investigation. The signed Play app contains no catalogue, download
+entrypoints or INTERNET/ACCESS_NETWORK_STATE permissions. App config embeds the
+edition; the UI, direct route and network functions all enforce it. Unknown
+metadata disables catalogue access. The CI gate inspects the built APK permissions.
 
-Use a conservative declaration for optional Discover data:
+For the Play edition, declare **no user data collected or shared**, **no account
+creation**, **no ads**, and no independent security certification. Profile, books,
+reading history and backups are processed locally. User-selected folder providers
+and Android backups are separate OS/provider behavior. Support email and public
+privacy links open external apps at the user's request. The public policy clearly
+distinguishes the two editions. Recheck declarations whenever services change.
 
-| Data type | Handling | Purpose |
-| --- | --- | --- |
-| App activity: in-app search history | Collected by Gutenberg, optional, not ephemeral | App functionality |
-| App activity: app interactions | Book/cover requests collected by Gutenberg, optional, not ephemeral | App functionality; Gutenberg's usage analysis |
-| Device or other IDs | IP in Gutenberg access logs, optional, not ephemeral | App functionality; Gutenberg's usage analysis and quality assurance |
-
-Declare the transfers to Gutenberg transparently. Google's user-initiated transfer
-exception may exclude these from the "shared" label; choosing the conservative
-shared declaration avoids promising that third parties receive nothing. Do not
-declare IP-derived location without evidence it is inferred. Connections use HTTPS.
-No accounts are created; account-deletion requirements do not apply. Do not claim
-an independent security review, payment certification or developer access to
-Gutenberg's deletion controls. Refer requests for its logs to its privacy policy.
-The developer does not provide a remote deletion endpoint for local reading data.
+The GitHub APK still connects to Gutenberg; its catalogue requests and IP access
+logs are **not** covered by the Play edition's no-collection declaration. See
+`docs/privacy.md` and Gutenberg's own policy for that edition.
 
 Consult Google's [Data safety guidance](https://support.google.com/googleplay/android-developer/answer/10787469)
-when completing the current form. Recheck declarations whenever network services
-or SDKs change. Public policies live at `/es/privacy/` and `/en/privacy/`.
+when completing the current form. Public policies live at `/es/privacy/` and
+`/en/privacy/`.
 
 ## Content declarations
 
 No restricted access/sign-in; no ads; no government affiliation; no financial
 features; no health features; no user-to-user communication, user publishing,
-gambling, purchases or subscriptions. Imported books and the Gutenberg catalogue
-can contain mature text; answer the IARC questionnaire based on its actual
-wording for a general-purpose reader with an online catalogue. Audience selection
-is separate from the automatically assigned content rating. Do not invent an IARC
-rating or claim that imported literature is content-filtered.
+gambling, purchases or subscriptions. The Play app bundles no books and offers no online content. Select "no" for
+ratings-relevant content in the package, user-to-user sharing and online content.
+Google explicitly excludes files users import themselves from the ratings
+questionnaire: [Online Content guidance](https://support.google.com/googleplay/android-developer/answer/11070055).
+The APK's catalogue must not be used to rate the offline Play edition. Audience
+selection remains separate from the assigned rating.
 
 ## Assets and listing
 
 `store/google-play/listing.json` contains Spanish and English listing text.
 `scripts/prepare-play-assets.py` packages real website Android screenshots as PNG,
-a 512×512 icon and 1024×500 feature graphics. It uses the existing local fonts and
+a 512×512 icon and 1024×500 feature graphics. Play screenshots use reader, statistics
+and achievements screens; home/library images showing Discover are excluded. It uses the existing local fonts and
 icon; it does not paint UI or invent screenshots. Captures are scaled without
 cropping or distortion and centered on a 1080×1920 canvas to meet Play's aspect
 ratio limits. Upscaling does not add source detail. Original provenance remains in

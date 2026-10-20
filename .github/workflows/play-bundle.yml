@@ -121,6 +121,12 @@ jobs:
           keytool -printcert -jarfile dist/play/avido-play.aab > "$RUNNER_TEMP/bundle-signer.txt"
           bundle_actual=$(sed -n 's/^[[:space:]]*SHA256: //p' "$RUNNER_TEMP/bundle-signer.txt" | tr -d ':' | tr '[:upper:]' '[:lower:]')
           test "$bundle_actual" = "$expected"
+          aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)
+          "$aapt" dump permissions dist/play/avido-play.apk > dist/play/PERMISSIONS.txt
+          if grep -E 'android.permission.(INTERNET|ACCESS_NETWORK_STATE|MANAGE_EXTERNAL_STORAGE|READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE)|com.google.android.gms.permission.AD_ID' dist/play/PERMISSIONS.txt; then
+            echo '::error::Play edition contains a forbidden network, advertising or broad-storage permission.'
+            exit 1
+          fi
           (cd dist/play && sha256sum avido-play.aab avido-play.apk > SHA256SUMS.txt)
           printf 'Source: %s\nVersion: %s (%s)\nPackage: com.alexfdez.avido.play\n' "$GITHUB_SHA" "$APP_VERSION" "$BUILD_NUMBER" > dist/play/BUILD.txt
 
