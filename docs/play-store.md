@@ -81,6 +81,32 @@ was on Pixel 9 / Android 16, arm64; no tablet coverage is claimed. Local build
 metadata, hashes and diagnostic logs are in the ignored `artifacts/android/play/`
 folder. A fresh installation through Google Play still needs test-track validation.
 
+## Play Console submission (20 October 2026)
+
+Version **1.0.0 (5)**, package `com.apps_alejandro.avido`, was accepted by Play
+Console and submitted with the English/Spanish listing and declarations to the
+**Closed testing – Alpha** track. The console shows **Changes in review**;
+automatic quick checks and Google's review are pending. Initial test availability
+is Spain and feedback goes to `apps_alejandro@proton.me`. No testers have been
+assigned or opted in. Public production access remains locked until the real
+12-tester / 14-day requirement and Google's production-access review are satisfied.
+The owner has been asked to provide tester Google-account email addresses.
+
+A fresh installation of the definitive signed APK from `982049e` passed all five
+onboarding screens, home/library rendering, absence of Discover on both screens
+and the explicit Discover deep-link redirect. This used the existing Pixel 9 AVD
+headlessly, then shut it down. The previous reader/import/backup coverage above
+precedes only the package-identity correction. Installation through Play itself
+still needs a real tester. Maestro MCP's old connection was stale after shutdown;
+the official local Maestro CLI ran the final native checks successfully.
+
+The uploaded AAB SHA-256 is
+`1342348163e6941c06d9ac1b0b48542f97202d3b86e4135478008eb839b6e28b`.
+Local artifacts and detailed metadata are in `artifacts/android/play/registered-build.json`.
+The Advertising ID declaration is **No**; the signed manifest excludes AD_ID.
+Google's missing-deobfuscation-file warning is expected because this build has
+R8/Proguard obfuscation disabled. Its other warning is the missing tester list.
+
 ## Release gates
 
 1. Validate lint, typecheck, tests and signed bundle/APK. Verify the changed app
