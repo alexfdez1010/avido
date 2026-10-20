@@ -7,6 +7,8 @@ const SIGNING = `
                 storePassword System.getenv('AVIDO_KEYSTORE_PASSWORD')
                 keyAlias System.getenv('AVIDO_KEY_ALIAS')
                 keyPassword System.getenv('AVIDO_KEY_PASSWORD')
+            } else if (System.getenv('AVIDO_STORE') == 'play') {
+                throw new GradleException('Play Store builds require a private upload key. Debug signing is forbidden.')
             } else {
                 storeFile file('debug.keystore')
                 storePassword 'android'

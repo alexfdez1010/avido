@@ -1,5 +1,12 @@
 # Privacy and local data
 
+Public user-facing policies are published at [Spanish](https://avido.alejandrofernandezcamello.me/es/privacy/)
+and [English](https://avido.alejandrofernandezcamello.me/en/privacy/). Their generator is
+`scripts/build-privacy.cjs`; this implementation guide complements those policies.
+The publisher is Alejandro Fernández Camello; support/privacy contact is
+`apps_alejandro@proton.me`. The intended audience is ages 16 and over.
+
+
 Ávido is built around a local reading library. The application source has no account system, advertising integration, analytics SDK, remote reading-history service or cloud-sync feature. You can read books already available on your device without using Discover or connecting to an Ávido service.
 
 This document describes the application in this repository. It is a description of the current implementation, not a guarantee about every operating system, dependency, development tool or modified build.
@@ -20,7 +27,7 @@ The app configuration does not explicitly disable operating-system backup or dev
 
 ## When the app connects to the network
 
-The optional **Discover** screen contacts Project Gutenberg directly over HTTPS. Opening it requests its catalogue; searching sends the search text and selected language; visible results load cover images; choosing a book downloads its EPUB. These requests expose the usual connection information, including the source IP address, to the receiving service. Downloads may follow redirects operated by that service. Opening the Project Gutenberg footer link hands the website to your browser.
+The optional **Discover** screen contacts Project Gutenberg directly over HTTPS. Opening it requests its catalogue; searching sends the search text and selected language; visible results load cover images; choosing a book downloads its EPUB. These requests expose the usual connection information, including the source IP address, to the receiving service. Downloads may follow redirects operated by that service. Project Gutenberg states that its access logs, including IP addresses, are retained for at most 60 days; this is not ephemeral-only processing. See its current policy for details. Opening the Project Gutenberg footer link hands the website to your browser.
 
 Ávido does not attach your local profile, XP, reading history or library database to these requests. The downloaded-book list stays local. Reading your own local books does not need this catalogue. EPUB parsing skips remote images and extracts supported embedded images locally.
 

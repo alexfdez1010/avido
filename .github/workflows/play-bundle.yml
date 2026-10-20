@@ -1,0 +1,133 @@
+name: Build Play Store bundle
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: play-store-bundle
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      APP_VERSION: 1.0.0
+      BUILD_NUMBER: ${{ github.run_number }}
+      AVIDO_STORE: play
+      NODE_OPTIONS: --max-old-space-size=6144
+      CCACHE_MAXSIZE: 1G
+      CCACHE_COMPILERCHECK: content
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # React Native's application CMake project detects ccache automatically.
+      # Cache compiler outputs, never generated native projects or signing keys.
+      - name: Install native compiler cache
+        run: |
+          echo "CCACHE_DIR=$RUNNER_TEMP/ccache" >> "$GITHUB_ENV"
+          if ! command -v ccache >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install --no-install-recommends -y ccache
+          fi
+
+      - name: Restore native compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ runner.arch }}-v1-${{ hashFiles('package-lock.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ runner.arch }}-v1-${{ hashFiles('package-lock.json') }}-
+
+      - name: Reset compiler cache statistics
+        run: ccache --zero-stats
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck & lint
+        run: |
+          npx tsc --noEmit
+          npx expo lint
+          npm test
+
+      - name: Prepare signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "AVIDO_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+          else
+            echo "::error::Missing private Play upload key."
+            exit 1
+          fi
+
+      - name: Generate native project
+        run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Build signed app bundle and verification APK
+        working-directory: android
+        env:
+          AVIDO_KEYSTORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEYSTORE_PASSWORD }}
+          AVIDO_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          AVIDO_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: ./gradlew bundleRelease assembleRelease --no-daemon --build-cache -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64
+
+      - name: Report compiler cache statistics
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### Native compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Collect Play artifacts
+        run: |
+          mkdir -p dist/play
+          cp android/app/build/outputs/bundle/release/app-release.aab dist/play/avido-play.aab
+          cp android/app/build/outputs/apk/release/app-release.apk dist/play/avido-play.apk
+
+      - name: Verify private upload signer and integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+          "$apksigner" verify --print-certs dist/play/avido-play.apk > "$RUNNER_TEMP/play-signer.txt"
+          actual=$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' "$RUNNER_TEMP/play-signer.txt")
+          expected=$(tr -d '[:space:]' < .github/play-upload-signer.sha256)
+          test "$actual" = "$expected"
+          jarsigner -verify dist/play/avido-play.aab
+          keytool -printcert -jarfile dist/play/avido-play.aab > "$RUNNER_TEMP/bundle-signer.txt"
+          bundle_actual=$(sed -n 's/^[[:space:]]*SHA256: //p' "$RUNNER_TEMP/bundle-signer.txt" | tr -d ':' | tr '[:upper:]' '[:lower:]')
+          test "$bundle_actual" = "$expected"
+          (cd dist/play && sha256sum avido-play.aab avido-play.apk > SHA256SUMS.txt)
+          printf 'Source: %s\nVersion: %s (%s)\nPackage: com.alexfdez.avido.play\n' "$GITHUB_SHA" "$APP_VERSION" "$BUILD_NUMBER" > dist/play/BUILD.txt
+
+      - name: Save Play Store artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: avido-play-${{ github.run_number }}
+          path: dist/play/
+          retention-days: 14
+          compression-level: 0

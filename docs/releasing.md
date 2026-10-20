@@ -68,7 +68,7 @@ The workflow artifact stores only one copy without ZIP compression; both APK
 filenames remain available on the permanent GitHub Release.
 
 The APK workflow builds Android only. The repository does not currently publish
-an iOS build, App Store release or Play Store listing. Browser previews are not a
+an iOS build or App Store release. The dedicated Google Play workflow is described below. Browser previews are not a
 replacement for native-reader verification; see [android-testing.md](android-testing.md).
 
 ## Versioning
@@ -103,3 +103,49 @@ their own licenses.
 ## Obtainium
 
 The website and README provide an Obtainium import link using the official redirect service. It tracks this repository’s tagged GitHub releases and filters assets to `^avido-[0-9]+\.[0-9]+\.[0-9]+\.apk$`, so the identical generic APK is not a second choice. No listing submission is required. Keep one release per version, a versioned APK attachment, monotonically increasing version codes, and the pinned signing identity. See the [official deep-link documentation](https://wiki.obtainium.imranr.dev/deep_links/).
+
+## Google Play distribution
+
+The owner selected GitHub Actions rather than an Expo/EAS account for store builds.
+Run **Actions → Build Play Store bundle → Run workflow** on `main`.
+`.github/workflows/play-bundle.yml` produces a private-key-signed Android App Bundle
+(`avido-play.aab`), a matching verification APK, checksums and source/version metadata.
+The artifact is retained for 14 days; download and back up accepted store builds.
+The workflow checks the APK and AAB certificate against `.github/play-upload-signer.sha256`.
+
+`AVIDO_STORE=play` selects **com.alexfdez.avido.play**. Existing direct-download
+builds retain **com.alexfdez.avido** and their pinned certificate. QA retains
+**com.alexfdez.avido.local**. This separation allows the existing APK and Play app
+to coexist and avoids replacing an installation signed with Expo's public debug key.
+Never upload an APK signed with the shared debug key to Play. A Play release fails
+if its private upload key is missing. Google Play App Signing manages the eventual
+distribution certificate separately from this upload certificate.
+
+The Play upload key and credentials are backed up outside Git at
+`~/.local/share/avido/play-signing/` with owner-only permissions. Keep another
+secure, encrypted backup. GitHub stores only dedicated `PLAY_UPLOAD_KEYSTORE_BASE64`,
+`PLAY_UPLOAD_KEYSTORE_PASSWORD`, `PLAY_UPLOAD_KEY_ALIAS`, and `PLAY_UPLOAD_KEY_PASSWORD`
+Actions secrets; none are printed in workflow output. Never replace these as a
+routine release action. They do not change the legacy APK secrets or certificate.
+
+Play versions start at 1.0.0. Its independent workflow run number supplies the
+monotonically increasing version code. Update the workflow's APP_VERSION for future
+user-visible releases. Rerunning an already uploaded workflow needs a fresh run
+number before uploading another binary.
+
+### Moving an existing library
+
+In the direct-download app, export **Profile → Progress backup** to a shared folder.
+Install the Play edition alongside it, choose the same books folder, then import
+that backup and review the replacement confirmation. Keep the original app until
+the new edition resumes your books correctly. Books are not included in the JSON;
+keep their original files. Never tell users to uninstall before exporting progress.
+
+### Store preparation
+
+Public policy URLs: `/es/privacy/` and `/en/privacy/` on the production website.
+The app links to the device language's policy from Profile. `scripts/build-privacy.cjs`
+is included by the website generator, requires no dependencies and must be updated
+alongside changes to data handling. Public support/privacy email:
+`apps_alejandro@proton.me`. The owner approved a free app without ads for ages 16+.
+See `docs/play-store.md` for declarations, source evidence and remaining release gates.

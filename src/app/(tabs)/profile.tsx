@@ -1,7 +1,7 @@
-import { Bell, BookMarked, Clock, Contrast, Download, FolderOpen, Minus, Moon, Plus, Sun, Timer, Upload, Vibrate } from 'lucide-react-native';
+import { Bell, BookMarked, Clock, Contrast, Download, FolderOpen, Mail, Minus, Moon, Plus, Shield, Sun, Timer, Upload, Vibrate } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { Alert, View } from 'react-native';
+import { Alert, Linking, View } from 'react-native';
 
 import { Card, PageHeader, Screen, SectionTitle, StatRow, Tap, Txt } from '@/components/kit';
 import { Miga } from '@/components/mascot/miga';
@@ -14,7 +14,7 @@ import { exportProgress, importProgress, pickProgressBackup } from '@/lib/progre
 import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
-import { LOCALE, plural, tx } from '@/i18n';
+import { isEs, LOCALE, plural, tx } from '@/i18n';
 
 function Row({ icon, title, hint, right, onPress, last, disabled, testID }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean; disabled?: boolean; testID?: string }) {
   const p = usePalette();
@@ -58,6 +58,11 @@ export default function Profile() {
   const p = usePalette();
   const [active, setActive] = useState(false);
   const [transferring, setTransferring] = useState(false);
+  const openExternal = async (url: string) => {
+    try { await Linking.openURL(url); } catch {
+      Alert.alert(tx('No se pudo abrir el enlace', 'Could not open the link'), url);
+    }
+  };
   const transferError = () => Alert.alert(
     tx('No se pudo completar la copia', 'Could not complete the backup'),
     tx('Comprueba que el archivo sea una copia de Ávido válida y que haya espacio disponible. Tus datos actuales se conservan si el archivo no es válido.', 'Check that the file is a valid Ávido backup and that storage is available. Invalid files leave your current data unchanged.')
@@ -195,6 +200,11 @@ export default function Profile() {
             right={sw(s.mode === 'dark', (v) => s.set({ mode: v ? 'dark' : 'light' }))}
           />
         )}
+      </Card>
+      <SectionTitle>{tx('Acerca de Ávido', 'About Ávido')}</SectionTitle>
+      <Card style={{ paddingVertical: 0 }}>
+        <Row testID="privacy-policy" icon={<Shield size={17} color={p.soft} />} title={tx('Política de privacidad', 'Privacy policy')} onPress={() => openExternal(`https://avido.alejandrofernandezcamello.me/${isEs ? 'es' : 'en'}/privacy/`)} />
+        <Row icon={<Mail size={17} color={p.soft} />} title={tx('Soporte', 'Support')} hint="apps_alejandro@proton.me" onPress={() => openExternal('mailto:apps_alejandro@proton.me')} last />
       </Card>
     </Screen>
   );

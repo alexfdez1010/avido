@@ -28,6 +28,9 @@ const fontFiles = [
 const buildNumber = Number(process.env.BUILD_NUMBER ?? '1');
 const version = process.env.APP_VERSION ?? '1.0.0';
 const localQA = process.env.AVIDO_LOCAL_QA === '1';
+const playStore = process.env.AVIDO_STORE === 'play';
+
+if (localQA && playStore) throw new Error('Local QA and Play Store builds must be separate.');
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -40,7 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
   backgroundColor: '#100E0B',
   android: {
-    package: localQA ? 'com.alexfdez.avido.local' : 'com.alexfdez.avido',
+    package: localQA ? 'com.alexfdez.avido.local' : playStore ? 'com.alexfdez.avido.play' : 'com.alexfdez.avido',
     versionCode: buildNumber,
     adaptiveIcon: {
       backgroundColor: '#100E0B',
@@ -56,6 +59,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'android.permission.MANAGE_EXTERNAL_STORAGE',
       'android.permission.READ_EXTERNAL_STORAGE',
       'android.permission.WRITE_EXTERNAL_STORAGE',
+      'com.google.android.gms.permission.AD_ID',
     ],
   },
   plugins: [

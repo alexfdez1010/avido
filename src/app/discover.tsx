@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { AlertCircle, ArrowLeft, BookOpen, Download, Search, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Cta, GUTTER, Tap, Txt } from '@/components/kit';
@@ -154,6 +154,10 @@ export default function Discover() {
           {tx('Clásicos libres · Project Gutenberg', 'Free classics · Project Gutenberg')}
         </Txt>
         <Txt v="display" style={{ marginTop: 6 }}>{tx('Descubrir', 'Discover')}</Txt>
+        <Txt v="caption" tone="muted" style={{ marginTop: 12 }}>{tx('Project Gutenberg recibe tus búsquedas, los libros solicitados y tu dirección IP. Consulta su política de privacidad. Comprueba los derechos de los libros en tu país.', 'Project Gutenberg receives your searches, requested books and IP address. Read its privacy policy. Check book rights in your country.')}</Txt>
+        <Tap accessibilityRole="link" onPress={() => Linking.openURL('https://www.gutenberg.org/policy/privacy_policy.html').catch(() => Alert.alert(tx('No se pudo abrir el enlace', 'Could not open the link'), 'https://www.gutenberg.org/policy/privacy_policy.html'))} style={{ minHeight: 48, justifyContent: 'center' }}>
+          <Txt v="caption" tone="ember">{tx('Privacidad de Project Gutenberg', 'Project Gutenberg privacy')}</Txt>
+        </Tap>
       </View>
       {!folderUri && (
         <View style={{ marginTop: 18, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: p.line, backgroundColor: p.surface, gap: 12 }}>

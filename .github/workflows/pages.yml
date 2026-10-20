@@ -6,6 +6,7 @@ on:
     paths:
       - 'site/**'
       - 'scripts/build-site.cjs'
+      - 'scripts/build-privacy.cjs'
       - 'scripts/test-site.cjs'
       - 'scripts/test-carousel.cjs'
       - '.github/workflows/pages.yml'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'site/**'
       - 'scripts/build-site.cjs'
+      - 'scripts/build-privacy.cjs'
       - 'scripts/test-site.cjs'
       - 'scripts/test-carousel.cjs'
       - '.github/workflows/pages.yml'
