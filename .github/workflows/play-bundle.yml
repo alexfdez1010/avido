@@ -123,7 +123,7 @@ jobs:
           test "$bundle_actual" = "$expected"
           aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)
           "$aapt" dump permissions dist/play/avido-play.apk > dist/play/PERMISSIONS.txt
-          if grep -E 'android.permission.(INTERNET|ACCESS_NETWORK_STATE|MANAGE_EXTERNAL_STORAGE|READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE)|com.google.android.gms.permission.AD_ID' dist/play/PERMISSIONS.txt; then
+          if grep -E 'android.permission.(INTERNET|ACCESS_NETWORK_STATE|SYSTEM_ALERT_WINDOW|MANAGE_EXTERNAL_STORAGE|READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE)|com.google.android.gms.permission.AD_ID' dist/play/PERMISSIONS.txt; then
             echo '::error::Play edition contains a forbidden network, advertising or broad-storage permission.'
             exit 1
           fi
