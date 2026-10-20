@@ -113,14 +113,20 @@ jobs:
         run: |
           set -euo pipefail
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
-          "$apksigner" verify --print-certs dist/play/avido-play.apk > "$RUNNER_TEMP/play-signer.txt"
-          actual=$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' "$RUNNER_TEMP/play-signer.txt")
+          "$apksigner" verify --print-certs dist/play/avido-play.apk | tee dist/play/APK-SIGNER.txt
+          actual=$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' dist/play/APK-SIGNER.txt | tr '[:upper:]' '[:lower:]' | tr -d '\r')
           expected=$(tr -d '[:space:]' < .github/play-upload-signer.sha256)
-          test "$actual" = "$expected"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Upload certificate mismatch: actual=$actual expected=$expected"
+            exit 1
+          fi
           jarsigner -verify dist/play/avido-play.aab
-          keytool -printcert -jarfile dist/play/avido-play.aab > "$RUNNER_TEMP/bundle-signer.txt"
-          bundle_actual=$(sed -n 's/^[[:space:]]*SHA256: //p' "$RUNNER_TEMP/bundle-signer.txt" | tr -d ':' | tr '[:upper:]' '[:lower:]')
-          test "$bundle_actual" = "$expected"
+          keytool -printcert -jarfile dist/play/avido-play.aab | tee dist/play/BUNDLE-SIGNER.txt
+          bundle_actual=$(sed -n 's/^[[:space:]]*SHA256: //p' dist/play/BUNDLE-SIGNER.txt | tr -d ':' | tr '[:upper:]' '[:lower:]' | tr -d '\r')
+          if [ "$bundle_actual" != "$expected" ]; then
+            echo "::error::Bundle certificate mismatch: actual=$bundle_actual expected=$expected"
+            exit 1
+          fi
           aapt=$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -1)
           "$aapt" dump permissions dist/play/avido-play.apk > dist/play/PERMISSIONS.txt
           if grep -E 'android.permission.(INTERNET|ACCESS_NETWORK_STATE|SYSTEM_ALERT_WINDOW|MANAGE_EXTERNAL_STORAGE|READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE)|com.google.android.gms.permission.AD_ID' dist/play/PERMISSIONS.txt; then
