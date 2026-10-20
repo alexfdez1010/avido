@@ -85,9 +85,11 @@ folder. A fresh installation through Google Play still needs test-track validati
 
 Version **1.0.0 (5)**, package `com.apps_alejandro.avido`, was accepted by Play
 Console and submitted with the English/Spanish listing and declarations to the
-**Closed testing – Alpha** track. The console shows **Changes in review**;
-automatic quick checks and Google's review are pending. Initial test availability
-is Spain and feedback goes to `apps_alejandro@proton.me`. No testers have been
+**Closed testing – Alpha** track. The original console submission showed **Changes in review**;
+the initial submission was subsequently published to closed testing. The owner
+then requested worldwide test availability (178 countries/regions, including
+Rest of World). This country expansion has been saved and submitted
+for review. Feedback goes to `apps_alejandro@proton.me`. No testers have been
 assigned or opted in. Public production access remains locked until the real
 12-tester / 14-day requirement and Google's production-access review are satisfied.
 The owner has been asked to provide tester Google-account email addresses.
@@ -124,3 +126,7 @@ R8/Proguard obfuscation disabled. Its other warning is the missing tester list.
    release for Google's review. Production approval cannot be guaranteed.
 
 Use `docs/releasing.md` for signing, build and progress-migration instructions.
+
+The signed cloud build also passed all checks and artifact upload in
+GitHub Actions run `39413031900` (`982049e`). The signer check supports both
+numbered signer output and the current `V2 Signer:` format.
