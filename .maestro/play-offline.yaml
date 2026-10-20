@@ -1,6 +1,6 @@
 # Requires a configured Play profile and an unfinished local demonstration book.
 # Preserves the library, profile and reading history.
-appId: com.alexfdez.avido.play
+appId: com.apps_alejandro.avido
 name: Offline Play edition reading and privacy
 tags:
   - local

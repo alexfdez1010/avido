@@ -16,7 +16,7 @@ function config(env) {
 
 test('Play, legacy APK and QA retain separate Android identities', () => {
   assert.equal(config({}).android.package, 'com.alexfdez.avido');
-  assert.equal(config({ AVIDO_STORE: 'play' }).android.package, 'com.alexfdez.avido.play');
+  assert.equal(config({ AVIDO_STORE: 'play' }).android.package, 'com.apps_alejandro.avido');
   assert.equal(config({ AVIDO_LOCAL_QA: '1' }).android.package, 'com.alexfdez.avido.local');
   assert.throws(() => config({ AVIDO_LOCAL_QA: '1', AVIDO_STORE: 'play' }), /must be separate/);
   assert.equal(config({ AVIDO_STORE: 'play' }).extra.distribution, 'play');

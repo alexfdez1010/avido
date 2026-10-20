@@ -44,7 +44,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   backgroundColor: '#100E0B',
   extra: { ...config.extra, distribution: playStore ? 'play' : 'direct' },
   android: {
-    package: localQA ? 'com.alexfdez.avido.local' : playStore ? 'com.alexfdez.avido.play' : 'com.alexfdez.avido',
+    package: localQA ? 'com.alexfdez.avido.local' : playStore ? 'com.apps_alejandro.avido' : 'com.alexfdez.avido',
     versionCode: buildNumber,
     adaptiveIcon: {
       backgroundColor: '#100E0B',

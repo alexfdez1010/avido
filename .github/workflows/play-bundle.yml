@@ -114,7 +114,7 @@ jobs:
           set -euo pipefail
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
           "$apksigner" verify --print-certs dist/play/avido-play.apk | tee dist/play/APK-SIGNER.txt
-          actual=$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' dist/play/APK-SIGNER.txt | tr '[:upper:]' '[:lower:]' | tr -d '\r')
+          actual=$(sed -nE 's/^(Signer #[0-9]+|V[0-9]+ Signer):? certificate SHA-256 digest: //p' dist/play/APK-SIGNER.txt | tr '[:upper:]' '[:lower:]' | tr -d '\r' | sort -u)
           expected=$(tr -d '[:space:]' < .github/play-upload-signer.sha256)
           if [ "$actual" != "$expected" ]; then
             echo "::error::Upload certificate mismatch: actual=$actual expected=$expected"
@@ -134,7 +134,7 @@ jobs:
             exit 1
           fi
           (cd dist/play && sha256sum avido-play.aab avido-play.apk > SHA256SUMS.txt)
-          printf 'Source: %s\nVersion: %s (%s)\nPackage: com.alexfdez.avido.play\n' "$GITHUB_SHA" "$APP_VERSION" "$BUILD_NUMBER" > dist/play/BUILD.txt
+          printf 'Source: %s\nVersion: %s (%s)\nPackage: com.apps_alejandro.avido\n' "$GITHUB_SHA" "$APP_VERSION" "$BUILD_NUMBER" > dist/play/BUILD.txt
 
       - name: Save Play Store artifacts
         uses: actions/upload-artifact@v4

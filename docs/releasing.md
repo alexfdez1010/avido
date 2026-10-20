@@ -113,7 +113,7 @@ Run **Actions → Build Play Store bundle → Run workflow** on `main`.
 The artifact is retained for 14 days; download and back up accepted store builds.
 The workflow checks the APK and AAB certificate against `.github/play-upload-signer.sha256`.
 
-`AVIDO_STORE=play` selects **com.alexfdez.avido.play**. Existing direct-download
+`AVIDO_STORE=play` selects **com.apps_alejandro.avido**. Existing direct-download
 builds retain **com.alexfdez.avido** and their pinned certificate. QA retains
 **com.alexfdez.avido.local**. This separation allows the existing APK and Play app
 to coexist and avoids replacing an installation signed with Expo's public debug key.

@@ -3,7 +3,9 @@
 Owner decisions (20 October 2026): free, no ads or purchases; audience 16–17
 and 18+; public support/privacy email `apps_alejandro@proton.me`.
 Publisher: Alejandro Fernández Camello. Category: Books & Reference, app.
-Play package: `com.alexfdez.avido.play`; legacy APK and QA keep their identities.
+Play package: `com.apps_alejandro.avido`, fixed by the existing Play Console listing.
+Legacy APK and QA keep their identities. The registered upload certificate was
+downloaded from Play Console and matches the private upload key.
 
 ## Data safety evidence
 
@@ -60,14 +62,17 @@ are not used for the Play listing. Tablet screenshots are not fabricated.
 
 ## Native verification (20 October 2026)
 
-The signed offline Play build `03c3c00` (1.0.0, code 3) passed the local Android
+The signed offline capture build `03c3c00` (1.0.0, code 3, temporary package
+`com.alexfdez.avido.play`) passed the local Android
 reading-plan flow, including untimed reading, an optional 30-minute reminder and
 returning to untimed reading. An explicit Discover deep link redirected to the
 library. Folder import and backup restore ran through the actual Android UI.
 English and Spanish privacy/support controls were checked, including enlarged
 system text at 130%. Temporary settings were restored and the emulator closed.
 The personal/legacy package was not modified. The repeatable reading-plan flow
-is `.maestro/play-offline.yaml`.
+is `.maestro/play-offline.yaml`, now targeting the registered Play package.
+The store rejected the temporary package; the production config now uses the
+existing listing identity. Screenshot UI and offline behavior are unchanged.
 
 The full three-architecture bundle passed Google's bundletool validation,
 JAR signature verification, pinned private-certificate comparison, package/version
