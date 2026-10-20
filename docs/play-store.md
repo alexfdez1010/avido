@@ -42,15 +42,39 @@ selection remains separate from the assigned rating.
 ## Assets and listing
 
 `store/google-play/listing.json` contains Spanish and English listing text.
-`scripts/prepare-play-assets.py` packages real website Android screenshots as PNG,
-a 512×512 icon and 1024×500 feature graphics. Play screenshots use reader, statistics
-and achievements screens; home/library images showing Discover are excluded. It uses the existing local fonts and
-icon; it does not paint UI or invent screenshots. Captures are scaled without
-cropping or distortion and centered on a 1080×1920 canvas to meet Play's aspect
-ratio limits. Upscaling does not add source detail. Original provenance remains in
-the adjacent `site/assets/screenshots/*/*.webp.json` files. Regenerate with Python
-and Pillow. The main listing supports phone screenshots only; tablet artwork is
-not fabricated. Do not describe the app as already available on Play before approval.
+`scripts/prepare-play-assets.py` packages native Play screenshots as PNG, a
+512×512 icon and localized 1024×500 feature graphics. Seven new phone captures
+per language cover home, library, reader, statistics and achievements.
+`store/google-play/source/provenance.json` records their exact source, APK SHA-256,
+private signer, device, transformations and demonstration-data context.
+
+All captures come from the unmodified, signed offline Play app, with three original
+sample EPUBs imported through the system picker and a representative fictional
+reading history restored through the actual backup UI. The app's own quest,
+XP, level and achievement definitions calculate the fixture's values. No third-party
+book text or cover images are used. Samples are not bundled in the distributed app
+and the metrics do not represent user outcomes or proven habit effectiveness.
+Captures are scaled proportionally, without cropping or retouching, and centered
+on a 1080×1920 canvas. Regenerate with Python and Pillow. Old website screenshots
+are not used for the Play listing. Tablet screenshots are not fabricated.
+
+## Native verification (20 October 2026)
+
+The signed offline Play build `03c3c00` (1.0.0, code 3) passed the local Android
+reading-plan flow, including untimed reading, an optional 30-minute reminder and
+returning to untimed reading. An explicit Discover deep link redirected to the
+library. Folder import and backup restore ran through the actual Android UI.
+English and Spanish privacy/support controls were checked, including enlarged
+system text at 130%. Temporary settings were restored and the emulator closed.
+The personal/legacy package was not modified. The repeatable reading-plan flow
+is `.maestro/play-offline.yaml`.
+
+The full three-architecture bundle passed Google's bundletool validation,
+JAR signature verification, pinned private-certificate comparison, package/version
+checks and the forbidden-permission checks above. Native interactive coverage
+was on Pixel 9 / Android 16, arm64; no tablet coverage is claimed. Local build
+metadata, hashes and diagnostic logs are in the ignored `artifacts/android/play/`
+folder. A fresh installation through Google Play still needs test-track validation.
 
 ## Release gates
 

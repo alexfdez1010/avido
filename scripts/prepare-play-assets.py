@@ -10,8 +10,10 @@ Image.open(ROOT / "assets/images/icon.png").convert("RGB").resize((512, 512), Im
 for language in ("es", "en"):
     target = OUT / language
     target.mkdir(exist_ok=True)
-    for number, screen in enumerate(("reader", "stats", "stats-details", "trophies", "trophies-details"), 1):
-        screenshot = Image.open(ROOT / f"site/assets/screenshots/{language}/{screen}.webp").convert("RGB")
+    for previous in target.glob("[0-9][0-9]-*.png"):
+        previous.unlink()
+    for number, screen in enumerate(("home", "library", "reader", "stats", "stats-details", "trophies", "trophies-details"), 1):
+        screenshot = Image.open(OUT / f"source/{language}/{screen}.png").convert("RGB")
         # Preserve the entire captured UI; pad to Play's recommended 9:16 canvas.
         height = 1920
         width = round(screenshot.width * height / screenshot.height)
@@ -32,4 +34,4 @@ for language in ("es", "en"):
     graphic.paste(icon, (706, 125))
     graphic.save(target / "feature-graphic.png")
 
-print("Prepared Google Play PNGs from existing native screenshots, icon and brand fonts.")
+print("Prepared Google Play PNGs from the verified offline Play captures, icon and brand fonts.")

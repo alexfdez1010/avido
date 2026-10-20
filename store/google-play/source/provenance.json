@@ -1,0 +1,83 @@
+{
+  "sourceCommit": "03c3c00ae9dde426c0ebbdf00210461fbbedbabd",
+  "apkSha256": "edece4d0db13ad18db8b8afc609bac19a57d9e10c671bd139841527d16d3d7db",
+  "package": "com.alexfdez.avido.play",
+  "version": "1.0.0",
+  "versionCode": 3,
+  "architectures": [
+    "arm64-v8a"
+  ],
+  "device": "Pixel_9_Android_16",
+  "signerSha256": "349abca62822cb9cd4ffbd2517caf1f784bf3706899306d84dea9c08d5ba2732",
+  "capturedAt": "2026-10-20",
+  "sourcePixels": [
+    1080,
+    2424
+  ],
+  "publishedPixels": [
+    1080,
+    1920
+  ],
+  "processing": "Native Android capture, proportional scaling and horizontal padding only; no UI reconstruction or retouching.",
+  "content": "Three original demonstration EPUBs imported through the Android folder picker. No third-party book text or cover images.",
+  "history": "Representative fictional reading history imported via the app’s validated progress backup. Quest, XP, level and achievement calculations use actual app definitions. Not user results or evidence of effectiveness.",
+  "bookSourceIncludedInApp": false,
+  "captures": [
+    {
+      "file": "es/home.png",
+      "sha256": "66f03b0fef963d9eccc5a8dc7cb041b3e9955a2ad7bb2d61c2eeeafa285e9638"
+    },
+    {
+      "file": "es/library.png",
+      "sha256": "132605fe9704dc7e2f73e32124a485e40f40f13af178e4f1731dbb31b9ceb04a"
+    },
+    {
+      "file": "es/reader.png",
+      "sha256": "53626bf36aa0f294fcf2ce9426cc673f0aa2e2a8832531d23b391fbc75977d6f"
+    },
+    {
+      "file": "es/stats.png",
+      "sha256": "4cdaebd6ebc076115e23b94db8d2010b102a6d4003badb4876353b52c718eb71"
+    },
+    {
+      "file": "es/stats-details.png",
+      "sha256": "aa27076b40afe36aa04bddc1bb4664c592be780c881830cde7ff28ab09de1d25"
+    },
+    {
+      "file": "es/trophies.png",
+      "sha256": "338b1c4d82cbab881253c659a390fa7444d59b14fa8be3b276237ec763f129b4"
+    },
+    {
+      "file": "es/trophies-details.png",
+      "sha256": "d687f9ab87432547a129dd4972d5eeb58e9d970e7da832d00f4ea3deb06c99f0"
+    },
+    {
+      "file": "en/home.png",
+      "sha256": "82628d8fbbe91bf9d5eba41a67db927a7803cc327178dd78c37908790aae43df"
+    },
+    {
+      "file": "en/library.png",
+      "sha256": "68b69b650d708a58be65d213de188036e315f50d3ff717665d62bf884d502d60"
+    },
+    {
+      "file": "en/reader.png",
+      "sha256": "fdd53c189bc70261c6c1343318845911bd7efa1d34b325e6474b3e1b01f3fcac"
+    },
+    {
+      "file": "en/stats.png",
+      "sha256": "824ccf362d2e6b41dea5c507b6a00caddec451ca29437007af81a9d68dba17d5"
+    },
+    {
+      "file": "en/stats-details.png",
+      "sha256": "9be6b02528f1d2865a50f16d70b5073edb8ead2d97d4fc306d0af8380ee293a9"
+    },
+    {
+      "file": "en/trophies.png",
+      "sha256": "28abe792e9752914da70ee1aa9163b5f1879b1a34e38bc17226f1859c67ad1fa"
+    },
+    {
+      "file": "en/trophies-details.png",
+      "sha256": "4d1f4630054af9488b9477f777fe63264205fd287ff6b15742807fa2d5702720"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# Requires a configured Play profile and an unfinished local demonstration book.
+# Preserves the library, profile and reading history.
+appId: com.alexfdez.avido.play
+name: Offline Play edition reading and privacy
+tags:
+  - local
+  - play
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: reading-plan
+    timeout: 15000
+- assertNotVisible: Discover|Descubrir
+- assertVisible:
+    id: reading-step-none
+    checked: true
+- tapOn:
+    id: reading-step-30
+    waitToSettleTimeoutMs: 1000
+- assertVisible:
+    id: reading-step-30
+    checked: true
+- tapOn:
+    id: reading-start
+    waitToSettleTimeoutMs: 1000
+- assertVisible:
+    id: reader-screen|reader-text-only
+- back
+- assertVisible:
+    id: reading-step-none
+    checked: true
