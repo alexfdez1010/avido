@@ -11,7 +11,14 @@ for language in ("es", "en"):
     target = OUT / language
     target.mkdir(exist_ok=True)
     for number, screen in enumerate(("home", "library", "reader", "stats", "trophies"), 1):
-        Image.open(ROOT / f"site/assets/screenshots/{language}/{screen}.webp").convert("RGB").save(target / f"{number:02}-{screen}.png")
+        screenshot = Image.open(ROOT / f"site/assets/screenshots/{language}/{screen}.webp").convert("RGB")
+        # Preserve the entire captured UI; pad to Play's recommended 9:16 canvas.
+        height = 1920
+        width = round(screenshot.width * height / screenshot.height)
+        screenshot = screenshot.resize((width, height), Image.Resampling.LANCZOS)
+        canvas = Image.new("RGB", (1080, height), "#f3ede2")
+        canvas.paste(screenshot, ((1080 - width) // 2, 0))
+        canvas.save(target / f"{number:02}-{screen}.png")
     graphic = Image.new("RGB", (1024, 500), "#f3ede2")
     draw = ImageDraw.Draw(graphic)
     display = ImageFont.truetype(str(ROOT / "site/assets/fonts/fraunces-black.ttf"), 94)

@@ -52,7 +52,9 @@ rating or claim that imported literature is content-filtered.
 `store/google-play/listing.json` contains Spanish and English listing text.
 `scripts/prepare-play-assets.py` packages real website Android screenshots as PNG,
 a 512×512 icon and 1024×500 feature graphics. It uses the existing local fonts and
-icon; it does not paint UI or invent screenshots. Original provenance remains in
+icon; it does not paint UI or invent screenshots. Captures are scaled without
+cropping or distortion and centered on a 1080×1920 canvas to meet Play's aspect
+ratio limits. Upscaling does not add source detail. Original provenance remains in
 the adjacent `site/assets/screenshots/*/*.webp.json` files. Regenerate with Python
 and Pillow. The main listing supports phone screenshots only; tablet artwork is
 not fabricated. Do not describe the app as already available on Play before approval.
