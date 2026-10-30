@@ -69,9 +69,9 @@ export default function Onboarding() {
       </View>
       <View>
         <Txt v="hero" style={{ marginTop: 20 }}>
-          {tx('Lee más.', 'Read more.')}{'\n'}
+          {tx('Lee más', 'Read more')}{'\n'}
           <Txt v="hero" italic tone="ember">
-            {tx('Mucho más.', 'Much more.')}
+            {tx('Mucho más', 'Much more')}
           </Txt>
         </Txt>
       </View>
@@ -88,7 +88,7 @@ export default function Onboarding() {
       <Txt v="display" style={{ marginTop: 12 }}>
         {tx('¿Cómo te llamamos?', 'What should we call you?')}
       </Txt>
-      <Input style={{ marginTop: 28, borderWidth: 0, borderBottomWidth: 2, borderRadius: 0, borderBottomColor: p.ember, height: 64 }}>
+      <Input style={{ marginTop: 28, borderWidth: 1, borderRadius: 12, borderCurve: 'continuous', borderColor: p.line, backgroundColor: p.surface, height: 64 }}>
         <InputField
           value={name}
           onChangeText={setName}

@@ -30,7 +30,7 @@ function Row({ book, status, done, onPress }: { book: FreeBook; status?: Status;
   const [coverFailed, setCoverFailed] = useState(false);
   const busy = status === 'loading';
   return (
-    <Tap onPress={onPress} disabled={busy} scale={0.98} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: p.line }}>
+    <Tap onPress={onPress} disabled={busy} scale={0.98} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12 }}>
       <View style={{ width: 52, height: 78, borderRadius: 5, overflow: 'hidden', backgroundColor: p.surface, alignItems: 'center', justifyContent: 'center' }}>
         {!coverFailed ? (
           <Image source={{ uri: book.cover, headers: GUTENBERG_HEADERS }} style={{ width: 52, height: 78 }} contentFit="cover" transition={p.ink ? 0 : 150} onError={() => setCoverFailed(true)} />
@@ -151,7 +151,7 @@ function Discover() {
 
   const header = (
     <View style={{ paddingTop: insets.top + 6 }}>
-      <View style={{ paddingBottom: 18, borderBottomWidth: 1, borderBottomColor: p.ink ? p.text : p.line }}>
+      <View style={{ paddingBottom: 18 }}>
         <Tap onPress={() => router.back()} accessibilityLabel={tx('Volver', 'Back')} style={{ width: 48, height: 48, marginLeft: -12, alignItems: 'center', justifyContent: 'center' }}>
           <ArrowLeft size={22} color={p.text} />
         </Tap>
@@ -174,22 +174,21 @@ function Discover() {
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
-        <InputField value={q} onChangeText={setQ} placeholder={tx('Título o autor', 'Title or author')} placeholderTextColor={p.faint} returnKeyType="search" autoCorrect={false} onSubmitEditing={() => setQuery(q)} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
+        <InputField value={q} onChangeText={setQ} placeholder={tx('Título o autor', 'Title or author')} placeholderTextColor={p.muted} returnKeyType="search" autoCorrect={false} onSubmitEditing={() => setQuery(q)} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
         {!!q && (
           <InputSlot style={{ paddingRight: 14 }} onPress={() => setQ('')}>
             <X size={16} color={p.muted} />
           </InputSlot>
         )}
       </Input>
-      <View style={{ flexDirection: 'row', gap: 22, marginTop: 10, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: p.line }}>
+      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 10, marginBottom: 8 }}>
         {LANGS.map((l) => {
           const on = l.id === lang;
           return (
-            <Tap key={l.id || 'all'} feedback="select" scale={0.98} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => setLang(l.id)} style={{ height: 46, justifyContent: 'center' }}>
+            <Tap key={l.id || 'all'} feedback="select" scale={0.98} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => setLang(l.id)} style={{ minHeight: 48, paddingHorizontal: 12, borderRadius: 12, backgroundColor: on ? p.emberSoft : p.surface, justifyContent: 'center' }}>
               <Txt v="label" style={{ fontSize: 14, fontFamily: on ? fonts.uiBold : fonts.uiMedium }} color={on ? p.text : p.muted}>
                 {l.label}
               </Txt>
-              {on && <View style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2.5, borderRadius: 2, backgroundColor: p.ember }} />}
             </Tap>
           );
         })}

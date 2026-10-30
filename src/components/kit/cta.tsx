@@ -27,11 +27,16 @@ export function Cta({ label, onPress, kind = 'primary', icon, loading, disabled,
         haptic('medium');
         onPress?.();
       }}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }}
       isDisabled={disabled || loading}
       style={{
         backgroundColor: bg,
         borderRadius: compact ? 12 : 16,
-        height: compact ? 48 : 56,
+        minHeight: compact ? 48 : 56,
+        height: 'auto',
+        paddingVertical: 12,
+        borderCurve: 'continuous',
         paddingHorizontal: compact ? 16 : 24,
         borderWidth: kind === 'ghost' || (p.ink && kind === 'quiet') ? 1.5 : 0,
         borderColor: p.ink ? p.text : p.line,
@@ -43,7 +48,7 @@ export function Cta({ label, onPress, kind = 'primary', icon, loading, disabled,
       }}
     >
       {loading ? <ActivityIndicator color={fg} /> : icon ? <View>{icon}</View> : null}
-      <ButtonText style={{ color: fg, fontFamily: fonts.uiBold, fontSize: compact ? 14 : 16, letterSpacing: -0.1, fontWeight: undefined }}>{label}</ButtonText>
+      <ButtonText style={{ color: fg, fontFamily: fonts.uiBold, fontSize: compact ? 14 : 16, letterSpacing: -0.1, fontWeight: undefined, flexShrink: 1, textAlign: 'center' }}>{label}</ButtonText>
     </Button>
   );
 }

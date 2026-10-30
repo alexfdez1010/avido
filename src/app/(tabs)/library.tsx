@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { Check, Compass, FolderOpen, RefreshCw, RotateCcw, Search, Trash2, X } from 'lucide-react-native';
+import { BookOpen, Check, Compass, FolderOpen, RefreshCw, RotateCcw, Search, Trash2, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -194,7 +194,7 @@ export default function Library() {
           </View>
         }
       >
-        <Tap onPress={pickFolder} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, minHeight: 32 }}>
+        <Tap onPress={pickFolder} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, minHeight: 48 }}>
           <FolderOpen size={15} color={p.ember} />
           <Txt v="label" tone="ember" numberOfLines={1}>
             {folderName ?? tx('Elegir carpeta', 'Choose folder')}
@@ -215,25 +215,24 @@ export default function Library() {
         <InputSlot style={{ paddingLeft: 14 }}>
           <Search size={17} color={p.muted} />
         </InputSlot>
-        <InputField value={q} onChangeText={setQ} placeholder={tx('Buscar título o autor', 'Search title or author')} placeholderTextColor={p.faint} returnKeyType="search" autoCorrect={false} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
+        <InputField value={q} onChangeText={setQ} placeholder={tx('Buscar título o autor', 'Search title or author')} placeholderTextColor={p.muted} returnKeyType="search" autoCorrect={false} style={{ fontFamily: fonts.ui, color: p.text, fontSize: 15 }} />
         {!!q && (
-          <InputSlot style={{ paddingRight: 14 }} onPress={() => setQ('')}>
+          <InputSlot accessibilityLabel={tx('Borrar búsqueda', 'Clear search')} style={{ width: 48, height: 48, justifyContent: 'center' }} onPress={() => setQ('')}>
             <X size={16} color={p.muted} />
           </InputSlot>
         )}
       </Input>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10, marginBottom: 22, marginHorizontal: -GUTTER, borderBottomWidth: 1, borderBottomColor: p.line }} contentContainerStyle={{ gap: 22, paddingHorizontal: GUTTER }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10, marginBottom: 22, marginHorizontal: -GUTTER }} contentContainerStyle={{ gap: 8, paddingHorizontal: GUTTER }}>
         {FILTERS.map((f) => {
           const on = f.id === filter;
           return (
-            <Tap key={f.id} feedback="select" scale={0.98} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => setFilter(f.id)} style={{ height: 46, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Tap key={f.id} feedback="select" scale={0.98} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => setFilter(f.id)} style={{ minHeight: 48, paddingHorizontal: 12, borderRadius: 12, backgroundColor: on ? p.emberSoft : p.surface, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Txt v="label" style={{ fontSize: 14, fontFamily: on ? fonts.uiBold : fonts.uiMedium }} color={on ? p.text : p.muted}>
                 {f.label}
               </Txt>
               <Txt v="mono" style={{ fontSize: 10.5 }} color={on ? p.ember : p.faint}>
                 {counts[f.id]}
               </Txt>
-              {on && <View style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2.5, borderRadius: 2, backgroundColor: p.ember }} />}
             </Tap>
           );
         })}
@@ -243,16 +242,19 @@ export default function Library() {
 
   const empty = (
     <View style={{ alignItems: 'center', paddingVertical: 50, paddingHorizontal: 20, gap: 10 }}>
-      <Txt style={{ fontFamily: fonts.displayBlackItalic, fontSize: 64, color: p.faint }}>∅</Txt>
+      {q.trim() ? <Search size={36} color={p.muted} /> : <BookOpen size={36} color={p.ember} />}
       <Txt v="title" center>
-        {!folderUri ? tx('Sin carpeta', 'No folder') : q ? tx('Nada por aquí', 'Nothing here') : tx('Aún no hay libros', 'No books yet')}
+        {q.trim() ? tx('Sin resultados', 'No results') : !folderUri ? tx('Tu biblioteca empieza aquí', 'Your library starts here') : filter !== 'all' ? tx('No hay libros en esta selección', 'No books in this selection') : tx('Aún no hay libros', 'No books yet')}
       </Txt>
       <Txt v="body" tone="muted" center>
-        {!folderUri || q ? '' : 'EPUB · PDF · TXT · MD'}
+        {q.trim() ? tx('Prueba con otro título o autor, o borra la búsqueda.', 'Try another title or author, or clear your search.') : !folderUri ? tx('Elige la carpeta donde guardas tus EPUB, PDF, TXT o Markdown para empezar a leer.', 'Choose the folder containing your EPUB, PDF, TXT or Markdown books to start reading.') : filter !== 'all' ? tx('Prueba otra selección para ver el resto de tu biblioteca.', 'Try another selection to see the rest of your library.') : tx('Añade archivos EPUB, PDF, TXT o Markdown a tu carpeta y actualiza la biblioteca.', 'Add EPUB, PDF, TXT or Markdown files to your folder and refresh your library.')}
       </Txt>
       <View style={{ marginTop: 10, gap: 8, alignItems: 'center' }}>
+        {!!q.trim() && <Cta kind="quiet" label={tx('Borrar búsqueda', 'Clear search')} onPress={() => setQ('')} />}
+        {folderUri && !q.trim() && filter !== 'all' && <Cta kind="quiet" label={tx('Ver todos los libros', 'Show all books')} onPress={() => setFilter('all')} />}
+        {folderUri && !q.trim() && filter === 'all' && <Cta kind="quiet" label={tx('Actualizar biblioteca', 'Refresh library')} onPress={() => scanLibrary()} />}
         {!folderUri && <Cta label={tx('Elegir carpeta', 'Choose folder')} onPress={pickFolder} />}
-        {DISCOVER_ENABLED && !q && <Cta kind={folderUri ? 'primary' : 'ghost'} icon={<Compass size={18} color={folderUri ? p.onEmber : p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />}
+        {DISCOVER_ENABLED && !q.trim() && filter === 'all' && <Cta kind={folderUri ? 'primary' : 'ghost'} icon={<Compass size={18} color={folderUri ? p.onEmber : p.text} />} label={tx('Descubrir clásicos', 'Discover classics')} onPress={() => router.push('/discover')} />}
       </View>
     </View>
   );

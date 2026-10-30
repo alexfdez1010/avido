@@ -22,7 +22,6 @@ import { fonts } from '@/theme/fonts';
 import { tx } from '@/i18n';
 
 function Header() {
-  const p = usePalette();
   const name = useSettings((s) => s.name);
   const streak = useStreak();
   const xp = useGame((s) => s.xp);
@@ -32,14 +31,13 @@ function Header() {
     <PageHeader
       eyebrow={formatLongDate()}
       right={
-        <Tap onPress={() => router.push('/trophies')} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 40 }}>
+        <Tap onPress={() => router.push('/trophies')} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
             <Flame size={18} dim={!todayMet && streak === 0} />
             <Txt v="number" style={{ fontSize: 16, lineHeight: 20 }} tone={todayMet ? 'gold' : 'text'}>
               {streak}
             </Txt>
           </View>
-          <View style={{ width: 1, height: 16, backgroundColor: p.line }} />
           <Txt v="mono" tone="soft">
             {tx('Nv', 'Lv')} {level}
           </Txt>
@@ -48,11 +46,11 @@ function Header() {
       title={
         <Txt v="display">
           {greeting()}
-          {name ? ',' : '.'}
+          {name ? ',' : ''}
           {name ? (
             <Txt v="display" italic tone="ember">
               {'\n'}
-              {name}.
+              {name}
             </Txt>
           ) : null}
         </Txt>
@@ -287,7 +285,7 @@ export default function Today() {
         <>
           <SectionTitle
             right={
-              <Tap onPress={() => router.push('/library')} style={{ minHeight: 40, justifyContent: 'center', paddingLeft: 8 }}>
+              <Tap onPress={() => router.push('/library')} style={{ minHeight: 48, justifyContent: 'center', paddingLeft: 8 }}>
                 <Txt v="label" tone="ember">
                   {tx('Ver todo', 'See all')}
                 </Txt>

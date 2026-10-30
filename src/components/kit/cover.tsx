@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import React, { memo } from 'react';
 import { View } from 'react-native';
-import Svg, { Circle, Line, Rect } from 'react-native-svg';
+import Svg, { Circle, Rect } from 'react-native-svg';
 
 import { hashString, seededRandom } from '@/lib/hash';
 import type { Book } from '@/lib/types';
@@ -25,16 +25,7 @@ function Pattern({ seed, w, h, hue }: { seed: string; w: number; h: number; hue:
       </Svg>
     );
   }
-  if (kind === 1) {
-    const n = 5 + Math.floor(rand() * 5);
-    return (
-      <Svg width={w} height={h} style={{ position: 'absolute' }}>
-        {Array.from({ length: n }).map((_, i) => (
-          <Line key={i} x1={0} x2={w} y1={h * 0.55 + i * ((h * 0.4) / n)} y2={h * 0.55 + i * ((h * 0.4) / n)} stroke={ink} strokeWidth={1.4} opacity={0.35 + (i / n) * 0.6} />
-        ))}
-      </Svg>
-    );
-  }
+  if (kind === 1) return null;
   const s = w * (0.3 + rand() * 0.2);
   return (
     <Svg width={w} height={h} style={{ position: 'absolute' }}>
@@ -53,13 +44,10 @@ export const Cover = memo(function Cover({ book, width, radius = 6 }: { book: Pi
         width,
         height,
         borderRadius: radius,
+        borderCurve: 'continuous',
         overflow: 'hidden',
         backgroundColor: hsl(book.hue, 32, 20),
-        shadowColor: '#000',
-        shadowOpacity: 0.28,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 6,
+        boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.28)',
       }}
     >
       {book.coverUri ? (

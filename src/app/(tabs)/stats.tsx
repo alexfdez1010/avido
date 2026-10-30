@@ -83,7 +83,7 @@ function PagesChart({ buckets, monthly }: { buckets: Bucket[]; monthly: boolean 
           {tx('máx.', 'max')} {pagesFmt(max)}
         </Txt>
       </View>
-      <View style={{ height: H, flexDirection: 'row', alignItems: 'flex-end', gap: n > 40 ? 1 : n > 14 ? 2 : 6, borderBottomWidth: 1, borderBottomColor: p.ink ? p.text : p.line }}>
+      <View style={{ height: H, flexDirection: 'row', alignItems: 'flex-end', gap: n > 40 ? 1 : n > 14 ? 2 : 6 }}>
         {buckets.map((b, i) => {
           const v = values[i];
           const h = v > 0 ? Math.max(3, (v / max) * (H - 4)) : 0;
@@ -146,9 +146,8 @@ function MiniBars({ values, labels, highlight }: { values: number[]; labels: (st
 }
 
 function Line({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  const p = usePalette();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: p.ink ? p.faint : p.line }}>
+    <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, paddingVertical: 12 }}>
       <View style={{ flexShrink: 1 }}>
         <Txt v="label">{label}</Txt>
         {hint ? (
@@ -313,7 +312,7 @@ export default function Stats() {
             const pages = b.readPages ?? 0;
             const pph = b.readSeconds >= 600 && pages > 0 ? pages / (b.readSeconds / 3600) : null;
             return (
-              <Tap key={b.id} onPress={() => router.push(`/reader/${b.id}`)} style={{ minHeight: 56, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 16, borderBottomWidth: 1, borderBottomColor: p.ink ? p.faint : p.line }}>
+              <Tap key={b.id} onPress={() => router.push(`/reader/${b.id}`)} style={{ minHeight: 56, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
                 <View style={{ flex: 1 }}>
                   <Txt v="label" numberOfLines={1}>
                     {b.title}

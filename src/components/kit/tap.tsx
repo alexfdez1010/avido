@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import React from 'react';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 
 import { Pressable } from '@/components/ui/pressable';
 import { useSettings } from '@/store/settings';
@@ -21,17 +21,20 @@ export function haptic(kind: 'light' | 'medium' | 'heavy' | 'success' | 'select'
 type TapProps = Omit<PressableProps, 'style'> & { style?: StyleProp<ViewStyle>; scale?: number; feedback?: Parameters<typeof haptic>[0] | false };
 
 export function Tap({ style, scale = 0.97, feedback = 'light', onPress, onPressIn, onPressOut, children, ...rest }: TapProps) {
+  const reduceMotion = useReducedMotion();
+  const eink = useSettings((state) => state.eink);
   const s = useSharedValue(1);
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
+  const motion = { duration: reduceMotion || eink ? 0 : 120, easing: Easing.out(Easing.cubic) };
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: reduceMotion || eink ? 1 : s.get() }] }));
   return (
     <APressable
       {...rest}
       onPressIn={(e) => {
-        s.set(withSpring(scale, { damping: 18, stiffness: 420 }));
+        s.set(withTiming(scale, motion));
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        s.set(withSpring(1, { damping: 14, stiffness: 300 }));
+        s.set(withTiming(1, motion));
         onPressOut?.(e);
       }}
       onPress={(e) => {

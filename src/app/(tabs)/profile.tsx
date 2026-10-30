@@ -17,9 +17,8 @@ import { useSettings } from '@/store/settings';
 import { isEs, LOCALE, plural, tx } from '@/i18n';
 
 function Row({ icon, title, hint, right, onPress, last, disabled, testID }: { icon: React.ReactNode; title: string; hint?: string; right?: React.ReactNode; onPress?: () => void; last?: boolean; disabled?: boolean; testID?: string }) {
-  const p = usePalette();
   const body = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 60, paddingVertical: 10, borderBottomWidth: last ? 0 : 1, borderBottomColor: p.ink ? p.faint : p.line }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 60, paddingTop: 10, paddingBottom: last ? 10 : 16 }}>
       <View style={{ width: 24, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
       <View style={{ flex: 1 }}>
         <Txt v="label">{title}</Txt>

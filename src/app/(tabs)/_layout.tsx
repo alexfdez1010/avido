@@ -26,9 +26,7 @@ function TabBar({ state, navigation }: TabBarProps) {
         right: 0,
         bottom: 0,
         paddingBottom: insets.bottom,
-        backgroundColor: p.ink ? p.bg : p.mode === 'dark' ? 'rgba(15,13,10,0.98)' : 'rgba(243,237,226,0.98)',
-        borderTopWidth: p.ink ? 1.5 : 1,
-        borderTopColor: p.ink ? p.text : p.line,
+        backgroundColor: p.bg,
       }}
     >
       <View style={{ flexDirection: 'row', height: TAB_BAR_HEIGHT, paddingHorizontal: 8 }}>
@@ -41,7 +39,7 @@ function TabBar({ state, navigation }: TabBarProps) {
             <Tap
               key={route.key}
               feedback="select"
-              scale={0.94}
+              scale={1}
               accessibilityRole="tab"
               accessibilityState={{ selected: focused }}
               accessibilityLabel={LABELS[name]}
@@ -79,7 +77,7 @@ export default function TabsLayout() {
   const p = usePalette();
   if (!onboarded) return <Redirect href="/onboarding" />;
   return (
-    <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: p.bg }, animation: 'shift' }}>
+    <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: p.bg }, animation: 'none' }}>
       <Tabs.Screen name="index" />
       <Tabs.Screen name="library" />
       <Tabs.Screen name="stats" />

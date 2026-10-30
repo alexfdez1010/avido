@@ -15,7 +15,7 @@ export function TocSheet({ open, onClose, chapters, current, theme, onPick }: { 
       {chapters.map((c, i) => {
         const on = i === current;
         return (
-          <Tap key={i} feedback="select" onPress={() => onPick(i)} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 13, gap: 14, borderBottomWidth: 1, borderBottomColor: theme.line }}>
+          <Tap key={i} feedback="select" onPress={() => onPick(i)} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 13, gap: 14 }}>
             <Txt v="mono" color={on ? theme.accent : theme.muted} style={{ width: 28 }}>
               {String(i + 1).padStart(2, '0')}
             </Txt>

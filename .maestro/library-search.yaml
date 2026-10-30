@@ -1,0 +1,23 @@
+# Requires completed onboarding and a local QA library containing synthetic books
+# The deliberately unmatched search must recover without changing book data
+appId: ${APP_ID}
+name: Recover from an empty library search
+env:
+  APP_ID: com.alexfdez.avido.local
+tags:
+  - local
+  - library
+---
+- launchApp:
+    clearState: false
+- tapOn: Library|Biblioteca
+- tapOn: Input Field
+- inputText: zzz-no-book-827
+- hideKeyboard
+- assertVisible: No results|Sin resultados
+- takeScreenshot: library-search-empty
+- tapOn:
+    text: Clear search|Borrar búsqueda
+    index: 1
+- assertNotVisible: No results|Sin resultados
+- assertVisible: Input Field

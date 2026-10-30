@@ -36,7 +36,7 @@ function Code({ block, st }: { block: Block; st: BlockStyle }) {
   const size = Math.max(11, Math.round(st.size * 0.8));
   return (
     <View style={{ paddingHorizontal: st.margin, marginTop: 6, marginBottom: Math.round(st.size * st.lineHeight * 0.75) }}>
-      <View style={{ backgroundColor: codeBg(t), borderRadius: 8, borderWidth: t.id === 'eink' ? 1 : 0, borderColor: t.line, borderLeftWidth: 3, borderLeftColor: t.accent, overflow: 'hidden' }}>
+      <View style={{ backgroundColor: codeBg(t), borderRadius: 8, borderWidth: t.id === 'eink' ? 1 : 0, borderColor: t.line, overflow: 'hidden' }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 14, paddingVertical: 12 }}>
           <Text style={{ color: t.text, fontFamily: fonts.mono, fontSize: size, lineHeight: Math.round(size * 1.6), textAlign: 'left' }}>
             {block.s?.map((s, i) => (

@@ -16,9 +16,9 @@ const VARIANTS: Record<TxtVariant, TextStyle> = {
   body: { fontFamily: fonts.ui, fontSize: 15, lineHeight: 22 },
   label: { fontFamily: fonts.uiMedium, fontSize: 14.5, lineHeight: 19 },
   caption: { fontFamily: fonts.ui, fontSize: 12.5, lineHeight: 16 },
-  mono: { fontFamily: fonts.mono, fontSize: 12, lineHeight: 16, letterSpacing: 0.2 },
-  numeral: { fontFamily: fonts.displayBlack, fontSize: 28, lineHeight: 32, letterSpacing: -0.6 },
-  number: { fontFamily: fonts.monoBold, fontSize: 22, lineHeight: 26, letterSpacing: -0.5 },
+  mono: { fontFamily: fonts.mono, fontSize: 12, lineHeight: 16, letterSpacing: 0.2, fontVariant: ['tabular-nums'] },
+  numeral: { fontFamily: fonts.displayBlack, fontSize: 28, lineHeight: 32, letterSpacing: -0.6, fontVariant: ['tabular-nums'] },
+  number: { fontFamily: fonts.monoBold, fontSize: 22, lineHeight: 26, letterSpacing: -0.5, fontVariant: ['tabular-nums'] },
   eyebrow: { fontFamily: fonts.monoBold, fontSize: 10.5, lineHeight: 14, letterSpacing: 1.4, textTransform: 'uppercase' },
 };
 
