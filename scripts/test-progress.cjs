@@ -25,7 +25,7 @@ function load(file, imports) {
   }, console, Date, setTimeout });
   return exports;
 }
-const api = load('src/lib/progress-backup.ts', { 'expo-crypto': crypto });
+const api = load('src/lib/progress-backup.ts', { 'expo-crypto': crypto, './daily-goals': load('src/lib/daily-goals.ts', {}) });
 const day = { sec: 300, pages: 5, xp: 60, sessions: 1, longest: 300, newBooks: 1, chapters: 0, quests: ['min5'], hours: { 12: 300 } };
 function fixture() {
   return {
@@ -34,7 +34,7 @@ function fixture() {
       progress: 0.4, maxProgress: 0.7, readSeconds: 300, readPages: 5, location: { chapter: 0, block: 2 } }],
     game: { xp: 60, freezes: 1, bestStreak: 0, goalsMet: 0, questsDone: 1, totalSec: 300, totalPages: 5, longestSession: 300,
       days: { '2026-10-17': { ...day } }, unlocked: { first_page: 20 }, finished: [], flags: {}, lastReconciled: '2026-10-17' },
-    profile: { name: 'QA Reader', dailyGoalMin: 20, yearlyGoal: 24 },
+    profile: { name: 'QA Reader', dailyGoalMin: 20, yearlyGoal: 24, weeklyGoalsEnabled: false, weeklyGoalMin: null },
   };
 }
 
@@ -268,4 +268,27 @@ test('an asynchronous scan cannot resurrect a book deleted while hashing', async
   const app = scannerSetup({ books: { legacy1: localBook() }, files: [{ uri: 'content://folder/Reading.txt' }], onDigest: (state) => { state.books = {}; } });
   await app.api.scanLibrary();
   assert.equal(Object.keys(app.state.books).length, 0);
+});
+
+for (const enabled of [true, false]) test(`weekly goals roundtrip when enabled=${enabled}`, async () => {
+  const data = fixture();
+  data.profile.weeklyGoalsEnabled = enabled;
+  data.profile.weeklyGoalMin = [5, 10, 15, 20, 25, 30, 180];
+  assert.deepEqual(plain(await api.decodeProgressBackup(await api.encodeProgressBackup(data))), data);
+});
+
+test('legacy backups explicitly restore the uniform daily goal', () => {
+  const data = fixture();
+  delete data.profile.weeklyGoalsEnabled;
+  delete data.profile.weeklyGoalMin;
+  const restored = api.validateProgressBackup(data);
+  assert.equal(restored.profile.weeklyGoalsEnabled, false);
+  assert.equal(restored.profile.weeklyGoalMin, null);
+});
+
+for (const invalid of [[], [20], [20,20,20,20,20,20,0], [20,20,20,20,20,20,181], [20,20,20,20,20,20,5.5], 'weekly', null]) test(`reject invalid active weekly goals ${JSON.stringify(invalid)}`, () => {
+  const data = fixture();
+  data.profile.weeklyGoalsEnabled = true;
+  data.profile.weeklyGoalMin = invalid;
+  assert.throws(() => api.validateProgressBackup(data), /weekly goals/);
 });

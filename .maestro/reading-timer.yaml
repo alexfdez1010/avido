@@ -35,16 +35,21 @@ tags:
       id: reader-target-toast
     timeout: 315000
 - takeScreenshot: five-minute-reminder
-# Poll while keeping the reader visible; notVisible returns immediately in
-# some Maestro versions instead of waiting for the transient toast to expire.
+# The completion stays until dismissed, even after temporarily leaving the app.
 - repeat:
-    times: 50
-    while:
-      visible:
-        id: reader-target-toast
+    times: 5
     commands:
       - assertVisible:
-          id: reader-screen|reader-text-only
+          id: reader-target-toast
+- pressKey: Home
+- launchApp:
+    clearState: false
+    stopApp: false
+- assertVisible:
+    id: reader-target-toast
+- tapOn:
+    id: reader-target-dismiss
+    waitToSettleTimeoutMs: 500
 - assertNotVisible:
     id: reader-target-toast
 - assertVisible:

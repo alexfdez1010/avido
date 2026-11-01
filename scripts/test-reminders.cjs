@@ -20,7 +20,7 @@ function load(file, imports, DateImpl = Date) {
 
 const i18n = { tx: (es) => es };
 const companion = load('src/lib/companion.ts', { '@/i18n': i18n });
-function setup({ platform = 'android', enabled = true, granted = true, met = false, seconds = 601 } = {}) {
+function setup({ platform = 'android', enabled = true, granted = true, met = false, seconds = 601, weeklyGoalMin = null } = {}) {
   const scheduled = [];
   let permissionCalls = 0;
   const now = new Date(2026, 8, 29, 12).getTime();
@@ -43,7 +43,8 @@ function setup({ platform = 'android', enabled = true, granted = true, met = fal
     'react-native': { Platform: { OS: platform } },
     '@/store/game': { computeStreak: () => 2, useGame: { getState: () => ({ days: { today: { sec: seconds, goalMet: met } } }) } },
     '@/store/library': { useLibrary: { getState: () => ({ books: { a: { title: 'El faro', lastOpenedAt: 1 } } }) } },
-    '@/store/settings': { useSettings: { getState: () => ({ reminders: enabled, reminderHour: 21, dailyGoalMin: 20, onboarded: true }) } },
+    '@/store/settings': { useSettings: { getState: () => ({ reminders: enabled, reminderHour: 21, dailyGoalMin: 20, onboarded: true, weeklyGoalsEnabled: !!weeklyGoalMin, weeklyGoalMin }) } },
+    './daily-goals': load('src/lib/daily-goals.ts', {}),
     './dates': { dayKey: () => 'today' },
     './companion': companion,
     '@/i18n': i18n,
@@ -83,4 +84,11 @@ test('web permission request returns without calling native APIs', async () => {
   const app = setup({ platform: 'web' });
   assert.equal(await app.ensurePermission(), false);
   assert.equal(app.permissionCalls(), 0);
+});
+
+test('each notification uses its scheduled weekday goal, including the late reminder', async () => {
+  const app = setup({ seconds: 0, weeklyGoalMin: [5, 10, 15, 30, 45, 60, 90] });
+  await app.scheduleReminders();
+  assert.equal(app.scheduled.length, 4);
+  for (const [index, minutes] of [15, 30, 45, 15].entries()) assert.match(app.scheduled[index].content.body, new RegExp(`${minutes} min`));
 });

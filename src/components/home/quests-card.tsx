@@ -7,13 +7,14 @@ import { questsForDay } from '@/game/quests';
 import { emptyDay } from '@/game/types';
 import { usePalette } from '@/hooks/use-palette';
 import { dayKey } from '@/lib/dates';
+import { dailyGoalForDate } from '@/lib/daily-goals';
 import { useGame } from '@/store/game';
 import { useSettings } from '@/store/settings';
 
 export function useQuestSummary() {
   const key = dayKey();
   const log = useGame((s) => s.days[key]) ?? emptyDay();
-  const goal = useSettings((s) => s.dailyGoalMin);
+  const goal = useSettings((s) => dailyGoalForDate(s));
   const quests = questsForDay(key, goal);
   const done = quests.filter((q) => log.quests.includes(q.id)).length;
   return { quests, log, done };

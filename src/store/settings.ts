@@ -6,6 +6,7 @@ import type { ReadingFontId } from '@/theme/fonts';
 import type { AppMode, ReaderThemeId } from '@/theme/palette';
 
 import { jsonStorage } from './storage';
+import { isWeekGoals, type WeekGoals } from '@/lib/daily-goals';
 
 export type ReaderPrefs = {
   font: ReadingFontId;
@@ -52,6 +53,8 @@ type SettingsState = {
   mode: AppMode;
   eink: boolean;
   dailyGoalMin: number;
+  weeklyGoalsEnabled: boolean;
+  weeklyGoalMin: WeekGoals | null;
   yearlyGoal: number;
   reminders: boolean;
   reminderHour: number;
@@ -70,6 +73,8 @@ export const useSettings = create<SettingsState>()(
       mode: EINK ? 'light' : 'dark',
       eink: EINK,
       dailyGoalMin: 20,
+      weeklyGoalsEnabled: false,
+      weeklyGoalMin: null,
       yearlyGoal: 24,
       reminders: true,
       reminderHour: 21,
@@ -84,7 +89,10 @@ export const useSettings = create<SettingsState>()(
       version: 1,
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<SettingsState>;
-        return { ...current, ...p, reader: { ...current.reader, ...p.reader, footer: { ...current.reader.footer, ...p.reader?.footer } } };
+        return { ...current, ...p,
+          weeklyGoalsEnabled: p.weeklyGoalsEnabled === true && isWeekGoals(p.weeklyGoalMin),
+          weeklyGoalMin: isWeekGoals(p.weeklyGoalMin) ? p.weeklyGoalMin : null,
+          reader: { ...current.reader, ...p.reader, footer: { ...current.reader.footer, ...p.reader?.footer } } };
       },
     }
   )

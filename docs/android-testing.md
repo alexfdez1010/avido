@@ -74,14 +74,16 @@ Committed `.maestro/` flows preserve app data (`clearState: false`). Read each
 flow's setup comments, start from its required screen, and use a QA book rather
 than changing personal reading progress. `reading-plan.yaml` verifies the untimed
 default, selects 30 minutes and opens the book. `reading-timer.yaml` selects
-5 minutes, waits for the actual reminder without gestures, verifies it disappears
-without stopping the reader, and checks that returning home resets the selection
+5 minutes, waits for the actual reminder without gestures, verifies it remains visible across a background/foreground cycle until explicitly
+dismissed without stopping the reader, and checks that returning home resets the selection
 to untimed. `text-only-reader.yaml` clears the footer and verifies that reader
 controls can still be recovered; it leaves QA reader settings in text-only mode.
 Untimed reading is the default. Optional 5/15/30-minute reminders use foreground
 reader time, including reading without touching the screen, and pause during
 loading, settings or backgrounding. An explicitly chosen reminder appears once
-even with all reader chrome hidden. Reading continues without a modal, writing
+even with all reader chrome hidden, gives success haptic feedback when enabled,
+and remains visible until dismissed. Opening a sheet or backgrounding temporarily
+hides the notice without consuming it. Reading continues without a modal, writing
 request or countdown stopping it. Reward toasts remain suppressed in text-only mode.
 Restore settings changed by a manual check. Flows default to the QA app ID and
 accept `APP_ID` to target another explicitly chosen installation:
@@ -127,3 +129,20 @@ If Maestro cannot retrieve the hierarchy, record that failure and use ADB with
 native screenshots for a clearly identified manual check. Do not report the
 failed automated flows as passed. Keep screenshots, the exported test copy and
 scoped logs under `artifacts/android/` and restore temporary emulator settings.
+
+## Weekly goals
+
+Profile → Challenges → Goals by weekday reveals the advanced editor. A new plan
+starts from the current daily goal. Each local weekday has its own 5–180 minute
+goal; Monday is shown first. Turning the plan off restores the uniform goal and
+retains the weekly values for reactivation. Goal rewards, quests, reader/home
+progress and scheduled reminders use the selected date's goal. Completed days
+keep their earned rewards. Progress backups include the plan; importing a legacy
+backup explicitly restores uniform goals.
+
+`test-daily-goals.cjs` covers weekday mapping, local midnight, legacy hydration,
+invalid schedules and one-time rewards. `test-reminders.cjs` checks future dates
+and `test-progress.cjs` verifies backup compatibility. `.maestro/weekly-goals.yaml`
+requires a QA profile with uniform 20-minute goals and weekly mode off. It edits
+Monday and Sunday, relaunches to check persistence, checks mode switching and
+restores those values and the original uniform mode.

@@ -1,0 +1,155 @@
+# Requires a synthetic QA profile with a uniform 20-minute goal and weekly mode off.
+# Restores Monday/Sunday values and uniform mode after verifying persistence.
+appId: ${APP_ID}
+name: Edit and retain independent weekday goals
+env:
+  APP_ID: com.alexfdez.avido.local
+tags:
+  - local
+  - goals
+---
+- launchApp:
+    clearState: false
+- tapOn:
+    text: You|Tú
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekly-goals-expand
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- assertVisible:
+    id: daily-goal-value
+    text: 20 min
+- tapOn:
+    id: weekly-goals-expand
+    waitToSettleTimeoutMs: 500
+- tapOn:
+    id: weekly-goals-toggle
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekday-goal-1-plus
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- tapOn:
+    id: weekday-goal-1-plus
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: weekday-goal-1-value
+    text: 25 min
+- assertVisible:
+    id: weekday-goal-2-value
+    text: 20 min
+- scrollUntilVisible:
+    element:
+      id: weekday-goal-0-plus
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- tapOn:
+    id: weekday-goal-0-plus
+    repeat: 2
+    delay: 250
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: weekday-goal-0-value
+    text: 30 min
+- takeScreenshot: weekly-goals-sunday
+- stopApp
+- launchApp:
+    clearState: false
+- tapOn:
+    text: You|Tú
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekly-goals-expand
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- tapOn:
+    id: weekly-goals-expand
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekday-goal-1-value
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- assertVisible:
+    id: weekday-goal-1-value
+    text: 25 min
+- takeScreenshot: weekly-goals-persisted
+- scrollUntilVisible:
+    element:
+      id: weekly-goals-toggle
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: UP
+- tapOn:
+    id: weekly-goals-toggle
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: daily-goal-value
+    text: 20 min
+- assertNotVisible:
+    id: weekday-goal-1-value
+- tapOn:
+    id: weekly-goals-toggle
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekday-goal-1-minus
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- assertVisible:
+    id: weekday-goal-1-value
+    text: 25 min
+- tapOn:
+    id: weekday-goal-1-minus
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekday-goal-0-value
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: DOWN
+- assertVisible:
+    id: weekday-goal-0-value
+    text: 30 min
+- tapOn:
+    id: weekday-goal-0-minus
+    repeat: 2
+    delay: 250
+    waitToSettleTimeoutMs: 500
+- scrollUntilVisible:
+    element:
+      id: weekly-goals-toggle
+    timeout: 60000
+    waitToSettleTimeoutMs: 500
+    centerElement: true
+    direction: UP
+- tapOn:
+    id: weekly-goals-toggle
+    waitToSettleTimeoutMs: 500
+- assertVisible:
+    id: daily-goal-value
+    text: 20 min
+- tapOn:
+    id: weekly-goals-expand
+    waitToSettleTimeoutMs: 500
+- tapOn:
+    text: Today|Hoy
+    waitToSettleTimeoutMs: 500

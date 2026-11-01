@@ -5,6 +5,7 @@ import { computeStreak, useGame } from '@/store/game';
 import { useLibrary } from '@/store/library';
 import { useSettings } from '@/store/settings';
 import { dayKey } from './dates';
+import { dailyGoalForDate } from './daily-goals';
 import { companionReminder } from './companion';
 import { tx } from '@/i18n';
 
@@ -31,7 +32,8 @@ export async function scheduleReminders() {
   if (Platform.OS === 'web') return;
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
-    const { reminders, reminderHour, dailyGoalMin, onboarded } = useSettings.getState();
+    const settings = useSettings.getState();
+    const { reminders, reminderHour, onboarded } = settings;
     if (!reminders || !onboarded) return;
     if (!(await ensurePermission())) return;
     const game = useGame.getState();
@@ -46,7 +48,7 @@ export async function scheduleReminders() {
       date.setHours(reminderHour, 0, 0, 0);
       if (i === 0 && (today?.goalMet || date.getTime() < Date.now())) continue;
       await Notifications.scheduleNotificationAsync({
-        content: companionReminder({ goal: dailyGoalMin, seconds: i === 0 ? today?.sec : 0, bookTitle: book?.title, variant: i }),
+        content: companionReminder({ goal: dailyGoalForDate(settings, date), seconds: i === 0 ? today?.sec : 0, bookTitle: book?.title, variant: i }),
         trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: 'reminders' },
       });
     }
@@ -55,7 +57,7 @@ export async function scheduleReminders() {
       late.setHours(22, 30, 0, 0);
       if (late.getTime() > Date.now() && reminderHour < 22)
         await Notifications.scheduleNotificationAsync({
-          content: { ...companionReminder({ goal: dailyGoalMin, seconds: today?.sec, bookTitle: book?.title }), title: tx('Miga · ¿Unas páginas antes de dormir?', 'Miga · A few pages before bed?') },
+          content: { ...companionReminder({ goal: dailyGoalForDate(settings, late), seconds: today?.sec, bookTitle: book?.title }), title: tx('Miga · ¿Unas páginas antes de dormir?', 'Miga · A few pages before bed?') },
           trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: late, channelId: 'reminders' },
         });
     }

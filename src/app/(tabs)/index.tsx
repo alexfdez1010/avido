@@ -11,6 +11,7 @@ import { WeekStrip } from '@/components/home/week-strip';
 import { levelProgress, levelTitle, streakMultiplier } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
 import { dayKey, formatLongDate, greeting } from '@/lib/dates';
+import { dailyGoalForDate } from '@/lib/daily-goals';
 import { DISCOVER_ENABLED } from '@/lib/distribution';
 import { pickFolder } from '@/lib/library';
 import { DEFAULT_SESSION_TARGET, SESSION_TARGETS, type SessionTarget } from '@/lib/reading-plan';
@@ -61,7 +62,7 @@ function Header() {
 
 function DayCard() {
   const p = usePalette();
-  const goal = useSettings((s) => s.dailyGoalMin);
+  const goal = useSettings((s) => dailyGoalForDate(s));
   const log = useGame((s) => s.days[dayKey()]);
   const freezes = useGame((s) => s.freezes);
   const streak = useStreak();

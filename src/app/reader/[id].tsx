@@ -21,6 +21,7 @@ import { TocSheet } from '@/components/reader/toc-sheet';
 import { useReadingTracker } from '@/hooks/use-reading-tracker';
 import { loadContent } from '@/lib/content';
 import { dayKey, formatClock } from '@/lib/dates';
+import { dailyGoalForDate } from '@/lib/daily-goals';
 import { personalCharsPerMin } from '@/lib/stats';
 import { parseSessionTarget } from '@/lib/reading-plan';
 import type { Block, Book, BookContent } from '@/lib/types';
@@ -37,7 +38,7 @@ type Item = { key: string; chars: number; type: 'head'; ch: number } | { key: st
 
 
 function GoalChip({ theme }: { theme: ReaderTheme }) {
-  const goal = useSettings((s) => s.dailyGoalMin);
+  const goal = useSettings((s) => dailyGoalForDate(s));
   const sec = useGame((s) => s.days[dayKey()]?.sec ?? 0);
   const met = sec >= goal * 60;
   return (

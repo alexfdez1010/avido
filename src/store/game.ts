@@ -7,6 +7,7 @@ import { questsForDay } from '@/game/quests';
 import type { Celebration, DayLog } from '@/game/types';
 import { emptyDay } from '@/game/types';
 import { addDays, dayKey, parseDayKey } from '@/lib/dates';
+import { dailyGoalForDate } from '@/lib/daily-goals';
 
 import { useLibrary } from './library';
 import { useSettings } from './settings';
@@ -172,7 +173,7 @@ export const useGame = create<GameState>()(
           }));
           log = gainXp(Math.round(((sec / 60) * 6 + pages * 4) * mult * 10) / 10, log, key);
 
-          const goal = useSettings.getState().dailyGoalMin;
+          const goal = dailyGoalForDate(useSettings.getState());
           if (!log.goalMet && log.sec >= goal * 60) {
             log = { ...log, goalMet: true };
             set((s) => ({ days: { ...s.days, [key]: log }, goalsMet: s.goalsMet + 1 }));

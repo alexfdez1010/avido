@@ -61,6 +61,7 @@ async function setup({ pure = true, layout = 'scroll', format = 'txt', seconds =
     '@/components/reader/toc-sheet': { TocSheet: 'TocSheet' },
     '@/hooks/use-reading-tracker': { useReadingTracker: (_id, enabled) => { enabledStates.push(enabled); return tracker; } },
     '@/lib/content': { loadContent: () => loadError ? Promise.reject(new Error('Unreadable file')) : Promise.resolve(content) },
+    '@/lib/daily-goals': { dailyGoalForDate: (s) => s.dailyGoalMin },
     '@/lib/dates': { dayKey: () => '2026-10-16', formatClock: String },
     '@/lib/stats': { personalCharsPerMin: () => 1000 },
     '@/lib/reading-plan': { parseSessionTarget: () => targetMin == null ? null : Number(targetMin) },
@@ -232,7 +233,9 @@ function setupToast(initial = {}) {
     'react/jsx-runtime': { jsx, jsxs: jsx },
     'react-native-reanimated': { default: { View: 'AnimatedView' }, FadeInUp: { duration() {} }, FadeOutUp: { duration() {} } },
     '@/components/mascot/miga': { Miga: 'Miga' },
-    '@/components/kit': { haptic: () => haptics++, Txt: 'Txt' },
+    '@/components/kit': { haptic: () => haptics++, Txt: 'Txt', Tap: 'Tap' },
+    'react-native': { View: 'View' },
+    'lucide-react-native': { Check: 'Check', X: 'X' },
     '@/store/game': { useGame: (select) => select({ queue }) },
     '@/i18n': { tx: (es) => es },
   };
@@ -265,54 +268,57 @@ function setupToast(initial = {}) {
       return render();
     },
     celebrate(item) { queue = [...queue, item]; return render(); },
+    dismiss() {
+      const find = (node) => !node || typeof node !== 'object' ? null : Array.isArray(node) ? node.map(find).find(Boolean) : node.props?.testID === 'reader-target-dismiss' ? node : find(node.props?.children);
+      const button = find(tree);
+      assert.ok(button, 'Expected a dismiss button');
+      button.props.onPress();
+      return render();
+    },
     tree: () => tree,
     haptics: () => haptics,
   };
 }
 
-test('a chosen reading time produces one passive acknowledgement without stopping reading', () => {
-  const app = setupToast();
+for (const minutes of [5, 15, 30]) test(`a ${minutes}-minute completion stays visible until explicitly dismissed`, () => {
+  const app = setupToast({ targetMin: minutes, sessionSec: minutes * 60 - 1 });
   assert.equal(app.tree(), null);
-  const toast = app.update({ sessionSec: 300 });
+  const toast = app.update({ sessionSec: minutes * 60 });
   assert.equal(toast.props.testID, 'reader-target-toast');
-  assert.equal(toast.props.pointerEvents, 'none');
-  assert.match(JSON.stringify(toast), /5 minutos leyendo/);
-  assert.equal(app.haptics(), 0);
-  app.advance(1000);
-  assert.equal(app.update({ sessionSec: 301 }).props.testID, 'reader-target-toast');
-  assert.equal(app.advance(2200), null);
-  assert.equal(app.update({ sessionSec: 900 }), null);
-  assert.equal(app.update({ sessionSec: 1801 }), null);
+  assert.equal(toast.props.pointerEvents, 'auto');
+  assert.match(JSON.stringify(toast), /Tiempo completado/);
+  assert.match(JSON.stringify(toast), new RegExp(`${minutes} minutos`));
+  assert.equal(app.haptics(), 1);
+  assert.equal(app.advance(60000).props.testID, 'reader-target-toast');
+  assert.equal(app.dismiss(), null);
+  assert.equal(app.update({ sessionSec: minutes * 60 + 900 }), null);
+  assert.equal(app.haptics(), 1);
 });
 
-test('a target crossed as an overlay or background opens appears once on returning to reading', () => {
+test('a target crossed as an overlay or background opens appears on returning to reading', () => {
   const app = setupToast({ enabled: false, targetEnabled: false });
   assert.equal(app.update({ sessionSec: 300 }), null);
-  assert.equal(app.update({ targetEnabled: true, sessionSec: 300 }).props.testID, 'reader-target-toast');
-  assert.equal(app.advance(3200), null);
-  assert.equal(app.update({ sessionSec: 900 }), null);
   assert.equal(app.haptics(), 0);
+  assert.equal(app.update({ targetEnabled: true }).props.testID, 'reader-target-toast');
+  assert.equal(app.advance(3200).props.testID, 'reader-target-toast');
+  assert.equal(app.update({ targetEnabled: false }), null);
+  app.advance(60000);
+  assert.equal(app.update({ targetEnabled: true }).props.testID, 'reader-target-toast');
+  assert.equal(app.haptics(), 1);
+  assert.equal(app.dismiss(), null);
 });
 
-test('a simultaneous quest reward preserves the passive target acknowledgement without replaying the reward', () => {
+test('a simultaneous quest cannot replace the timer and does not replay after dismissal', () => {
   const app = setupToast();
   assert.equal(app.update({ sessionSec: 300 }).props.testID, 'reader-target-toast');
   const reward = { id: 'min30', kind: 'quest', title: 'Read 30 minutes', subtitle: 'Beat your daily goal', big: '1' };
   assert.equal(app.celebrate(reward).props.testID, 'reader-target-toast');
-  assert.equal(app.haptics(), 0);
-  assert.equal(app.advance(3200), null);
-  assert.equal(app.update({ sessionSec: 304 }), null);
-  assert.equal(app.haptics(), 0);
-  assert.equal(app.celebrate({ ...reward, id: 'later-chapter' }).props.testID, 'reader-live-toast');
   assert.equal(app.haptics(), 1);
-});
-
-test('disabling reminders immediately clears a visible target without replaying it', () => {
-  const app = setupToast();
-  assert.equal(app.update({ sessionSec: 300 }).props.testID, 'reader-target-toast');
-  assert.equal(app.update({ enabled: false }), null);
-  assert.equal(app.update({ enabled: true }), null);
-  assert.equal(app.advance(5000), null);
+  assert.equal(app.advance(3200).props.testID, 'reader-target-toast');
+  assert.equal(app.dismiss(), null);
+  assert.equal(app.update({ sessionSec: 304 }), null);
+  assert.equal(app.celebrate({ ...reward, id: 'later-chapter' }).props.testID, 'reader-live-toast');
+  assert.equal(app.haptics(), 2);
 });
 
 test('rewards earned while toasts are disabled are not deferred until controls return', () => {
@@ -340,13 +346,14 @@ test('a chosen reminder works in pure text mode using elapsed foreground reading
   assert.equal(app.tracker.sessionSec, 0);
 });
 
-test('explicit reminders appear once while pure text still suppresses rewards', () => {
+test('explicit reminders stay visible while pure text still suppresses rewards', () => {
   const app = setupToast({ enabled: false, targetEnabled: true });
   assert.equal(app.update({ sessionSec: 300 }).props.testID, 'reader-target-toast');
   app.celebrate({ id: 'reward', kind: 'achievement', title: 'Read a chapter', subtitle: 'A first chapter', big: '1' });
-  assert.equal(app.advance(3200), null);
+  assert.equal(app.advance(3200).props.testID, 'reader-target-toast');
+  assert.equal(app.dismiss(), null);
   assert.equal(app.update({ enabled: true, sessionSec: 900 }), null);
-  assert.equal(app.haptics(), 0);
+  assert.equal(app.haptics(), 1);
 });
 
 test('an untimed reader never receives a session target', async () => {

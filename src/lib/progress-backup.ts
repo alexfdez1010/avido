@@ -3,6 +3,7 @@ import { CryptoDigestAlgorithm, digestStringAsync } from 'expo-crypto';
 import type { DayLog } from '@/game/types';
 import type { Book } from './types';
 import type { useGame } from '@/store/game';
+import { isWeekGoals, type WeekGoals } from './daily-goals';
 
 const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
 const GAME_NUMBERS = ['xp', 'freezes', 'bestStreak', 'goalsMet', 'questsDone', 'totalSec', 'totalPages', 'longestSession'] as const;
@@ -17,7 +18,7 @@ export type ProgressBackup = {
   exportedAt: number;
   books: BackupBook[];
   game: BackupGame;
-  profile: { name: string; dailyGoalMin: number; yearlyGoal: number };
+  profile: { name: string; dailyGoalMin: number; yearlyGoal: number; weeklyGoalsEnabled?: boolean; weeklyGoalMin?: WeekGoals | null };
 };
 
 function record(value: unknown): Record<string, unknown> {
@@ -113,9 +114,12 @@ export function validateProgressBackup(value: unknown): ProgressBackup {
   const dailyGoalMin = number(p.dailyGoalMin, 180, true);
   const yearlyGoal = number(p.yearlyGoal, 200, true);
   if (dailyGoalMin < 5 || yearlyGoal < 1) throw new Error('Invalid goals');
+  const weeklyGoalsEnabled = p.weeklyGoalsEnabled === undefined ? false : bool(p.weeklyGoalsEnabled);
+  const weeklyGoalMin = p.weeklyGoalMin ?? null;
+  if ((weeklyGoalMin !== null && !isWeekGoals(weeklyGoalMin)) || (weeklyGoalsEnabled && weeklyGoalMin === null)) throw new Error('Invalid weekly goals');
   return {
     exportedAt: number(data.exportedAt), books, game: parseGame(data.game),
-    profile: { name: text(p.name, 256), dailyGoalMin, yearlyGoal },
+    profile: { name: text(p.name, 256), dailyGoalMin, yearlyGoal, weeklyGoalsEnabled, weeklyGoalMin },
   };
 }
 

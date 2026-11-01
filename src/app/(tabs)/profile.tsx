@@ -1,10 +1,11 @@
-import { Bell, BookMarked, Clock, Contrast, Download, FolderOpen, Mail, Minus, Moon, Plus, Shield, Sun, Timer, Upload, Vibrate } from 'lucide-react-native';
+import { Bell, BookMarked, Clock, Contrast, Download, FolderOpen, Mail, Minus, Moon, Plus, Shield, Sun, Upload, Vibrate } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Alert, Linking, View } from 'react-native';
 
 import { Card, PageHeader, Screen, SectionTitle, StatRow, Tap, Txt } from '@/components/kit';
 import { Miga } from '@/components/mascot/miga';
+import { DailyGoalSettings } from '@/components/profile/daily-goal-settings';
 import { Switch } from '@/components/ui/switch';
 import { levelProgress, levelTitle } from '@/game/levels';
 import { usePalette } from '@/hooks/use-palette';
@@ -139,7 +140,7 @@ export default function Profile() {
 
       <SectionTitle>{tx('Retos', 'Challenges')}</SectionTitle>
       <Card style={{ paddingVertical: 0 }}>
-        <Row icon={<Timer size={17} color={p.ember} />} title={tx('Meta diaria', 'Daily goal')} right={<Stepper value={s.dailyGoalMin} unit="′" step={5} min={5} max={180} onChange={(v) => s.set({ dailyGoalMin: v })} />} />
+        <DailyGoalSettings />
         <Row icon={<BookMarked size={17} color={p.gold} />} title={tx('Libros este año', 'Books this year')} last right={<Stepper value={s.yearlyGoal} unit="" step={1} min={1} max={200} onChange={(v) => s.set({ yearlyGoal: v })} />} />
       </Card>
 
